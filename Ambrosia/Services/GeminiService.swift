@@ -11,8 +11,13 @@ actor GeminiService {
     private let apiKey: String
     private let session: URLSession
     
-    init(apiKey: String = "YOUR_API_KEY") { // To be injected or loaded from Config
-        self.apiKey = apiKey
+    init() {
+        // Securely read from Info.plist (which gets it from Secrets.xcconfig)
+        guard let key = Bundle.main.object(forInfoDictionaryKey: "GeminiAPIKey") as? String, !key.isEmpty, !key.contains("ReplaceWith") else {
+            fatalError("🚨 CRITICAL: API Key missing! Please set GEMINI_API_KEY in Ambrosia/Configs/Secrets.xcconfig")
+        }
+        self.apiKey = key
+        
         let config = URLSessionConfiguration.default
         config.timeoutIntervalForRequest = 30.0 // Reasonable timeout for Vision
         self.session = URLSession(configuration: config)

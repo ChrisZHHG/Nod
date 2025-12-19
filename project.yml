@@ -3,6 +3,9 @@ options:
   bundleIdPrefix: com.ambrosia
   deploymentTarget:
     iOS: 17.0
+configs:
+  Debug: Ambrosia/Configs/Secrets.xcconfig
+  Release: Ambrosia/Configs/Secrets.xcconfig
 packages: {}
 targets:
   Ambrosia:

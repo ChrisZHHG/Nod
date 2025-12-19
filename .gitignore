@@ -1,25 +1,17 @@
 # Xcode
 .DS_Store
-*/.DS_Store
 *.swp
-*.lock
-*~.nib
-*.pbxuser
-*.mode1v3
-*.mode2v3
-*.perspectivev3
-*.users
-*.xccheckout
-*.moved-aside
-DerivedData
+*.derivedData
+*.xcuserstate
+project.xcworkspace/
+xcuserdata/
+DerivedData/
+build/
 *.hmap
 *.ipa
-*.xcuserstate
+*.dSYM.zip
+*.dSYM
 
-# Swift Package Manager
-.build/
-Packages/
-Package.resolved
-
-# CocoaPods
-Pods/
+# Configuration & Secrets
+*.xcconfig
+Ambrosia/Configs/Secrets.xcconfig

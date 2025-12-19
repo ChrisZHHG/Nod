@@ -6,5 +6,7 @@
 	<string>Ambrosia needs camera access to scan physical menus.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Ambrosia needs access to photos to analyze menu screenshots.</string>
+    <key>GeminiAPIKey</key>
+    <string>$(GEMINI_API_KEY)</string>
 </dict>
 </plist>
