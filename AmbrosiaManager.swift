@@ -78,7 +78,15 @@ class AmbrosiaManager: ObservableObject {
             // Step 2: Reason (The Brain)
             self.state = .reasoning(stage: "Injecting Bely Persona...")
             log("🧠 Culture Agent: Analyzing with Profile: \(userProfile.tastePreference)")
-            let draft = try await cultureAgent.recommend(from: menuData, profile: userProfile)
+            var draft = try await cultureAgent.recommend(from: menuData, profile: userProfile)
+            
+            // Step 2.5: Visualize (The Artist)
+            // Fire and forget logic or await? Await for now to ensure result has image.
+            log("🎨 Visualizer Agent: Dreaming up the dish...")
+            if let imageURL = try? await visualizerAgent.visualize(dishName: draft.translation.localizedName, culturalDescription: draft.translation.culturalContext) {
+                draft.imageURL = imageURL
+                log("✨ Image Generated.")
+            }
             
             // Step 3: Verify (The Critic)
             self.state = .verifying

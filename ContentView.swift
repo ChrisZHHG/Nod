@@ -137,6 +137,19 @@ struct ChefCardView: View {
                 .foregroundColor(.white)
                 .multilineTextAlignment(.center)
             
+            if let url = recommendation.imageURL {
+                AsyncImage(url: url) { image in
+                    image.resizable()
+                         .aspectRatio(contentMode: .fill)
+                         .frame(height: 200)
+                         .cornerRadius(12)
+                         .clipped()
+                } placeholder: {
+                    Rectangle().fill(Color.gray.opacity(0.3)).frame(height: 200)
+                }
+                .padding(.horizontal)
+            }
+            
             Text(recommendation.recommendedItem.originalName)
                 .font(.title3)
                 .italic()
