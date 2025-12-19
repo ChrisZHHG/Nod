@@ -5,9 +5,8 @@ import Foundation
 class VisualizerAgent {
     private let service = GeminiService()
     
-    // "Nano Banana" is the codename for the efficient Image Generation model
-    // In production, this maps to "imagen-3.0-generate-001" or similar ID
-    private let modelID = "gemini-2.5-flash-image" 
+    // "Nano Banana" (Gemini 2.5 Flash Image) or Imagen 3 standard endpoint
+    private let modelID = "imagen-3.0-generate-001" 
     
     /// Generates a visual representation of a dish
     func visualize(dishName: String, culturalDescription: String) async throws -> URL? {

@@ -87,4 +87,19 @@ actor GeminiService {
         }
         return text
     }
+    // MARK: - Image Generation (Nano Banana Support)
+    
+    func generateImage(prompt: String, model: String) async throws -> URL? {
+        // Placeholder for the Image Generation REST Endpoint
+        // In real implementation, this hits: https://generativelanguage.googleapis.com/.../models/{model}:predict
+        
+        // Mocking the behavior for PoC stability (since Image Gen API requires specific separate billing often)
+        // Returning a high-quality placeholder image of generic food for demo purposes
+        print("[GeminiService] Generating image with model: \(model)")
+        try await Task.sleep(nanoseconds: 2_000_000_000)
+        
+        // Return a mock Lorem Picsum URL based on the hash of the prompt for consistency
+        let hash = abs(prompt.hashValue % 1000)
+        return URL(string: "https://picsum.photos/id/\(hash)/800/600")
+    }
 }
