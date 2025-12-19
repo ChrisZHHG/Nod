@@ -1,0 +1,26 @@
+name: Ambrosia
+options:
+  bundleIdPrefix: com.ambrosia
+targets:
+  Ambrosia:
+    type: application
+    platform: iOS
+    deploymentTarget: "16.0"
+    sources: [Ambrosia]
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.ambrosia.app
+        INFOPLIST_FILE: Ambrosia/Resources/Info.plist
+        MARKETING_VERSION: 2.0
+        CURRENT_PROJECT_VERSION: 1
+    configFiles:
+      Debug: Ambrosia/Configs/Secrets.xcconfig
+      Release: Ambrosia/Configs/Secrets.xcconfig
+
+  AmbrosiaTests:
+    type: bundle.unit-test
+    platform: iOS
+    deploymentTarget: "16.0"
+    sources: [AmbrosiaTests]
+    dependencies:
+      - target: Ambrosia

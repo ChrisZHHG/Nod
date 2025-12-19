@@ -27,7 +27,7 @@ class VisualizerAgent {
         """
         
         // Call Gemini Imagen 3
-        guard let image = try await service.generateImage(prompt: prompt) else {
+        guard let image = try await service.generateImage(prompt: prompt, model: modelID) else {
              throw NSError(domain: "VisualizerAgent", code: 0, userInfo: [NSLocalizedDescriptionKey: "Image Generation Failed"])
         }
         
