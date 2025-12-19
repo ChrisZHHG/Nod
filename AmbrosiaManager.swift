@@ -40,6 +40,7 @@ class AmbrosiaManager: ObservableObject {
     private let decoderAgent = DecoderAgent()
     private let cultureAgent = CultureAgent()
     private let safetyAgent = SafetyAgent()
+    private let visualizerAgent = VisualizerAgent()
     
     // Data
     private var currentImages: [Data] = []

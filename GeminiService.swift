@@ -3,8 +3,8 @@ import Foundation
 // MARK: - Network Service
 
 enum GeminiModel: String {
-    case flash = "gemini-2.0-flash-exp" // Updated to latest bleeding edge
-    case pro = "gemini-1.5-pro"         // Keeping 1.5 Pro for stability until 2.0 Pro Exp is verified
+    case flash = "gemini-3-flash-preview" // Updated to Gemini 3.0 Flash Preview
+    case pro = "gemini-1.5-pro"           // Keeping 1.5 Pro
 }
 
 actor GeminiService {
