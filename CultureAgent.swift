@@ -45,8 +45,8 @@ class CultureAgent {
         let menuJSON = try String(data: JSONEncoder().encode(menu), encoding: .utf8) ?? "{}"
         let prompt = buildSystemPrompt(profile: profile) + "\n\nMENU DATA:\n\(menuJSON)"
         
-        // Call Gemini 2.0 Flash (User requested "Latest 3.0/2.0" over 1.5 Pro)
-        // Flash 2.0 is often consistently smarter than 1.5 Pro in benchmarks
+        // Call Gemini 3.0 Flash (The latest standard)
+        // Flash 3.0 serves as the primary reasoning engine for speed+intelligence balance
         let jsonString = try await service.generateContent(
             prompt: prompt,
             model: .flash,
