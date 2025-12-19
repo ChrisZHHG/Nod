@@ -2,18 +2,7 @@ import SwiftUI
 import VisionKit
 
 // MARK: - App Entry Point
-// (Ideally move to separate file in Refactor step, keeping here for now to ensure compile)
-@main
-struct AmbrosiaApp: App {
-    @StateObject private var manager = AmbrosiaManager()
-    
-    var body: some Scene {
-        WindowGroup {
-            ContentView()
-                .environmentObject(manager)
-        }
-    }
-}
+// Moved to AmbrosiaApp.swift
 
 // MARK: - Main View (Liquid Glass Style)
 

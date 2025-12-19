@@ -10,16 +10,17 @@ targets:
     platform: iOS
     deploymentTarget: "17.0"
     sources:
-      - path: Agents
-      - path: Core
-      - path: Models
-      - path: Services
-      - path: Views
-      - path: Resources
+      - path: Ambrosia/Agents
+      - path: Ambrosia/Core
+      - path: Ambrosia/Models
+      - path: Ambrosia/Services
+      - path: Ambrosia/Views
+      - path: Ambrosia/Resources
+      - path: Ambrosia/AmbrosiaApp.swift
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.ambrosia.app
-        INFOPLIST_FILE: Resources/Info.plist
+        INFOPLIST_FILE: Ambrosia/Resources/Info.plist
         ipioneos:
           ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         marketing:
@@ -30,6 +31,6 @@ targets:
     type: bundle.unit-test
     platform: iOS
     sources:
-      - path: Tests
+      - path: AmbrosiaTests
     dependencies:
       - target: Ambrosia
