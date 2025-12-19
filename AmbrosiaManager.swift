@@ -101,41 +101,4 @@ class AmbrosiaManager: ObservableObject {
     }
 }
 
-// MARK: - Skeleton Agents (Prototypes for Day 1)
-
-class DecoderAgent {
-    func decode(images: [Data]) async throws -> MenuData {
-        // TODO: Call Gemini Flash 3.0
-        try await Task.sleep(nanoseconds: 1_000_000_000) // Fake Network
-        return MenuData(items: ["Kung Pao Chicken", "Mapo Tofu"])
-    }
-}
-
-class CultureAgent {
-    func recommend(from menu: MenuData, profile: UserProfile) async throws -> MenuRecommendation {
-        // TODO: Call Gemini Pro 3.0
-        try await Task.sleep(nanoseconds: 2_000_000_000) // Fake Reasoning
-        return MenuRecommendation(
-            dishNameOriginal: "宫保鸡丁",
-            dishNameTranslated: "Kung Pao Chicken (Peanut & Spicy)",
-            price: "$18",
-            reasoning: "Classic Sichuan dish fitting your spicy preference.",
-            confidenceScore: 95
-        )
-    }
-}
-
-class SafetyAgent {
-    func audit(draft: MenuRecommendation, context: MenuData, profile: UserProfile) async throws -> MenuRecommendation {
-        // TODO: Call Gemini Flash 3.0 for safety check
-        if profile.allergies.contains("Peanuts") && draft.dishNameTranslated.contains("Peanut") {
-            throw NSError(domain: "Ambrosia", code: 403, userInfo: [NSLocalizedDescriptionKey: "Safety Alert: Contains Peanuts!"])
-        }
-        return draft
-    }
-}
-
-struct MenuData {
-    let items: [String]
-    // Will expand to full JSON structure
-}
+// MARK: - End of File
