@@ -3,7 +3,11 @@ import Foundation
 // MARK: - Agent D: The Visualizer (Image Generation)
 
 class VisualizerAgent {
-    private let service = GeminiService()
+    private let service: GeminiServiceProtocol
+    
+    init(service: GeminiServiceProtocol = GeminiService()) {
+        self.service = service
+    }
     
     // "Nano Banana" (Gemini 2.5 Flash Image) or Imagen 3 standard endpoint
     private let modelID = "imagen-3.0-generate-001" 

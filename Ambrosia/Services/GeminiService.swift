@@ -7,7 +7,21 @@ enum GeminiModel: String {
     case pro = "gemini-3.0-pro"
 }
 
-actor GeminiService {
+
+protocol GeminiServiceProtocol: AnyObject {
+    func generateContent(prompt: String, images: [Data], model: GeminiModel, responseSchema: String?) async throws -> String
+    func generateImage(prompt: String, model: String) async throws -> URL?
+}
+
+// Default parameter extension to keep call sites clean if needed, 
+// though we usually rely on the function signature in the protocol.
+extension GeminiServiceProtocol {
+    func generateContent(prompt: String, images: [Data] = [], model: GeminiModel = .flash, responseSchema: String? = nil) async throws -> String {
+        return try await generateContent(prompt: prompt, images: images, model: model, responseSchema: responseSchema)
+    }
+}
+
+actor GeminiService: GeminiServiceProtocol {
     private let apiKey: String
     private let session: URLSession
     

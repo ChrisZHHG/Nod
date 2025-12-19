@@ -3,7 +3,11 @@ import Foundation
 // MARK: - Agent A: The Eye (Decoder)
 
 class DecoderAgent {
-    private let service = GeminiService()
+    private let service: GeminiServiceProtocol
+    
+    init(service: GeminiServiceProtocol = GeminiService()) {
+        self.service = service
+    }
     
     /// The System Prompt that forces VDU (Visual Document Understanding)
     private let systemPrompt = """

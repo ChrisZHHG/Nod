@@ -3,7 +3,11 @@ import Foundation
 // MARK: - Agent B: The Brain (Culture Agent)
 
 class CultureAgent {
-    private let service = GeminiService()
+    private let service: GeminiServiceProtocol
+    
+    init(service: GeminiServiceProtocol = GeminiService()) {
+        self.service = service
+    }
     
     /// The System Prompt that defines the "Bely Persona"
     /// Enforces "Explanation" over "Translation" and solves the Knapsack problem.

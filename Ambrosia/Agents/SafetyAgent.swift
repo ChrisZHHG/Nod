@@ -3,7 +3,11 @@ import Foundation
 // MARK: - Agent C: The Gatekeeper (Safety Agent)
 
 class SafetyAgent {
-    private let service = GeminiService()
+    private let service: GeminiServiceProtocol
+    
+    init(service: GeminiServiceProtocol = GeminiService()) {
+        self.service = service
+    }
     
     /// The Guardrail Prompt
     private func buildAuditPrompt(profile: UserProfile, recommendation: MenuRecommendation) -> String {

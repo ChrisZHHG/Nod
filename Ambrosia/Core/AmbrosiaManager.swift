@@ -37,14 +37,22 @@ class AmbrosiaManager: ObservableObject {
     @Published var timelineLog: [String] = [] // For debug/demo UI
     
     // Services
-    private let decoderAgent = DecoderAgent()
-    private let cultureAgent = CultureAgent()
-    private let safetyAgent = SafetyAgent()
-    private let visualizerAgent = VisualizerAgent()
+    // Services
+    private let decoderAgent: DecoderAgent
+    private let cultureAgent: CultureAgent
+    private let safetyAgent: SafetyAgent
+    private let visualizerAgent: VisualizerAgent
     
     // Data
     private var currentImages: [Data] = []
     var userProfile: UserProfile = UserProfile()
+    
+    init(service: GeminiServiceProtocol = GeminiService()) {
+        self.decoderAgent = DecoderAgent(service: service)
+        self.cultureAgent = CultureAgent(service: service)
+        self.safetyAgent = SafetyAgent(service: service)
+        self.visualizerAgent = VisualizerAgent(service: service)
+    }
     
     // MARK: - Public Intents
     
