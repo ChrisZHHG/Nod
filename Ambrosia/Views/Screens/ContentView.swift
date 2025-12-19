@@ -61,8 +61,9 @@ struct WelcomeView: View {
                     manager.startSession()
                 }
             Text("Tap to Scan Menu")
-                .font(.glassTitle)
-                .foregroundColor(.white.opacity(0.8))
+                .font(.title2.bold()) // Hierarchy Fix: Larger, bolder
+                .foregroundColor(.white.opacity(0.9))
+                .shadow(color: .purple.opacity(0.5), radius: 8)
                 .padding(.top)
         }
     }
@@ -88,7 +89,7 @@ struct ScannerView: View {
                         .overlay(RoundedRectangle(cornerRadius: 24).stroke(Color.white.opacity(0.3), lineWidth: 1))
                         .shadow(color: .black.opacity(0.2), radius: 10)
                         .padding()
-                        .frame(height: 400) // Fixed height for scanner window
+                        .frame(maxHeight: .infinity) // Layout Fix: Flexible instead of fixed 400
                     
                     if isCapturing {
                         Color.white.opacity(0.3).cornerRadius(24).padding()
@@ -170,10 +171,12 @@ struct ChefCardView: View {
                     } placeholder: {
                         Rectangle().fill(Color.white.opacity(0.1)).frame(height: 250)
                     }
-                    .mask(LinearGradient(gradient: Gradient(stops: [
-                        .init(color: .black, location: 0.8),
-                        .init(color: .clear, location: 1.0)
-                    ]), startPoint: .top, endPoint: .bottom))
+                    .cornerRadius(20) // Image Fix: Solid clean corners, no ghost mask
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 20)
+                            .stroke(Color.white.opacity(0.2), lineWidth: 1)
+                    )
+                    // Removed mask to prevent "washed out" look against glass background
                 }
                 
                 VStack(spacing: 16) {
@@ -266,7 +269,7 @@ struct ErrorView: View {
 // MARK: - Design System Helpers
 
 struct GlassButtonStyle: ButtonStyle {
-    var color: Color = .white.opacity(0.1)
+    var color: Color = .white.opacity(0.25) // Affordance Fix: Higher opacity base
     
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
@@ -274,7 +277,10 @@ struct GlassButtonStyle: ButtonStyle {
             .background(color)
             .background(.ultraThinMaterial)
             .cornerRadius(16)
-            .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color.white.opacity(0.3), lineWidth: 1))
+            .overlay(
+                RoundedRectangle(cornerRadius: 16)
+                    .stroke(Color.white.opacity(0.5), lineWidth: 1) // Affordance Fix: Stronger border
+            )
             .scaleEffect(configuration.isPressed ? 0.95 : 1.0)
             .animation(.easeOut(duration: 0.2), value: configuration.isPressed)
     }
