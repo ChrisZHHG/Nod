@@ -61,4 +61,41 @@ struct CulturalTranslation: Codable {
     let localizedName: String // "夫妻肺片" -> "Spicy Beef & Tripe"
     let culturalContext: String // "Served cold, numbing spicy, popular appetizer"
     let warnings: [String] // ["Offal", "High Sodium"]
+    let warnings: [String] // ["Offal", "High Sodium"]
+}
+
+// MARK: - V2: Individual Profile
+struct IndividualProfile: Codable, Equatable {
+    var partySize: Int = 1
+    var budget: Int = 50
+    var allergies: [String] = []
+    var tastePreference: String = "Spicy" // "Authentic", "Mild"
+}
+
+// MARK: - V2 Group Models
+
+struct GroupProfile: Codable, Equatable {
+    var headcount: Int = 4
+    var budgetTotal: Int = 200
+    var dietaryRestrictions: [String] = [] // "No Pork", "Vegetarian"
+    var collectiveAllergies: [String] = [] // "Peanuts"
+    var refinementKeywords: [String] = []  // "Seafood", "Fried" (The "Something Else" input)
+}
+
+struct ComboRecommendation: Codable, Identifiable {
+    var id = UUID()
+    let name: String // "The Family Feast"
+    let dishes: [MenuItem]
+    let drinks: [DrinkRecommendation] // Paired drinks
+    let totalPrice: Double
+    let reasoning: String
+    var imageURL: URL? = nil
+}
+
+struct DrinkRecommendation: Codable, Identifiable {
+    var id: String { name }
+    let name: String
+    let type: String // "Alcoholic", "Zero-Proof"
+    let description: String
+    let pairingReason: String
 }
