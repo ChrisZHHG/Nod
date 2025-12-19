@@ -14,27 +14,71 @@ struct ContentView: View {
             // iOS 26 Liquid Glass Background
             LiquidBackground()
             
+            // State Machine View Switcher
             switch manager.state {
             case .idle:
-                WelcomeView()
+                // V2: Mode Selection Entry Point
+                ModeSelectionView()
+                
             case .scanning(let images):
-                ScannerView(imageCount: images.count)
+                ScannerView(
+                    images: images,
+                    onCapture: { image in manager.addImage(image) },
+                    onAnalyze: {
+                        if manager.appMode == .group {
+                            withAnimation { showGroupSetup = true }
+                        } else {
+                            Task { await manager.generateRecommendation() }
+                        }
+                    }
+                )
+                
+                // Group Wizard Overlay
+                if showGroupSetup {
+                    GroupSetupView {
+                        withAnimation { showGroupSetup = false }
+                        Task { await manager.generateRecommendation() }
+                    }
+                    .transition(.move(edge: .bottom))
+                    .zIndex(2)
+                }
+                
             case .decoding(let progress):
-                ProgressView("Reading Menu...", value: progress, total: 1.0)
-                    .progressViewStyle(CircularProgressViewStyle(tint: .white))
-                    .foregroundColor(.white)
+                ProcessingView(status: "Reading Menu...", progress: progress)
+                
             case .reasoning(let stage):
-                ThinkingView(stage: stage)
+                ProcessingView(status: stage, progress: 0.5)
+                
             case .verifying:
-                ThinkingView(stage: "Verifying Safety...")
-            case .result(let rec):
-                ChefCardView(recommendation: rec)
-            case .error(let msg):
-                ErrorView(message: msg)
+                ProcessingView(status: "Safety Checks...", progress: 0.8)
+                
+            case .result(let recommendation):
+                // Individual Result
+                ChefCardView(recommendation: recommendation) {
+                    manager.startSession() // Reset
+                }
+                
+            case .resultCombo(let combo):
+                // Group Result
+                ComboResultView(combo: combo) { keyword in
+                    // Refinement Loop
+                    var updatedProfile = manager.groupProfile
+                    updatedProfile.refinementKeywords.append(keyword)
+                    manager.groupProfile = updatedProfile
+                    Task { await manager.generateRecommendation() }
+                }
+                
+            case .error(let message):
+                ErrorView(message: message) {
+                    manager.state = .idle
+                }
             }
         }
         .animation(.fluidSpring, value: manager.state) // "Silky" Transitions
+        .environmentObject(manager)
     }
+    
+    @State private var showGroupSetup = false // Local state for wizard visibility
 }
 
 // MARK: - Subviews
