@@ -3,7 +3,7 @@
 
 **Ambrosia** is a native iOS application designed to solve "Menu Anxiety" and "Decision Paralysis" through AI-driven **Cultural Translation**. Unlike simple translation apps, Ambrosia *interprets* dishes, explains flavors, and ensures safety against allergies using a sophisticated **Multi-Agent System** powered by **Google Gemini 3.0**.
 
-![iOS 17](https://img.shields.io/badge/iOS-17.0%2B-black) ![Swift 5.9](https://img.shields.io/badge/Swift-5.9-orange) ![AI Gemini](https://img.shields.io/badge/AI-Gemini%203.0-blue)
+![iOS 26.1](https://img.shields.io/badge/iOS-26.1%2B-cyan) ![UI Liquid Glass](https://img.shields.io/badge/UI-Liquid%20Glass-purple) ![AI Gemini](https://img.shields.io/badge/AI-Gemini%203.0-blue)
 
 ---
 
