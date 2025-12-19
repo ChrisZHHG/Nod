@@ -6,24 +6,26 @@ final class AmbrosiaUnitTests: XCTestCase {
     var mockService: MockGeminiService!
     var safetyAgent: SafetyAgent!
     var decoderAgent: DecoderAgent!
-    var cultureAgent: CultureAgent!
+    var chefAgent: ChefAgent!
     
     override func setUp() {
         super.setUp()
         mockService = MockGeminiService()
         safetyAgent = SafetyAgent(service: mockService)
         decoderAgent = DecoderAgent(service: mockService)
-        cultureAgent = CultureAgent(service: mockService)
+        chefAgent = ChefAgent(service: mockService)
     }
     
     // MARK: - Test 1: Safety Guardrails
     
     func testSafetyAgentBlocksPeanuts() async throws {
         // 1. Setup
-        var profile = UserProfile()
+        var profile = IndividualProfile()
         profile.allergies = ["Peanuts"]
         
+        // Mock data to simulate V2 dangerous item
         let dangerousItem = MenuItem(originalName: "Kung Pao Chicken", description: "Contains peanuts", price: 15, isSpicy: true, isVegetarian: false, containsGluten: false, containsPeanuts: true, containsSeafood: false)
+        
         let badDraft = MenuRecommendation(
             recommendedItem: dangerousItem,
             translation: CulturalTranslation(localizedName: "Kung Pao Chicken", culturalContext: "Tasty chicken with peanuts", warnings: ["Peanuts"]),
@@ -40,7 +42,7 @@ final class AmbrosiaUnitTests: XCTestCase {
             _ = try await safetyAgent.audit(draft: badDraft, context: menuData, profile: profile)
             XCTFail("❌ Safety Agent failed to block Peanuts!")
         } catch {
-            XCTAssertTrue(error.localizedDescription.contains("Safety Alert"))
+            XCTAssertTrue(error.localizedDescription.contains("Safety Alert") || error.localizedDescription.contains("SAFETY ALERT"))
         }
     }
     
@@ -60,18 +62,19 @@ final class AmbrosiaUnitTests: XCTestCase {
         XCTAssertEqual(menuData.currency, "USD")
     }
     
-    // MARK: - Test 3: Culture Agent Logic (Mocked)
+    // MARK: - Test 3: Chef Agent Logic (Mocked)
     
-    func testCultureAgentReturnsRecommendation() async throws {
+    func testChefAgentReturnsRecommendation() async throws {
         // 1. Mock Response
         mockService.mockResponse = TestHelpers.cultureRecommendationJSON
         
         // 2. Recommend
         let menuData = MenuData(sections: [], currency: "USD", languageDetected: "en", metadata: MenuMetadata(restaurantName: "Test", timestamp: Date()))
-        let rec = try await cultureAgent.recommend(from: menuData, profile: UserProfile())
+        let rec = try await chefAgent.recommend(from: menuData, profile: IndividualProfile())
         
         // 3. Assert
         XCTAssertEqual(rec.recommendedItem.originalName, "Spring Rolls")
         XCTAssertEqual(rec.pairings?.first, "Tea")
     }
 }
+
