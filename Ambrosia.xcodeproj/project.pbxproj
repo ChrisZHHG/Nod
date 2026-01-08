@@ -29,9 +29,22 @@
 		BD597DD42EF60C3800006C6F /* AmbrosiaUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = AmbrosiaUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		BD597E262EF61EC000006C6F /* Exceptions for "Ambrosia" folder in "Ambrosia" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Resources/Info.plist,
+			);
+			target = BD597DBC2EF60C3500006C6F /* Ambrosia */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		BD597DBF2EF60C3500006C6F /* Ambrosia */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				BD597E262EF61EC000006C6F /* Exceptions for "Ambrosia" folder in "Ambrosia" target */,
+			);
 			path = Ambrosia;
 			sourceTree = "<group>";
 		};
@@ -271,6 +284,8 @@
 /* Begin XCBuildConfiguration section */
 		BD597DDC2EF60C3800006C6F /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReferenceAnchor = BD597DBF2EF60C3500006C6F /* Ambrosia */;
+			baseConfigurationReferenceRelativePath = Configs/Secrets.xcconfig;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
@@ -335,6 +350,8 @@
 		};
 		BD597DDD2EF60C3800006C6F /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReferenceAnchor = BD597DBF2EF60C3500006C6F /* Ambrosia */;
+			baseConfigurationReferenceRelativePath = Configs/Secrets.xcconfig;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
@@ -392,6 +409,8 @@
 		};
 		BD597DDF2EF60C3800006C6F /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReferenceAnchor = BD597DBF2EF60C3500006C6F /* Ambrosia */;
+			baseConfigurationReferenceRelativePath = Configs/Secrets.xcconfig;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -399,7 +418,8 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = TDLZ3DFQ66;
 				ENABLE_PREVIEWS = YES;
-				GENERATE_INFOPLIST_FILE = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Ambrosia/Resources/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -420,6 +440,8 @@
 		};
 		BD597DE02EF60C3800006C6F /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReferenceAnchor = BD597DBF2EF60C3500006C6F /* Ambrosia */;
+			baseConfigurationReferenceRelativePath = Configs/Secrets.xcconfig;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -427,7 +449,8 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = TDLZ3DFQ66;
 				ENABLE_PREVIEWS = YES;
-				GENERATE_INFOPLIST_FILE = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Ambrosia/Resources/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;

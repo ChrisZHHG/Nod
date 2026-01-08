@@ -1,17 +1,17 @@
-//
-//  AmbrosiaApp.swift
-//  Ambrosia
-//
-//  Created by Chris on 2025-12-19.
-//
-
 import SwiftUI
 
 @main
 struct AmbrosiaApp: App {
+    // Legacy manager kept for backwards compatibility
+    // @StateObject private var legacyManager = AmbrosiaManager()
+    
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            // New TCA-style architecture
+            AppRootView()
+            
+            // Legacy entry point (deprecated)
+            // ContentView().environmentObject(legacyManager)
         }
     }
 }
