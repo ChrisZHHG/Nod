@@ -17,7 +17,7 @@ flowchart TD
     end
     
     subgraph Core["State Management"]
-        Manager[AmbrosiaManager]
+        Store[AppStore]
     end
     
     subgraph Agents["AI Agent Pipeline"]
@@ -31,15 +31,15 @@ flowchart TD
         Gemini[GeminiService]
     end
     
-    ModeSelection --> Manager
-    Manager --> Scanner
-    Scanner -- "Images" --> Manager
-    Manager --> Decoder
+    ModeSelection --> Store
+    Store --> Scanner
+    Scanner -- "Images" --> Store
+    Store --> Decoder
     Decoder -- "MenuData" --> Chef
     Chef -- "Recommendation" --> Safety
     Safety -- "Verified" --> Visualizer
-    Visualizer -- "ImageURL" --> Manager
-    Manager --> Result
+    Visualizer -- "ImageURL" --> Store
+    Store --> Result
     
     Decoder --> Gemini
     Chef --> Gemini
@@ -53,7 +53,7 @@ flowchart TD
 
 | Component | Responsibility |
 |-----------|----------------|
-| **AmbrosiaManager** | Central state machine, coordinates agents, manages navigation |
+| **AppStore** | Central state machine, coordinates agents, manages navigation (TCA-style) |
 | **DecoderAgent** | Extracts menu data from scanned images via OCR + LLM |
 | **ChefAgent** | Generates recommendations based on profile and menu |
 | **SafetyAgent** | Audits recommendations for allergens and dietary restrictions |

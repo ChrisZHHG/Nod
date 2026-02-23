@@ -126,9 +126,18 @@ final class AppStore {
             combo.imageURL = imageURL
         }
         
+        // Safety Audit
+        self.appState = .verifying
+        log("🛡️ Safety Agent: Auditing group combo...")
+        let verifiedCombo = try await dependencies.safety.auditCombo(
+            draft: combo,
+            context: menuData,
+            group: groupProfile
+        )
+        
         self.appState = .idle
-        navigationPath.append(.combo(combo))
-        log("🎉 Group Feast Ready.")
+        navigationPath.append(.combo(verifiedCombo))
+        log("🎉 Group Feast Ready and Verified.")
     }
     
     // MARK: - Logging

@@ -201,7 +201,6 @@ struct ResultRootView: View {
     let store: AppStore
     
     var body: some View {
-        // TODO: Integrate existing ChefCardView
         ChefCardView(recommendation: recommendation) {
             store.resetSession()
         }
@@ -215,7 +214,6 @@ struct ComboRootView: View {
     let store: AppStore
     
     var body: some View {
-        // TODO: Integrate existing ComboResultView
         ComboResultView(combo: combo) { keyword in
             var profile = store.groupProfile
             profile.refinementKeywords.append(keyword)

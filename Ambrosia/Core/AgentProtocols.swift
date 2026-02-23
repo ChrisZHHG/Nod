@@ -13,6 +13,7 @@ protocol ChefAgentProtocol: Sendable {
 
 protocol SafetyAgentProtocol: Sendable {
     func audit(draft: MenuRecommendation, context: MenuData, profile: IndividualProfile) async throws -> MenuRecommendation
+    func auditCombo(draft: ComboRecommendation, context: MenuData, group: GroupProfile) async throws -> ComboRecommendation
 }
 
 protocol VisualizerAgentProtocol: Sendable {

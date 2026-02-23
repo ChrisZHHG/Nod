@@ -77,6 +77,7 @@ struct ChefClient: ChefClientProtocol {
 /// Client for auditing recommendations for safety
 protocol SafetyClientProtocol: Sendable {
     func audit(draft: MenuRecommendation, context: MenuData, profile: IndividualProfile) async throws -> MenuRecommendation
+    func auditCombo(draft: ComboRecommendation, context: MenuData, group: GroupProfile) async throws -> ComboRecommendation
 }
 
 struct SafetyClient: SafetyClientProtocol {
@@ -88,6 +89,10 @@ struct SafetyClient: SafetyClientProtocol {
     
     func audit(draft: MenuRecommendation, context: MenuData, profile: IndividualProfile) async throws -> MenuRecommendation {
         try await agent.audit(draft: draft, context: context, profile: profile)
+    }
+    
+    func auditCombo(draft: ComboRecommendation, context: MenuData, group: GroupProfile) async throws -> ComboRecommendation {
+        try await agent.auditCombo(draft: draft, context: context, group: group)
     }
 }
 

@@ -1,0 +1,331 @@
+Command line invocation:
+    /Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild -project /Users/chriszhang/Desktop/Project/Ambrosia/Ambrosia.xcodeproj -scheme Ambrosia -destination "platform=iOS Simulator,name=iPhone 16 Pro" build
+
+--- xcodebuild: WARNING: Using the first of multiple matching destinations:
+{ platform:iOS Simulator, arch:arm64, id:CD5928E3-1F93-4636-AE06-1CFBB09B8073, OS:18.6, name:iPhone 16 Pro }
+{ platform:iOS Simulator, arch:x86_64, id:CD5928E3-1F93-4636-AE06-1CFBB09B8073, OS:18.6, name:iPhone 16 Pro }
+ComputePackagePrebuildTargetDependencyGraph
+
+Prepare packages
+
+CreateBuildRequest
+
+SendProjectDescription
+
+CreateBuildOperation
+
+ComputeTargetDependencyGraph
+note: Building targets in dependency order
+note: Target dependency graph (1 target)
+    Target 'Ambrosia' in project 'Ambrosia' (no dependencies)
+
+GatherProvisioningInputs
+
+CreateBuildDescription
+
+ExecuteExternalTool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -v -E -dM -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator18.5.sdk -x c -c /dev/null
+
+ExecuteExternalTool /Applications/Xcode.app/Contents/Developer/usr/bin/actool --print-asset-tag-combinations --output-format xml1 /Users/chriszhang/Desktop/Project/Ambrosia/Ambrosia/Assets.xcassets
+
+ExecuteExternalTool /Applications/Xcode.app/Contents/Developer/usr/bin/actool --version --output-format xml1
+
+ExecuteExternalTool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc --version
+
+ExecuteExternalTool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ld -version_details
+
+Build description signature: eb278329622bebe846d60fcc0af6f46f
+Build description path: /Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Intermediates.noindex/XCBuildData/eb278329622bebe846d60fcc0af6f46f.xcbuilddata
+ClangStatCache /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang-stat-cache /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator18.5.sdk /Users/chriszhang/Library/Developer/Xcode/DerivedData/SDKStatCaches.noindex/iphonesimulator18.5-22F76-d5fc8ad4295d2ef488fb7d0f804ce0c4.sdkstatcache
+    cd /Users/chriszhang/Desktop/Project/Ambrosia/Ambrosia.xcodeproj
+    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang-stat-cache /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator18.5.sdk -o /Users/chriszhang/Library/Developer/Xcode/DerivedData/SDKStatCaches.noindex/iphonesimulator18.5-22F76-d5fc8ad4295d2ef488fb7d0f804ce0c4.sdkstatcache
+
+WriteAuxiliaryFile /Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Intermediates.noindex/Ambrosia.build/Debug-iphonesimulator/Ambrosia.build/Objects-normal/arm64/Ambrosia.SwiftFileList (in target 'Ambrosia' from project 'Ambrosia')
+    cd /Users/chriszhang/Desktop/Project/Ambrosia
+    write-file /Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Intermediates.noindex/Ambrosia.build/Debug-iphonesimulator/Ambrosia.build/Objects-normal/arm64/Ambrosia.SwiftFileList
+
+WriteAuxiliaryFile /Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Intermediates.noindex/Ambrosia.build/Debug-iphonesimulator/Ambrosia.build/Objects-normal/arm64/Ambrosia.SwiftConstValuesFileList (in target 'Ambrosia' from project 'Ambrosia')
+    cd /Users/chriszhang/Desktop/Project/Ambrosia
+    write-file /Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Intermediates.noindex/Ambrosia.build/Debug-iphonesimulator/Ambrosia.build/Objects-normal/arm64/Ambrosia.SwiftConstValuesFileList
+
+WriteAuxiliaryFile /Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Intermediates.noindex/Ambrosia.build/Debug-iphonesimulator/Ambrosia.build/Objects-normal/arm64/Ambrosia.LinkFileList (in target 'Ambrosia' from project 'Ambrosia')
+    cd /Users/chriszhang/Desktop/Project/Ambrosia
+    write-file /Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Intermediates.noindex/Ambrosia.build/Debug-iphonesimulator/Ambrosia.build/Objects-normal/arm64/Ambrosia.LinkFileList
+
+CopyPNGFile /Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Products/Debug-iphonesimulator/Ambrosia.app/AppIconSource.png /Users/chriszhang/Desktop/Project/Ambrosia/Ambrosia/Resources/Design/AppIconSource.png (in target 'Ambrosia' from project 'Ambrosia')
+    cd /Users/chriszhang/Desktop/Project/Ambrosia
+    /Applications/Xcode.app/Contents/Developer/usr/bin/copypng -compress -strip-PNG-text /Users/chriszhang/Desktop/Project/Ambrosia/Ambrosia/Resources/Design/AppIconSource.png /Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Products/Debug-iphonesimulator/Ambrosia.app/AppIconSource.png
+
+CompileAssetCatalogVariant thinned /Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Products/Debug-iphonesimulator/Ambrosia.app /Users/chriszhang/Desktop/Project/Ambrosia/Ambrosia/Assets.xcassets (in target 'Ambrosia' from project 'Ambrosia')
+    cd /Users/chriszhang/Desktop/Project/Ambrosia
+    /Applications/Xcode.app/Contents/Developer/usr/bin/actool /Users/chriszhang/Desktop/Project/Ambrosia/Ambrosia/Assets.xcassets --compile /Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Intermediates.noindex/Ambrosia.build/Debug-iphonesimulator/Ambrosia.build/assetcatalog_output/thinned --output-format human-readable-text --notices --warnings --export-dependency-info /Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Intermediates.noindex/Ambrosia.build/Debug-iphonesimulator/Ambrosia.build/assetcatalog_dependencies_thinned --output-partial-info-plist /Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Intermediates.noindex/Ambrosia.build/Debug-iphonesimulator/Ambrosia.build/assetcatalog_generated_info.plist_thinned --app-icon AppIcon --accent-color AccentColor --compress-pngs --enable-on-demand-resources YES --filter-for-thinning-device-configuration iPhone17,1 --filter-for-device-os-version 18.6 --development-region en --target-device iphone --target-device ipad --minimum-deployment-target 18.5 --platform iphonesimulator
+/* com.apple.actool.document.warnings */
+/Users/chriszhang/Desktop/Project/Ambrosia/Ambrosia/Assets.xcassets:./AppIcon.appiconset: warning: A 76x76@2x app icon is required for iPad apps targeting iOS 7.0 and later
+/Users/chriszhang/Desktop/Project/Ambrosia/Ambrosia/Assets.xcassets:./AppIcon.appiconset: warning: A 83.5x83.5@2x app icon is required for iPad apps targeting iOS 9.0 and later
+/* com.apple.actool.compilation-results */
+/Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Intermediates.noindex/Ambrosia.build/Debug-iphonesimulator/Ambrosia.build/assetcatalog_generated_info.plist_thinned
+/Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Intermediates.noindex/Ambrosia.build/Debug-iphonesimulator/Ambrosia.build/assetcatalog_output/thinned/AppIcon60x60@2x.png
+/Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Intermediates.noindex/Ambrosia.build/Debug-iphonesimulator/Ambrosia.build/assetcatalog_output/thinned/Assets.car
+
+
+SwiftDriver Ambrosia normal arm64 com.apple.xcode.tools.swift.compiler (in target 'Ambrosia' from project 'Ambrosia')
+    cd /Users/chriszhang/Desktop/Project/Ambrosia
+    builtin-SwiftDriver -- /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc -module-name Ambrosia -Onone -enforce-exclusivity\=checked @/Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Intermediates.noindex/Ambrosia.build/Debug-iphonesimulator/Ambrosia.build/Objects-normal/arm64/Ambrosia.SwiftFileList -DDEBUG -enable-bare-slash-regex -enable-experimental-feature DebugDescriptionMacro -sdk /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator18.5.sdk -target arm64-apple-ios18.5-simulator -g -module-cache-path /Users/chriszhang/Library/Developer/Xcode/DerivedData/ModuleCache.noindex -Xfrontend -serialize-debugging-options -profile-coverage-mapping -profile-generate -enable-testing -index-store-path /Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Index.noindex/DataStore -swift-version 5 -I /Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Products/Debug-iphonesimulator -F /Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Products/Debug-iphonesimulator -emit-localized-strings -emit-localized-strings-path /Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Intermediates.noindex/Ambrosia.build/Debug-iphonesimulator/Ambrosia.build/Objects-normal/arm64 -c -j10 -enable-batch-mode -incremental -Xcc -ivfsstatcache -Xcc /Users/chriszhang/Library/Developer/Xcode/DerivedData/SDKStatCaches.noindex/iphonesimulator18.5-22F76-d5fc8ad4295d2ef488fb7d0f804ce0c4.sdkstatcache -output-file-map /Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Intermediates.noindex/Ambrosia.build/Debug-iphonesimulator/Ambrosia.build/Objects-normal/arm64/Ambrosia-OutputFileMap.json -use-frontend-parseable-output -save-temps -no-color-diagnostics -serialize-diagnostics -emit-dependencies -emit-module -emit-module-path /Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Intermediates.noindex/Ambrosia.build/Debug-iphonesimulator/Ambrosia.build/Objects-normal/arm64/Ambrosia.swiftmodule -validate-clang-modules-once -clang-build-session-file /Users/chriszhang/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/Session.modulevalidation -Xcc -I/Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Intermediates.noindex/Ambrosia.build/Debug-iphonesimulator/Ambrosia.build/swift-overrides.hmap -emit-const-values -Xfrontend -const-gather-protocols-file -Xfrontend /Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Intermediates.noindex/Ambrosia.build/Debug-iphonesimulator/Ambrosia.build/Objects-normal/arm64/Ambrosia_const_extract_protocols.json -Xcc -iquote -Xcc /Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Intermediates.noindex/Ambrosia.build/Debug-iphonesimulator/Ambrosia.build/Ambrosia-generated-files.hmap -Xcc -I/Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Intermediates.noindex/Ambrosia.build/Debug-iphonesimulator/Ambrosia.build/Ambrosia-own-target-headers.hmap -Xcc -I/Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Intermediates.noindex/Ambrosia.build/Debug-iphonesimulator/Ambrosia.build/Ambrosia-all-target-headers.hmap -Xcc -iquote -Xcc /Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Intermediates.noindex/Ambrosia.build/Debug-iphonesimulator/Ambrosia.build/Ambrosia-project-headers.hmap -Xcc -I/Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Products/Debug-iphonesimulator/include -Xcc -I/Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Intermediates.noindex/Ambrosia.build/Debug-iphonesimulator/Ambrosia.build/DerivedSources-normal/arm64 -Xcc -I/Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Intermediates.noindex/Ambrosia.build/Debug-iphonesimulator/Ambrosia.build/DerivedSources/arm64 -Xcc -I/Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Intermediates.noindex/Ambrosia.build/Debug-iphonesimulator/Ambrosia.build/DerivedSources -Xcc -DDEBUG\=1 -emit-objc-header -emit-objc-header-path /Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Intermediates.noindex/Ambrosia.build/Debug-iphonesimulator/Ambrosia.build/Objects-normal/arm64/Ambrosia-Swift.h -working-directory /Users/chriszhang/Desktop/Project/Ambrosia -experimental-emit-module-separately -disable-cmo
+
+SwiftCompile normal arm64 Compiling\ AmbrosiaManager.swift,\ AppRootView.swift,\ SettingsView.swift /Users/chriszhang/Desktop/Project/Ambrosia/Ambrosia/Core/AmbrosiaManager.swift /Users/chriszhang/Desktop/Project/Ambrosia/Ambrosia/Features/App/AppRootView.swift /Users/chriszhang/Desktop/Project/Ambrosia/Ambrosia/Views/Screens/SettingsView.swift (in target 'Ambrosia' from project 'Ambrosia')
+
+SwiftCompile normal arm64 /Users/chriszhang/Desktop/Project/Ambrosia/Ambrosia/Core/AmbrosiaManager.swift (in target 'Ambrosia' from project 'Ambrosia')
+    cd /Users/chriszhang/Desktop/Project/Ambrosia
+    
+
+SwiftCompile normal arm64 /Users/chriszhang/Desktop/Project/Ambrosia/Ambrosia/Features/App/AppRootView.swift (in target 'Ambrosia' from project 'Ambrosia')
+    cd /Users/chriszhang/Desktop/Project/Ambrosia
+    
+
+SwiftCompile normal arm64 /Users/chriszhang/Desktop/Project/Ambrosia/Ambrosia/Views/Screens/SettingsView.swift (in target 'Ambrosia' from project 'Ambrosia')
+    cd /Users/chriszhang/Desktop/Project/Ambrosia
+    
+
+SwiftEmitModule normal arm64 Emitting\ module\ for\ Ambrosia (in target 'Ambrosia' from project 'Ambrosia')
+
+EmitSwiftModule normal arm64 (in target 'Ambrosia' from project 'Ambrosia')
+    cd /Users/chriszhang/Desktop/Project/Ambrosia
+    
+
+SwiftCompile normal arm64 Compiling\ LiquidDesign.swift,\ ProcessingView.swift,\ CameraScannerView.swift /Users/chriszhang/Desktop/Project/Ambrosia/Ambrosia/Views/Components/LiquidDesign.swift /Users/chriszhang/Desktop/Project/Ambrosia/Ambrosia/Views/Components/ProcessingView.swift /Users/chriszhang/Desktop/Project/Ambrosia/Ambrosia/Views/Components/CameraScannerView.swift (in target 'Ambrosia' from project 'Ambrosia')
+
+SwiftCompile normal arm64 /Users/chriszhang/Desktop/Project/Ambrosia/Ambrosia/Views/Components/LiquidDesign.swift (in target 'Ambrosia' from project 'Ambrosia')
+    cd /Users/chriszhang/Desktop/Project/Ambrosia
+    
+
+SwiftCompile normal arm64 /Users/chriszhang/Desktop/Project/Ambrosia/Ambrosia/Views/Components/ProcessingView.swift (in target 'Ambrosia' from project 'Ambrosia')
+    cd /Users/chriszhang/Desktop/Project/Ambrosia
+    
+
+SwiftCompile normal arm64 /Users/chriszhang/Desktop/Project/Ambrosia/Ambrosia/Views/Components/CameraScannerView.swift (in target 'Ambrosia' from project 'Ambrosia')
+    cd /Users/chriszhang/Desktop/Project/Ambrosia
+    
+
+SwiftCompile normal arm64 Compiling\ SafetyAgent.swift,\ BentoGrid.swift,\ ComboResultView.swift /Users/chriszhang/Desktop/Project/Ambrosia/Ambrosia/Agents/SafetyAgent.swift /Users/chriszhang/Desktop/Project/Ambrosia/Ambrosia/Views/Components/BentoGrid.swift /Users/chriszhang/Desktop/Project/Ambrosia/Ambrosia/Views/Screens/ComboResultView.swift (in target 'Ambrosia' from project 'Ambrosia')
+
+SwiftCompile normal arm64 /Users/chriszhang/Desktop/Project/Ambrosia/Ambrosia/Agents/SafetyAgent.swift (in target 'Ambrosia' from project 'Ambrosia')
+    cd /Users/chriszhang/Desktop/Project/Ambrosia
+    
+
+SwiftCompile normal arm64 /Users/chriszhang/Desktop/Project/Ambrosia/Ambrosia/Views/Components/BentoGrid.swift (in target 'Ambrosia' from project 'Ambrosia')
+    cd /Users/chriszhang/Desktop/Project/Ambrosia
+    
+
+SwiftCompile normal arm64 /Users/chriszhang/Desktop/Project/Ambrosia/Ambrosia/Views/Screens/ComboResultView.swift (in target 'Ambrosia' from project 'Ambrosia')
+    cd /Users/chriszhang/Desktop/Project/Ambrosia
+    
+
+SwiftCompile normal arm64 Compiling\ AmbrosiaApp.swift,\ ModeSelectionView.swift /Users/chriszhang/Desktop/Project/Ambrosia/Ambrosia/AmbrosiaApp.swift /Users/chriszhang/Desktop/Project/Ambrosia/Ambrosia/Views/Screens/ModeSelectionView.swift (in target 'Ambrosia' from project 'Ambrosia')
+
+SwiftCompile normal arm64 /Users/chriszhang/Desktop/Project/Ambrosia/Ambrosia/AmbrosiaApp.swift (in target 'Ambrosia' from project 'Ambrosia')
+    cd /Users/chriszhang/Desktop/Project/Ambrosia
+    
+
+SwiftCompile normal arm64 /Users/chriszhang/Desktop/Project/Ambrosia/Ambrosia/Views/Screens/ModeSelectionView.swift (in target 'Ambrosia' from project 'Ambrosia')
+    cd /Users/chriszhang/Desktop/Project/Ambrosia
+    
+
+SwiftCompile normal arm64 Compiling\ ContentView.swift,\ HistoryStore.swift,\ GroupSetupView.swift /Users/chriszhang/Desktop/Project/Ambrosia/Ambrosia/Views/Screens/ContentView.swift /Users/chriszhang/Desktop/Project/Ambrosia/Ambrosia/Features/App/HistoryStore.swift /Users/chriszhang/Desktop/Project/Ambrosia/Ambrosia/Views/Screens/GroupSetupView.swift (in target 'Ambrosia' from project 'Ambrosia')
+
+SwiftCompile normal arm64 /Users/chriszhang/Desktop/Project/Ambrosia/Ambrosia/Views/Screens/ContentView.swift (in target 'Ambrosia' from project 'Ambrosia')
+    cd /Users/chriszhang/Desktop/Project/Ambrosia
+    
+
+SwiftCompile normal arm64 /Users/chriszhang/Desktop/Project/Ambrosia/Ambrosia/Features/App/HistoryStore.swift (in target 'Ambrosia' from project 'Ambrosia')
+    cd /Users/chriszhang/Desktop/Project/Ambrosia
+    
+
+SwiftCompile normal arm64 /Users/chriszhang/Desktop/Project/Ambrosia/Ambrosia/Views/Screens/GroupSetupView.swift (in target 'Ambrosia' from project 'Ambrosia')
+    cd /Users/chriszhang/Desktop/Project/Ambrosia
+    
+
+SwiftCompile normal arm64 Compiling\ AppStore.swift,\ GeneratedAssetSymbols.swift /Users/chriszhang/Desktop/Project/Ambrosia/Ambrosia/Features/App/AppStore.swift /Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Intermediates.noindex/Ambrosia.build/Debug-iphonesimulator/Ambrosia.build/DerivedSources/GeneratedAssetSymbols.swift (in target 'Ambrosia' from project 'Ambrosia')
+
+SwiftCompile normal arm64 /Users/chriszhang/Desktop/Project/Ambrosia/Ambrosia/Features/App/AppStore.swift (in target 'Ambrosia' from project 'Ambrosia')
+    cd /Users/chriszhang/Desktop/Project/Ambrosia
+    
+
+SwiftCompile normal arm64 /Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Intermediates.noindex/Ambrosia.build/Debug-iphonesimulator/Ambrosia.build/DerivedSources/GeneratedAssetSymbols.swift (in target 'Ambrosia' from project 'Ambrosia')
+    cd /Users/chriszhang/Desktop/Project/Ambrosia
+    
+
+SwiftCompile normal arm64 Compiling\ ChefAgent.swift,\ AmbrosiaTheme.swift,\ VisualizerAgent.swift /Users/chriszhang/Desktop/Project/Ambrosia/Ambrosia/Agents/ChefAgent.swift /Users/chriszhang/Desktop/Project/Ambrosia/Ambrosia/Views/Components/AmbrosiaTheme.swift /Users/chriszhang/Desktop/Project/Ambrosia/Ambrosia/Agents/VisualizerAgent.swift (in target 'Ambrosia' from project 'Ambrosia')
+
+SwiftCompile normal arm64 /Users/chriszhang/Desktop/Project/Ambrosia/Ambrosia/Agents/ChefAgent.swift (in target 'Ambrosia' from project 'Ambrosia')
+    cd /Users/chriszhang/Desktop/Project/Ambrosia
+    
+
+SwiftCompile normal arm64 /Users/chriszhang/Desktop/Project/Ambrosia/Ambrosia/Views/Components/AmbrosiaTheme.swift (in target 'Ambrosia' from project 'Ambrosia')
+    cd /Users/chriszhang/Desktop/Project/Ambrosia
+    
+
+SwiftCompile normal arm64 /Users/chriszhang/Desktop/Project/Ambrosia/Ambrosia/Agents/VisualizerAgent.swift (in target 'Ambrosia' from project 'Ambrosia')
+    cd /Users/chriszhang/Desktop/Project/Ambrosia
+    
+
+SwiftCompile normal arm64 Compiling\ Models.swift,\ FloatingNavBar.swift,\ GeminiService.swift /Users/chriszhang/Desktop/Project/Ambrosia/Ambrosia/Models/Models.swift /Users/chriszhang/Desktop/Project/Ambrosia/Ambrosia/Views/Components/FloatingNavBar.swift /Users/chriszhang/Desktop/Project/Ambrosia/Ambrosia/Services/GeminiService.swift (in target 'Ambrosia' from project 'Ambrosia')
+
+SwiftCompile normal arm64 /Users/chriszhang/Desktop/Project/Ambrosia/Ambrosia/Models/Models.swift (in target 'Ambrosia' from project 'Ambrosia')
+    cd /Users/chriszhang/Desktop/Project/Ambrosia
+    
+
+SwiftCompile normal arm64 /Users/chriszhang/Desktop/Project/Ambrosia/Ambrosia/Views/Components/FloatingNavBar.swift (in target 'Ambrosia' from project 'Ambrosia')
+    cd /Users/chriszhang/Desktop/Project/Ambrosia
+    
+
+SwiftCompile normal arm64 /Users/chriszhang/Desktop/Project/Ambrosia/Ambrosia/Services/GeminiService.swift (in target 'Ambrosia' from project 'Ambrosia')
+    cd /Users/chriszhang/Desktop/Project/Ambrosia
+    
+
+SwiftDriverJobDiscovery normal arm64 Compiling AmbrosiaApp.swift, ModeSelectionView.swift (in target 'Ambrosia' from project 'Ambrosia')
+
+SwiftCompile normal arm64 Compiling\ DependencyClients.swift,\ DecoderAgent.swift /Users/chriszhang/Desktop/Project/Ambrosia/Ambrosia/Dependencies/DependencyClients.swift /Users/chriszhang/Desktop/Project/Ambrosia/Ambrosia/Agents/DecoderAgent.swift (in target 'Ambrosia' from project 'Ambrosia')
+
+SwiftCompile normal arm64 /Users/chriszhang/Desktop/Project/Ambrosia/Ambrosia/Dependencies/DependencyClients.swift (in target 'Ambrosia' from project 'Ambrosia')
+    cd /Users/chriszhang/Desktop/Project/Ambrosia
+    
+
+SwiftCompile normal arm64 /Users/chriszhang/Desktop/Project/Ambrosia/Ambrosia/Agents/DecoderAgent.swift (in target 'Ambrosia' from project 'Ambrosia')
+    cd /Users/chriszhang/Desktop/Project/Ambrosia
+    
+
+SwiftDriverJobDiscovery normal arm64 Compiling ChefAgent.swift, AmbrosiaTheme.swift, VisualizerAgent.swift (in target 'Ambrosia' from project 'Ambrosia')
+
+SwiftCompile normal arm64 Compiling\ PerformanceUtils.swift,\ GlassButton.swift,\ AgentProtocols.swift /Users/chriszhang/Desktop/Project/Ambrosia/Ambrosia/Core/PerformanceUtils.swift /Users/chriszhang/Desktop/Project/Ambrosia/Ambrosia/Views/Components/GlassButton.swift /Users/chriszhang/Desktop/Project/Ambrosia/Ambrosia/Core/AgentProtocols.swift (in target 'Ambrosia' from project 'Ambrosia')
+
+SwiftCompile normal arm64 /Users/chriszhang/Desktop/Project/Ambrosia/Ambrosia/Core/PerformanceUtils.swift (in target 'Ambrosia' from project 'Ambrosia')
+    cd /Users/chriszhang/Desktop/Project/Ambrosia
+    
+
+SwiftCompile normal arm64 /Users/chriszhang/Desktop/Project/Ambrosia/Ambrosia/Views/Components/GlassButton.swift (in target 'Ambrosia' from project 'Ambrosia')
+    cd /Users/chriszhang/Desktop/Project/Ambrosia
+    
+
+SwiftCompile normal arm64 /Users/chriszhang/Desktop/Project/Ambrosia/Ambrosia/Core/AgentProtocols.swift (in target 'Ambrosia' from project 'Ambrosia')
+    cd /Users/chriszhang/Desktop/Project/Ambrosia
+    
+
+SwiftDriverJobDiscovery normal arm64 Compiling AppStore.swift, GeneratedAssetSymbols.swift (in target 'Ambrosia' from project 'Ambrosia')
+
+SwiftDriverJobDiscovery normal arm64 Emitting module for Ambrosia (in target 'Ambrosia' from project 'Ambrosia')
+
+SwiftDriver\ Compilation\ Requirements Ambrosia normal arm64 com.apple.xcode.tools.swift.compiler (in target 'Ambrosia' from project 'Ambrosia')
+    cd /Users/chriszhang/Desktop/Project/Ambrosia
+    builtin-Swift-Compilation-Requirements -- /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc -module-name Ambrosia -Onone -enforce-exclusivity\=checked @/Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Intermediates.noindex/Ambrosia.build/Debug-iphonesimulator/Ambrosia.build/Objects-normal/arm64/Ambrosia.SwiftFileList -DDEBUG -enable-bare-slash-regex -enable-experimental-feature DebugDescriptionMacro -sdk /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator18.5.sdk -target arm64-apple-ios18.5-simulator -g -module-cache-path /Users/chriszhang/Library/Developer/Xcode/DerivedData/ModuleCache.noindex -Xfrontend -serialize-debugging-options -profile-coverage-mapping -profile-generate -enable-testing -index-store-path /Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Index.noindex/DataStore -swift-version 5 -I /Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Products/Debug-iphonesimulator -F /Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Products/Debug-iphonesimulator -emit-localized-strings -emit-localized-strings-path /Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Intermediates.noindex/Ambrosia.build/Debug-iphonesimulator/Ambrosia.build/Objects-normal/arm64 -c -j10 -enable-batch-mode -incremental -Xcc -ivfsstatcache -Xcc /Users/chriszhang/Library/Developer/Xcode/DerivedData/SDKStatCaches.noindex/iphonesimulator18.5-22F76-d5fc8ad4295d2ef488fb7d0f804ce0c4.sdkstatcache -output-file-map /Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Intermediates.noindex/Ambrosia.build/Debug-iphonesimulator/Ambrosia.build/Objects-normal/arm64/Ambrosia-OutputFileMap.json -use-frontend-parseable-output -save-temps -no-color-diagnostics -serialize-diagnostics -emit-dependencies -emit-module -emit-module-path /Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Intermediates.noindex/Ambrosia.build/Debug-iphonesimulator/Ambrosia.build/Objects-normal/arm64/Ambrosia.swiftmodule -validate-clang-modules-once -clang-build-session-file /Users/chriszhang/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/Session.modulevalidation -Xcc -I/Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Intermediates.noindex/Ambrosia.build/Debug-iphonesimulator/Ambrosia.build/swift-overrides.hmap -emit-const-values -Xfrontend -const-gather-protocols-file -Xfrontend /Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Intermediates.noindex/Ambrosia.build/Debug-iphonesimulator/Ambrosia.build/Objects-normal/arm64/Ambrosia_const_extract_protocols.json -Xcc -iquote -Xcc /Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Intermediates.noindex/Ambrosia.build/Debug-iphonesimulator/Ambrosia.build/Ambrosia-generated-files.hmap -Xcc -I/Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Intermediates.noindex/Ambrosia.build/Debug-iphonesimulator/Ambrosia.build/Ambrosia-own-target-headers.hmap -Xcc -I/Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Intermediates.noindex/Ambrosia.build/Debug-iphonesimulator/Ambrosia.build/Ambrosia-all-target-headers.hmap -Xcc -iquote -Xcc /Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Intermediates.noindex/Ambrosia.build/Debug-iphonesimulator/Ambrosia.build/Ambrosia-project-headers.hmap -Xcc -I/Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Products/Debug-iphonesimulator/include -Xcc -I/Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Intermediates.noindex/Ambrosia.build/Debug-iphonesimulator/Ambrosia.build/DerivedSources-normal/arm64 -Xcc -I/Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Intermediates.noindex/Ambrosia.build/Debug-iphonesimulator/Ambrosia.build/DerivedSources/arm64 -Xcc -I/Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Intermediates.noindex/Ambrosia.build/Debug-iphonesimulator/Ambrosia.build/DerivedSources -Xcc -DDEBUG\=1 -emit-objc-header -emit-objc-header-path /Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Intermediates.noindex/Ambrosia.build/Debug-iphonesimulator/Ambrosia.build/Objects-normal/arm64/Ambrosia-Swift.h -working-directory /Users/chriszhang/Desktop/Project/Ambrosia -experimental-emit-module-separately -disable-cmo
+
+SwiftMergeGeneratedHeaders /Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Intermediates.noindex/Ambrosia.build/Debug-iphonesimulator/Ambrosia.build/DerivedSources/Ambrosia-Swift.h /Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Intermediates.noindex/Ambrosia.build/Debug-iphonesimulator/Ambrosia.build/Objects-normal/arm64/Ambrosia-Swift.h (in target 'Ambrosia' from project 'Ambrosia')
+    cd /Users/chriszhang/Desktop/Project/Ambrosia
+    builtin-swiftHeaderTool -arch arm64 /Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Intermediates.noindex/Ambrosia.build/Debug-iphonesimulator/Ambrosia.build/Objects-normal/arm64/Ambrosia-Swift.h -o /Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Intermediates.noindex/Ambrosia.build/Debug-iphonesimulator/Ambrosia.build/DerivedSources/Ambrosia-Swift.h
+
+Copy /Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Products/Debug-iphonesimulator/Ambrosia.swiftmodule/arm64-apple-ios-simulator.swiftmodule /Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Intermediates.noindex/Ambrosia.build/Debug-iphonesimulator/Ambrosia.build/Objects-normal/arm64/Ambrosia.swiftmodule (in target 'Ambrosia' from project 'Ambrosia')
+    cd /Users/chriszhang/Desktop/Project/Ambrosia
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks -rename /Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Intermediates.noindex/Ambrosia.build/Debug-iphonesimulator/Ambrosia.build/Objects-normal/arm64/Ambrosia.swiftmodule /Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Products/Debug-iphonesimulator/Ambrosia.swiftmodule/arm64-apple-ios-simulator.swiftmodule
+
+Copy /Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Products/Debug-iphonesimulator/Ambrosia.swiftmodule/arm64-apple-ios-simulator.swiftdoc /Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Intermediates.noindex/Ambrosia.build/Debug-iphonesimulator/Ambrosia.build/Objects-normal/arm64/Ambrosia.swiftdoc (in target 'Ambrosia' from project 'Ambrosia')
+    cd /Users/chriszhang/Desktop/Project/Ambrosia
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks -rename /Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Intermediates.noindex/Ambrosia.build/Debug-iphonesimulator/Ambrosia.build/Objects-normal/arm64/Ambrosia.swiftdoc /Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Products/Debug-iphonesimulator/Ambrosia.swiftmodule/arm64-apple-ios-simulator.swiftdoc
+
+Copy /Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Products/Debug-iphonesimulator/Ambrosia.swiftmodule/arm64-apple-ios-simulator.abi.json /Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Intermediates.noindex/Ambrosia.build/Debug-iphonesimulator/Ambrosia.build/Objects-normal/arm64/Ambrosia.abi.json (in target 'Ambrosia' from project 'Ambrosia')
+    cd /Users/chriszhang/Desktop/Project/Ambrosia
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks -rename /Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Intermediates.noindex/Ambrosia.build/Debug-iphonesimulator/Ambrosia.build/Objects-normal/arm64/Ambrosia.abi.json /Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Products/Debug-iphonesimulator/Ambrosia.swiftmodule/arm64-apple-ios-simulator.abi.json
+
+Copy /Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Products/Debug-iphonesimulator/Ambrosia.swiftmodule/Project/arm64-apple-ios-simulator.swiftsourceinfo /Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Intermediates.noindex/Ambrosia.build/Debug-iphonesimulator/Ambrosia.build/Objects-normal/arm64/Ambrosia.swiftsourceinfo (in target 'Ambrosia' from project 'Ambrosia')
+    cd /Users/chriszhang/Desktop/Project/Ambrosia
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks -rename /Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Intermediates.noindex/Ambrosia.build/Debug-iphonesimulator/Ambrosia.build/Objects-normal/arm64/Ambrosia.swiftsourceinfo /Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Products/Debug-iphonesimulator/Ambrosia.swiftmodule/Project/arm64-apple-ios-simulator.swiftsourceinfo
+
+SwiftDriverJobDiscovery normal arm64 Compiling LiquidDesign.swift, ProcessingView.swift, CameraScannerView.swift (in target 'Ambrosia' from project 'Ambrosia')
+
+SwiftDriverJobDiscovery normal arm64 Compiling DependencyClients.swift, DecoderAgent.swift (in target 'Ambrosia' from project 'Ambrosia')
+
+SwiftDriverJobDiscovery normal arm64 Compiling SafetyAgent.swift, BentoGrid.swift, ComboResultView.swift (in target 'Ambrosia' from project 'Ambrosia')
+
+SwiftDriverJobDiscovery normal arm64 Compiling AmbrosiaManager.swift, AppRootView.swift, SettingsView.swift (in target 'Ambrosia' from project 'Ambrosia')
+
+SwiftDriverJobDiscovery normal arm64 Compiling PerformanceUtils.swift, GlassButton.swift, AgentProtocols.swift (in target 'Ambrosia' from project 'Ambrosia')
+
+SwiftDriverJobDiscovery normal arm64 Compiling Models.swift, FloatingNavBar.swift, GeminiService.swift (in target 'Ambrosia' from project 'Ambrosia')
+
+SwiftDriverJobDiscovery normal arm64 Compiling ContentView.swift, HistoryStore.swift, GroupSetupView.swift (in target 'Ambrosia' from project 'Ambrosia')
+
+SwiftDriver\ Compilation Ambrosia normal arm64 com.apple.xcode.tools.swift.compiler (in target 'Ambrosia' from project 'Ambrosia')
+    cd /Users/chriszhang/Desktop/Project/Ambrosia
+    builtin-Swift-Compilation -- /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc -module-name Ambrosia -Onone -enforce-exclusivity\=checked @/Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Intermediates.noindex/Ambrosia.build/Debug-iphonesimulator/Ambrosia.build/Objects-normal/arm64/Ambrosia.SwiftFileList -DDEBUG -enable-bare-slash-regex -enable-experimental-feature DebugDescriptionMacro -sdk /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator18.5.sdk -target arm64-apple-ios18.5-simulator -g -module-cache-path /Users/chriszhang/Library/Developer/Xcode/DerivedData/ModuleCache.noindex -Xfrontend -serialize-debugging-options -profile-coverage-mapping -profile-generate -enable-testing -index-store-path /Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Index.noindex/DataStore -swift-version 5 -I /Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Products/Debug-iphonesimulator -F /Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Products/Debug-iphonesimulator -emit-localized-strings -emit-localized-strings-path /Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Intermediates.noindex/Ambrosia.build/Debug-iphonesimulator/Ambrosia.build/Objects-normal/arm64 -c -j10 -enable-batch-mode -incremental -Xcc -ivfsstatcache -Xcc /Users/chriszhang/Library/Developer/Xcode/DerivedData/SDKStatCaches.noindex/iphonesimulator18.5-22F76-d5fc8ad4295d2ef488fb7d0f804ce0c4.sdkstatcache -output-file-map /Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Intermediates.noindex/Ambrosia.build/Debug-iphonesimulator/Ambrosia.build/Objects-normal/arm64/Ambrosia-OutputFileMap.json -use-frontend-parseable-output -save-temps -no-color-diagnostics -serialize-diagnostics -emit-dependencies -emit-module -emit-module-path /Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Intermediates.noindex/Ambrosia.build/Debug-iphonesimulator/Ambrosia.build/Objects-normal/arm64/Ambrosia.swiftmodule -validate-clang-modules-once -clang-build-session-file /Users/chriszhang/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/Session.modulevalidation -Xcc -I/Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Intermediates.noindex/Ambrosia.build/Debug-iphonesimulator/Ambrosia.build/swift-overrides.hmap -emit-const-values -Xfrontend -const-gather-protocols-file -Xfrontend /Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Intermediates.noindex/Ambrosia.build/Debug-iphonesimulator/Ambrosia.build/Objects-normal/arm64/Ambrosia_const_extract_protocols.json -Xcc -iquote -Xcc /Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Intermediates.noindex/Ambrosia.build/Debug-iphonesimulator/Ambrosia.build/Ambrosia-generated-files.hmap -Xcc -I/Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Intermediates.noindex/Ambrosia.build/Debug-iphonesimulator/Ambrosia.build/Ambrosia-own-target-headers.hmap -Xcc -I/Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Intermediates.noindex/Ambrosia.build/Debug-iphonesimulator/Ambrosia.build/Ambrosia-all-target-headers.hmap -Xcc -iquote -Xcc /Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Intermediates.noindex/Ambrosia.build/Debug-iphonesimulator/Ambrosia.build/Ambrosia-project-headers.hmap -Xcc -I/Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Products/Debug-iphonesimulator/include -Xcc -I/Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Intermediates.noindex/Ambrosia.build/Debug-iphonesimulator/Ambrosia.build/DerivedSources-normal/arm64 -Xcc -I/Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Intermediates.noindex/Ambrosia.build/Debug-iphonesimulator/Ambrosia.build/DerivedSources/arm64 -Xcc -I/Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Intermediates.noindex/Ambrosia.build/Debug-iphonesimulator/Ambrosia.build/DerivedSources -Xcc -DDEBUG\=1 -emit-objc-header -emit-objc-header-path /Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Intermediates.noindex/Ambrosia.build/Debug-iphonesimulator/Ambrosia.build/Objects-normal/arm64/Ambrosia-Swift.h -working-directory /Users/chriszhang/Desktop/Project/Ambrosia -experimental-emit-module-separately -disable-cmo
+
+Ld /Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Products/Debug-iphonesimulator/Ambrosia.app/Ambrosia.debug.dylib normal (in target 'Ambrosia' from project 'Ambrosia')
+    cd /Users/chriszhang/Desktop/Project/Ambrosia
+    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -Xlinker -reproducible -target arm64-apple-ios18.5-simulator -dynamiclib -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator18.5.sdk -O0 -L/Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Intermediates.noindex/EagerLinkingTBDs/Debug-iphonesimulator -L/Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Products/Debug-iphonesimulator -F/Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Intermediates.noindex/EagerLinkingTBDs/Debug-iphonesimulator -F/Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Products/Debug-iphonesimulator -filelist /Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Intermediates.noindex/Ambrosia.build/Debug-iphonesimulator/Ambrosia.build/Objects-normal/arm64/Ambrosia.LinkFileList -install_name @rpath/Ambrosia.debug.dylib -Xlinker -rpath -Xlinker @executable_path/Frameworks -dead_strip -Xlinker -object_path_lto -Xlinker /Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Intermediates.noindex/Ambrosia.build/Debug-iphonesimulator/Ambrosia.build/Objects-normal/arm64/Ambrosia_lto.o -rdynamic -Xlinker -no_deduplicate -Xlinker -objc_abi_version -Xlinker 2 -Xlinker -debug_variant -Xlinker -dependency_info -Xlinker /Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Intermediates.noindex/Ambrosia.build/Debug-iphonesimulator/Ambrosia.build/Objects-normal/arm64/Ambrosia_dependency_info.dat -fobjc-link-runtime -fprofile-instr-generate -L/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator -L/usr/lib/swift -Xlinker -add_ast_path -Xlinker /Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Intermediates.noindex/Ambrosia.build/Debug-iphonesimulator/Ambrosia.build/Objects-normal/arm64/Ambrosia.swiftmodule -Xlinker -alias -Xlinker _main -Xlinker ___debug_main_executable_dylib_entry_point -Xlinker -no_adhoc_codesign -o /Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Products/Debug-iphonesimulator/Ambrosia.app/Ambrosia.debug.dylib
+
+ConstructStubExecutorLinkFileList /Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Intermediates.noindex/Ambrosia.build/Debug-iphonesimulator/Ambrosia.build/Ambrosia-ExecutorLinkFileList-normal-arm64.txt (in target 'Ambrosia' from project 'Ambrosia')
+    cd /Users/chriszhang/Desktop/Project/Ambrosia
+    construct-stub-executor-link-file-list /Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Products/Debug-iphonesimulator/Ambrosia.app/Ambrosia.debug.dylib /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/lib/libPreviewsJITStubExecutor_no_swift_entry_point.a /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/lib/libPreviewsJITStubExecutor.a --output /Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Intermediates.noindex/Ambrosia.build/Debug-iphonesimulator/Ambrosia.build/Ambrosia-ExecutorLinkFileList-normal-arm64.txt
+note: Using stub executor library with Swift entry point. (in target 'Ambrosia' from project 'Ambrosia')
+
+Ld /Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Products/Debug-iphonesimulator/Ambrosia.app/Ambrosia normal (in target 'Ambrosia' from project 'Ambrosia')
+    cd /Users/chriszhang/Desktop/Project/Ambrosia
+    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -Xlinker -reproducible -target arm64-apple-ios18.5-simulator -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator18.5.sdk -O0 -L/Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Products/Debug-iphonesimulator -F/Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Products/Debug-iphonesimulator -Xlinker -rpath -Xlinker @executable_path -Xlinker -rpath -Xlinker @executable_path/Frameworks -rdynamic -Xlinker -no_deduplicate -Xlinker -objc_abi_version -Xlinker 2 -Xlinker -debug_variant -e ___debug_blank_executor_main -Xlinker -sectcreate -Xlinker __TEXT -Xlinker __debug_dylib -Xlinker /Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Intermediates.noindex/Ambrosia.build/Debug-iphonesimulator/Ambrosia.build/Ambrosia-DebugDylibPath-normal-arm64.txt -Xlinker -sectcreate -Xlinker __TEXT -Xlinker __debug_instlnm -Xlinker /Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Intermediates.noindex/Ambrosia.build/Debug-iphonesimulator/Ambrosia.build/Ambrosia-DebugDylibInstallName-normal-arm64.txt -Xlinker -filelist -Xlinker /Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Intermediates.noindex/Ambrosia.build/Debug-iphonesimulator/Ambrosia.build/Ambrosia-ExecutorLinkFileList-normal-arm64.txt -Xlinker -sectcreate -Xlinker __TEXT -Xlinker __entitlements -Xlinker /Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Intermediates.noindex/Ambrosia.build/Debug-iphonesimulator/Ambrosia.build/Ambrosia.app-Simulated.xcent -Xlinker -sectcreate -Xlinker __TEXT -Xlinker __ents_der -Xlinker /Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Intermediates.noindex/Ambrosia.build/Debug-iphonesimulator/Ambrosia.build/Ambrosia.app-Simulated.xcent.der /Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Products/Debug-iphonesimulator/Ambrosia.app/Ambrosia.debug.dylib -Xlinker -no_adhoc_codesign -o /Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Products/Debug-iphonesimulator/Ambrosia.app/Ambrosia
+
+LinkAssetCatalog /Users/chriszhang/Desktop/Project/Ambrosia/Ambrosia/Assets.xcassets (in target 'Ambrosia' from project 'Ambrosia')
+    cd /Users/chriszhang/Desktop/Project/Ambrosia
+    builtin-linkAssetCatalog --thinned /Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Intermediates.noindex/Ambrosia.build/Debug-iphonesimulator/Ambrosia.build/assetcatalog_output/thinned --thinned-dependencies /Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Intermediates.noindex/Ambrosia.build/Debug-iphonesimulator/Ambrosia.build/assetcatalog_dependencies_thinned --thinned-info-plist-content /Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Intermediates.noindex/Ambrosia.build/Debug-iphonesimulator/Ambrosia.build/assetcatalog_generated_info.plist_thinned --unthinned /Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Intermediates.noindex/Ambrosia.build/Debug-iphonesimulator/Ambrosia.build/assetcatalog_output/unthinned --unthinned-dependencies /Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Intermediates.noindex/Ambrosia.build/Debug-iphonesimulator/Ambrosia.build/assetcatalog_dependencies_unthinned --unthinned-info-plist-content /Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Intermediates.noindex/Ambrosia.build/Debug-iphonesimulator/Ambrosia.build/assetcatalog_generated_info.plist_unthinned --output /Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Products/Debug-iphonesimulator/Ambrosia.app --plist-output /Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Intermediates.noindex/Ambrosia.build/Debug-iphonesimulator/Ambrosia.build/assetcatalog_generated_info.plist
+note: Emplaced /Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Products/Debug-iphonesimulator/Ambrosia.app/Assets.car (in target 'Ambrosia' from project 'Ambrosia')
+note: Emplaced /Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Products/Debug-iphonesimulator/Ambrosia.app/AppIcon60x60@2x.png (in target 'Ambrosia' from project 'Ambrosia')
+
+ProcessInfoPlistFile /Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Products/Debug-iphonesimulator/Ambrosia.app/Info.plist /Users/chriszhang/Desktop/Project/Ambrosia/Ambrosia/Resources/Info.plist (in target 'Ambrosia' from project 'Ambrosia')
+    cd /Users/chriszhang/Desktop/Project/Ambrosia
+    builtin-infoPlistUtility /Users/chriszhang/Desktop/Project/Ambrosia/Ambrosia/Resources/Info.plist -producttype com.apple.product-type.application -genpkginfo /Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Products/Debug-iphonesimulator/Ambrosia.app/PkgInfo -expandbuildsettings -format binary -platform iphonesimulator -additionalcontentfile /Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Intermediates.noindex/Ambrosia.build/Debug-iphonesimulator/Ambrosia.build/assetcatalog_generated_info.plist -o /Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Products/Debug-iphonesimulator/Ambrosia.app/Info.plist
+
+CopySwiftLibs /Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Products/Debug-iphonesimulator/Ambrosia.app (in target 'Ambrosia' from project 'Ambrosia')
+    cd /Users/chriszhang/Desktop/Project/Ambrosia
+    builtin-swiftStdLibTool --copy --verbose --sign - --scan-executable /Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Products/Debug-iphonesimulator/Ambrosia.app/Ambrosia.debug.dylib --scan-folder /Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Products/Debug-iphonesimulator/Ambrosia.app/Frameworks --scan-folder /Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Products/Debug-iphonesimulator/Ambrosia.app/PlugIns --scan-folder /Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Products/Debug-iphonesimulator/Ambrosia.app/SystemExtensions --scan-folder /Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Products/Debug-iphonesimulator/Ambrosia.app/Extensions --platform iphonesimulator --toolchain /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain --destination /Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Products/Debug-iphonesimulator/Ambrosia.app/Frameworks --strip-bitcode --strip-bitcode-tool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/bitcode_strip --emit-dependency-info /Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Intermediates.noindex/Ambrosia.build/Debug-iphonesimulator/Ambrosia.build/SwiftStdLibToolInputDependencies.dep --filter-for-swift-os
+
+ExtractAppIntentsMetadata (in target 'Ambrosia' from project 'Ambrosia')
+    cd /Users/chriszhang/Desktop/Project/Ambrosia
+    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/appintentsmetadataprocessor --toolchain-dir /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain --module-name Ambrosia --sdk-root /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator18.5.sdk --xcode-version 16F6 --platform-family iOS --deployment-target 18.5 --bundle-identifier com.chriszhang.Ambrosia --output /Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Products/Debug-iphonesimulator/Ambrosia.app --target-triple arm64-apple-ios18.5-simulator --binary-file /Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Products/Debug-iphonesimulator/Ambrosia.app/Ambrosia --dependency-file /Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Intermediates.noindex/Ambrosia.build/Debug-iphonesimulator/Ambrosia.build/Objects-normal/arm64/Ambrosia_dependency_info.dat --stringsdata-file /Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Intermediates.noindex/Ambrosia.build/Debug-iphonesimulator/Ambrosia.build/Objects-normal/arm64/ExtractedAppShortcutsMetadata.stringsdata --source-file-list /Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Intermediates.noindex/Ambrosia.build/Debug-iphonesimulator/Ambrosia.build/Objects-normal/arm64/Ambrosia.SwiftFileList --metadata-file-list /Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Intermediates.noindex/Ambrosia.build/Debug-iphonesimulator/Ambrosia.build/Ambrosia.DependencyMetadataFileList --static-metadata-file-list /Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Intermediates.noindex/Ambrosia.build/Debug-iphonesimulator/Ambrosia.build/Ambrosia.DependencyStaticMetadataFileList --swift-const-vals-list /Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Intermediates.noindex/Ambrosia.build/Debug-iphonesimulator/Ambrosia.build/Objects-normal/arm64/Ambrosia.SwiftConstValuesFileList --compile-time-extraction --deployment-aware-processing --validate-assistant-intents --no-app-shortcuts-localization
+2025-12-24 23:30:56.527 appintentsmetadataprocessor[64810:125692862] Starting appintentsmetadataprocessor export
+2025-12-24 23:30:56.528 appintentsmetadataprocessor[64810:125692862] warning: Metadata extraction skipped. No AppIntents.framework dependency found.
+
+AppIntentsSSUTraining (in target 'Ambrosia' from project 'Ambrosia')
+    cd /Users/chriszhang/Desktop/Project/Ambrosia
+    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/appintentsnltrainingprocessor --infoplist-path /Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Products/Debug-iphonesimulator/Ambrosia.app/Info.plist --temp-dir-path /Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Intermediates.noindex/Ambrosia.build/Debug-iphonesimulator/Ambrosia.build/ssu --bundle-id com.chriszhang.Ambrosia --product-path /Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Products/Debug-iphonesimulator/Ambrosia.app --extracted-metadata-path /Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Products/Debug-iphonesimulator/Ambrosia.app/Metadata.appintents --metadata-file-list /Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Intermediates.noindex/Ambrosia.build/Debug-iphonesimulator/Ambrosia.build/Ambrosia.DependencyMetadataFileList --archive-ssu-assets
+2025-12-24 23:30:56.544 appintentsnltrainingprocessor[64811:125692864] Parsing options for appintentsnltrainingprocessor
+2025-12-24 23:30:56.545 appintentsnltrainingprocessor[64811:125692864] No AppShortcuts found - Skipping.
+
+CodeSign /Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Products/Debug-iphonesimulator/Ambrosia.app/Ambrosia.debug.dylib (in target 'Ambrosia' from project 'Ambrosia')
+    cd /Users/chriszhang/Desktop/Project/Ambrosia
+    
+    Signing Identity:     "Sign to Run Locally"
+    
+    /usr/bin/codesign --force --sign - --timestamp\=none --generate-entitlement-der /Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Products/Debug-iphonesimulator/Ambrosia.app/Ambrosia.debug.dylib
+
+CodeSign /Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Products/Debug-iphonesimulator/Ambrosia.app/__preview.dylib (in target 'Ambrosia' from project 'Ambrosia')
+    cd /Users/chriszhang/Desktop/Project/Ambrosia
+    
+    Signing Identity:     "Sign to Run Locally"
+    
+    /usr/bin/codesign --force --sign - --timestamp\=none --generate-entitlement-der /Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Products/Debug-iphonesimulator/Ambrosia.app/__preview.dylib
+
+CodeSign /Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Products/Debug-iphonesimulator/Ambrosia.app (in target 'Ambrosia' from project 'Ambrosia')
+    cd /Users/chriszhang/Desktop/Project/Ambrosia
+    
+    Signing Identity:     "Sign to Run Locally"
+    
+    /usr/bin/codesign --force --sign - --timestamp\=none --generate-entitlement-der /Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Products/Debug-iphonesimulator/Ambrosia.app
+
+RegisterExecutionPolicyException /Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Products/Debug-iphonesimulator/Ambrosia.app (in target 'Ambrosia' from project 'Ambrosia')
+    cd /Users/chriszhang/Desktop/Project/Ambrosia
+    builtin-RegisterExecutionPolicyException /Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Products/Debug-iphonesimulator/Ambrosia.app
+
+Validate /Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Products/Debug-iphonesimulator/Ambrosia.app (in target 'Ambrosia' from project 'Ambrosia')
+    cd /Users/chriszhang/Desktop/Project/Ambrosia
+    builtin-validationUtility /Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Products/Debug-iphonesimulator/Ambrosia.app -infoplist-subpath Info.plist
+
+Touch /Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Products/Debug-iphonesimulator/Ambrosia.app (in target 'Ambrosia' from project 'Ambrosia')
+    cd /Users/chriszhang/Desktop/Project/Ambrosia
+    /usr/bin/touch -c /Users/chriszhang/Library/Developer/Xcode/DerivedData/Ambrosia-bxirztkirhvfmygocddpvuevzsop/Build/Products/Debug-iphonesimulator/Ambrosia.app
+
+** BUILD SUCCEEDED **
+

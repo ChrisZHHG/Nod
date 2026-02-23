@@ -35,12 +35,12 @@ struct MenuItem: Codable, Identifiable, Hashable, Sendable {
     let description: String?
     let price: Double?
     
-    // AI-Inferred Attributes (all optional with defaults for flexible parsing)
-    var isSpicy: Bool? = false
-    var isVegetarian: Bool? = false
-    var containsGluten: Bool? = false
-    var containsPeanuts: Bool? = false
-    var containsSeafood: Bool? = false
+    // AI-Inferred Attributes (Optional to reflect "Unknown" state)
+    var isSpicy: Bool? = nil
+    var isVegetarian: Bool? = nil
+    var containsGluten: Bool? = nil
+    var containsPeanuts: Bool? = nil
+    var containsSeafood: Bool? = nil
     
     // For V2: Recommendation Score
     var matchScore: Double? = nil

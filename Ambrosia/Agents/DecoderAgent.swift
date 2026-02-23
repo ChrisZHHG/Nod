@@ -42,7 +42,8 @@ final class DecoderAgent: DecoderAgentProtocol, @unchecked Sendable {
     
     RULES:
     - Extract exact dish names from the menu
-    - Infer dietary tags based on ingredients/icons
+    - Infer dietary tags based on ingredients/icons.
+    - If you are NOT 100% sure about a dietary tag (e.g. containsGluten), return null instead of false.
     - Use null for missing descriptions
     - Price should be a number, not a string
     """

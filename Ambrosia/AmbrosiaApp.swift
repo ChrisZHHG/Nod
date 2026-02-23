@@ -2,8 +2,6 @@ import SwiftUI
 
 @main
 struct AmbrosiaApp: App {
-    // Legacy manager kept for backwards compatibility
-    // @StateObject private var legacyManager = AmbrosiaManager()
     
     var body: some Scene {
         WindowGroup {
