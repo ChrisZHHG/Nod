@@ -47,46 +47,69 @@ struct ScannerView: View {
                 VStack(spacing: AmbrosiaTheme.Spacing.lg) {
                     // Feedback Text
                     if !images.isEmpty {
-                        Text("\(images.count) Images Captured")
-                            .font(AmbrosiaTheme.Typography.subheadline)
-                            .foregroundStyle(.white)
+                        Text("\(images.count) \(images.count == 1 ? "Photo" : "Photos") captured")
+                            .font(.system(size: 14, weight: .light, design: .rounded))
+                            .foregroundStyle(.ultraThinMaterial)
+                            .shadow(color: .white.opacity(0.2), radius: 3)
                             .padding(.vertical, 8)
-                            .padding(.horizontal, 16)
-                            .background(.black.opacity(0.6))
-                            .clipShape(Capsule())
+                            .padding(.horizontal, 20)
+                            .background(
+                                Capsule()
+                                    .fill(.ultraThinMaterial)
+                                    .environment(\.colorScheme, .dark)
+                            )
                     }
-                    
+
                     HStack(spacing: AmbrosiaTheme.Spacing.xl) {
                         Spacer()
-                        
-                        // Capture Button
+
+                        // Capture Button — glass ring with white fill
                         Button(action: {
                             HapticFeedback.light.trigger()
                             shouldCapture = true
                         }) {
                             ZStack {
                                 Circle()
-                                    .stroke(.white, lineWidth: 3)
-                                    .frame(width: 72, height: 72)
-                                
+                                    .stroke(.white.opacity(0.55), lineWidth: 2.5)
+                                    .frame(width: 76, height: 76)
                                 Circle()
                                     .fill(.white)
-                                    .frame(width: 60, height: 60)
+                                    .frame(width: 62, height: 62)
                             }
                         }
-                        
+
                         Spacer()
                     }
-                    
-                    // Finish / Analyze Button
+
+                    // Analyze button — amber CTA
                     if !images.isEmpty {
-                        GlassButton(title: "Analyze Menu", icon: "sparkles", variant: .primary) {
-                            onAnalyze()
+                        Button(action: { onAnalyze() }) {
+                            HStack(spacing: 10) {
+                                Image(systemName: "sparkles")
+                                    .font(.system(size: 16, weight: .medium))
+                                Text("Analyze Menu")
+                                    .font(.system(size: 17, weight: .semibold, design: .rounded))
+                            }
+                            .foregroundColor(AmbrosiaTheme.Cinematic.deepBlack)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 16)
+                            .background(
+                                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                                    .fill(AmbrosiaTheme.Cinematic.amber)
+                            )
                         }
+                        .buttonStyle(.plain)
                         .padding(.horizontal, AmbrosiaTheme.Spacing.xxl)
                     }
                 }
-                .padding(.bottom, 40)
+                .padding(.vertical, 20)
+                .padding(.bottom, 16)
+                .background(
+                    Rectangle()
+                        .fill(.ultraThinMaterial)
+                        .environment(\.colorScheme, .dark)
+                        .ignoresSafeArea(edges: .bottom)
+                )
             }
         }
     }

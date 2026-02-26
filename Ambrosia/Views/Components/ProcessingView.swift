@@ -1,183 +1,98 @@
 import SwiftUI
 
-// MARK: - Processing View (Enhanced with SF Symbols & Skeleton)
+// MARK: - Processing View — Cinematic "Simmer" Overlay
 
+/// Full-screen overlay shown while agents are processing.
+/// Matches the liquid glass dark aesthetic of the landing screen.
 struct ProcessingView: View {
-    let status: String
-    let progress: Double
-    
-    @State private var animateIcons = false
-    @State private var shimmerOffset: CGFloat = -200
-    
-    // Determine icon based on status
-    private var currentIcon: String {
-        if status.contains("Menu") || status.contains("Scan") {
-            return "doc.text.viewfinder"
-        } else if status.contains("Personal") || status.contains("Assemb") {
-            return "sparkles"
-        } else if status.contains("Safety") {
-            return "checkmark.shield"
-        } else {
-            return "wand.and.stars"
+    let appState: AppState
+
+    // Breathing animation state
+    @State private var textOpacity: Double = 0
+    @State private var dotCount: Int = 0
+    @State private var iconScale: Double = 0.85
+
+    // State-driven display content
+    private var content: (icon: String, headline: String, subline: String) {
+        switch appState {
+        case .decoding:
+            return ("doc.text.viewfinder", "Reading the menu", "Scanning every dish, price, and note")
+        case .reasoning(let stage):
+            let sub = stage.isEmpty ? "Crafting the perfect choice for you" : stage
+            return ("sparkles", "Simmering", sub)
+        case .verifying:
+            return ("checkmark.shield", "Auditing safety", "Double-checking allergens and restrictions")
+        default:
+            return ("wand.and.stars", "Working on it", "Just a moment")
         }
     }
-    
+
     var body: some View {
-        VStack(spacing: AmbrosiaTheme.Spacing.xl) {
-            // Animated SF Symbol Icon
-            ZStack {
-                // Glow Background
-                Circle()
-                    .fill(AmbrosiaTheme.Gradients.coralSunset)
-                    .frame(width: 100, height: 100)
-                    .blur(radius: 30)
-                    .opacity(0.5)
-                
-                // Icon with Animation
-                Image(systemName: currentIcon)
-                    .font(.system(size: 48, weight: .medium))
-                    .foregroundStyle(AmbrosiaTheme.Gradients.coralSunset)
-                    .symbolEffect(.variableColor.iterative, options: .repeating, value: animateIcons)
-                    .contentTransition(.symbolEffect(.replace))
+        ZStack {
+            // ── Full-bleed background ──────────────────────────────────────
+            Color.black.opacity(0.82).ignoresSafeArea()
+            Rectangle()
+                .fill(.ultraThinMaterial)
+                .environment(\.colorScheme, .dark)
+                .ignoresSafeArea()
+
+            // ── Content stack (top-left aligned, mirrors landing screen) ──
+            VStack(alignment: .leading, spacing: 0) {
+                Spacer()
+
+                // Animated SF icon
+                Image(systemName: content.icon)
+                    .font(.system(size: 44, weight: .ultraLight))
+                    .foregroundStyle(.ultraThinMaterial)
+                    .shadow(color: .white.opacity(0.25), radius: 6, x: 0, y: 2)
+                    .scaleEffect(iconScale)
+                    .animation(.easeInOut(duration: 1.4).repeatForever(autoreverses: true), value: iconScale)
+                    .padding(.bottom, 28)
+
+                // Headline — large, liquid glass
+                Text(content.headline + dots)
+                    .font(.system(size: 46, weight: .light, design: .rounded))
+                    .foregroundStyle(.ultraThinMaterial)
+                    .shadow(color: .white.opacity(0.28), radius: 4, x: 0, y: 1)
+                    .opacity(textOpacity)
+                    .animation(.easeInOut(duration: 0.6), value: content.headline)
+
+                // Subline — smaller, dimmer
+                Text(content.subline)
+                    .font(.system(size: 16, weight: .light, design: .rounded))
+                    .foregroundStyle(.ultraThinMaterial)
+                    .opacity(textOpacity * 0.65)
+                    .padding(.top, 10)
+                    .animation(.easeInOut(duration: 0.6), value: content.subline)
+
+                Spacer()
             }
-            .frame(height: 120)
-            
-            // Status Text
-            Text(status)
-                .font(AmbrosiaTheme.Typography.headline)
-                .foregroundStyle(AmbrosiaTheme.Colors.textPrimary)
-                .multilineTextAlignment(.center)
-                .contentTransition(.numericText())
-                .animation(.smooth, value: status)
-            
-            // Skeleton Bento Grid Preview
-            SkeletonBentoGrid()
-                .frame(height: 100)
-            
-            // Progress bar with gradient
-            if progress > 0 {
-                GeometryReader { geo in
-                    ZStack(alignment: .leading) {
-                        Capsule()
-                            .fill(AmbrosiaTheme.Colors.surfaceSecondary) // Gray background for visibility
-                            .frame(height: 6)
-                        
-                        Capsule()
-                            .fill(AmbrosiaTheme.Gradients.primary) // Blue gradient
-                            .frame(width: geo.size.width * progress, height: 6)
-                            .animation(.easeInOut, value: progress)
-                    }
-                }
-                .frame(width: 200, height: 6)
-            }
+            .padding(.leading, 28)
+            .frame(maxWidth: .infinity, alignment: .leading)
         }
-        .padding(AmbrosiaTheme.Spacing.xxl)
-        .glassCard()
-        .onAppear {
-            animateIcons = true
+        .ignoresSafeArea()
+        .onAppear { startAnimations() }
+        .transition(.opacity.combined(with: .scale(scale: 1.04)))
+    }
+
+    // ── Trailing animated dots ─────────────────────────────────────────────
+    private var dots: String {
+        String(repeating: ".", count: dotCount)
+    }
+
+    private func startAnimations() {
+        // Fade in text
+        withAnimation(.easeOut(duration: 0.7)) { textOpacity = 1.0 }
+
+        // Icon breathing
+        withAnimation(.easeInOut(duration: 1.4).repeatForever(autoreverses: true)) {
+            iconScale = 1.0
         }
-    }
-}
 
-// MARK: - Skeleton Bento Grid
-
-struct SkeletonBentoGrid: View {
-    @State private var shimmer = false
-    
-    var body: some View {
-        HStack(spacing: AmbrosiaTheme.Bento.spacing) {
-            // Left tile
-            SkeletonTile()
-            
-            // Right column
-            VStack(spacing: AmbrosiaTheme.Bento.spacing) {
-                SkeletonTile()
-                SkeletonTile()
-            }
+        // Dot ticker: ., .., ..., reset
+        Timer.scheduledTimer(withTimeInterval: 0.55, repeats: true) { timer in
+            dotCount = (dotCount + 1) % 4
+            // Stop if we've been cancelled (view left screen)
         }
-        .onAppear {
-            withAnimation(.easeInOut(duration: 1.5).repeatForever(autoreverses: false)) {
-                shimmer = true
-            }
-        }
-    }
-}
-
-// MARK: - Skeleton Tile with Shimmer
-
-struct SkeletonTile: View {
-    @State private var shimmerOffset: CGFloat = -100
-    
-    var body: some View {
-        RoundedRectangle(cornerRadius: AmbrosiaTheme.Radius.lg, style: .continuous)
-            .fill(AmbrosiaTheme.Colors.surfaceSecondary) // Gray placeholder
-            .overlay(
-                // Shimmer Effect (Darker for light mode)
-                GeometryReader { geo in
-                    RoundedRectangle(cornerRadius: AmbrosiaTheme.Radius.lg, style: .continuous)
-                        .fill(
-                            LinearGradient(
-                                colors: [
-                                    .clear,
-                                    Color.black.opacity(0.05), // Subtle dark shimmer
-                                    Color.black.opacity(0.1),
-                                    Color.black.opacity(0.05),
-                                    .clear
-                                ],
-                                startPoint: .leading,
-                                endPoint: .trailing
-                            )
-                        )
-                        .frame(width: 80)
-                        .offset(x: shimmerOffset)
-                        .onAppear {
-                            withAnimation(.linear(duration: 1.5).repeatForever(autoreverses: false)) {
-                                shimmerOffset = geo.size.width + 100
-                            }
-                        }
-                }
-                .clipped()
-            )
-            .clipShape(RoundedRectangle(cornerRadius: AmbrosiaTheme.Radius.lg, style: .continuous))
-    }
-}
-
-// MARK: - Shimmer View Modifier
-
-struct ShimmerModifier: ViewModifier {
-    @State private var phase: CGFloat = 0
-    
-    func body(content: Content) -> some View {
-        content
-            .overlay(
-                GeometryReader { geo in
-                    Rectangle()
-                        .fill(
-                            LinearGradient(
-                                colors: [
-                                    .clear,
-                                    Color.white.opacity(0.15),
-                                    .clear
-                                ],
-                                startPoint: .leading,
-                                endPoint: .trailing
-                            )
-                        )
-                        .frame(width: 60)
-                        .offset(x: phase * geo.size.width - 60)
-                        .onAppear {
-                            withAnimation(.linear(duration: 1.2).repeatForever(autoreverses: false)) {
-                                phase = 1
-                            }
-                        }
-                }
-                .clipped()
-            )
-    }
-}
-
-extension View {
-    func shimmer() -> some View {
-        modifier(ShimmerModifier())
     }
 }

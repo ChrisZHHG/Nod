@@ -4,39 +4,57 @@ import SwiftUI
 
 struct AppRootView: View {
     @State private var store = AppStore()
-    
+
+    /// True whenever an agent pipeline is actively running
+    private var isProcessing: Bool {
+        switch store.appState {
+        case .decoding, .reasoning, .verifying: return true
+        default: return false
+        }
+    }
+
     var body: some View {
-        NavigationStack(path: $store.navigationPath) {
-            ZStack {
-                Color.clear.ignoresSafeArea()
-                ModeSelectionRootView(store: store)
-            }
-            .navigationDestination(for: AppDestination.self) { destination in
-                switch destination {
-                case .scanner:
-                    ScannerView(
-                        images: store.capturedImages,
-                        onCapture: { data in store.captureImage(data) },
-                        onAnalyze: { Task { await store.generateRecommendation() } },
-                        onCancel: { store.resetSession() }
-                    )
-                    .navigationBarBackButtonHidden(true)
-                case .result(let recommendation):
-                    ChefCardView(
-                        recommendation: recommendation,
-                        onReset: { store.resetSession() }
-                    )
-                    .navigationBarBackButtonHidden(true)
-                case .combo(let combo):
-                    ComboResultView(
-                        combo: combo,
-                        onRefine: { _ in Task { await store.generateRecommendation() } }
-                    )
-                    .navigationBarBackButtonHidden(true)
+        ZStack {
+            NavigationStack(path: $store.navigationPath) {
+                ZStack {
+                    Color.clear.ignoresSafeArea()
+                    ModeSelectionRootView(store: store)
+                }
+                .navigationDestination(for: AppDestination.self) { destination in
+                    switch destination {
+                    case .scanner:
+                        ScannerView(
+                            images: store.capturedImages,
+                            onCapture: { data in store.captureImage(data) },
+                            onAnalyze: { Task { await store.generateRecommendation() } },
+                            onCancel: { store.resetSession() }
+                        )
+                        .navigationBarBackButtonHidden(true)
+                    case .result(let recommendation):
+                        ChefCardView(
+                            recommendation: recommendation,
+                            onReset: { store.resetSession() }
+                        )
+                        .navigationBarBackButtonHidden(true)
+                    case .combo(let combo):
+                        ComboResultView(
+                            combo: combo,
+                            onRefine: { _ in Task { await store.generateRecommendation() } }
+                        )
+                        .navigationBarBackButtonHidden(true)
+                    }
                 }
             }
+            .animation(.spring(response: 0.6, dampingFraction: 0.7), value: store.appState)
+
+            // ── Simmer overlay — covers the whole app during AI processing ──
+            if isProcessing {
+                ProcessingView(appState: store.appState)
+                    .zIndex(99)
+                    .transition(.opacity.animation(.easeInOut(duration: 0.4)))
+            }
         }
-        .animation(.spring(response: 0.6, dampingFraction: 0.7), value: store.appState)
+        .animation(.easeInOut(duration: 0.35), value: isProcessing)
     }
 }
 
