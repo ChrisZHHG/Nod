@@ -13,6 +13,12 @@ struct AppRootView: View {
         }
     }
 
+    /// Extract error message from AppState.error, if any
+    private var errorMessage: String? {
+        if case .error(let msg) = store.appState { return msg }
+        return nil
+    }
+
     var body: some View {
         ZStack {
             NavigationStack(path: $store.navigationPath) {
@@ -55,8 +61,15 @@ struct AppRootView: View {
             }
         }
         .animation(.easeInOut(duration: 0.35), value: isProcessing)
+        // ── Error alert — surfaces any agent pipeline failure ──
+        .alert("Something went wrong", isPresented: .constant(errorMessage != nil)) {
+            Button("Try Again") { store.resetSession() }
+        } message: {
+            Text(errorMessage ?? "")
+        }
     }
 }
+
 
 // MARK: - Mode Selection Root
 

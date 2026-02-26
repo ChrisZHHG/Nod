@@ -26,8 +26,8 @@
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Nod needs access to photos to analyze menu screenshots.</string>
 
-    <key>GeminiAPIKey</key>
-    <string>$(GEMINI_API_KEY)</string>
+    <key>OpenRouterAPIKey</key>
+    <string>$(OPENROUTER_API_KEY)</string>
     <key>UISupportedInterfaceOrientations</key>
     <array>
         <string>UIInterfaceOrientationPortrait</string>

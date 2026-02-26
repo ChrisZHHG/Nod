@@ -1,0 +1,31 @@
+# Secrets & API keys — never commit these
+Ambrosia/Configs/Secrets.xcconfig
+
+# Xcode build artifacts
+build/
+*.xcuserstate
+*.xcworkspace/xcuserdata/
+*.xcodeproj/xcuserdata/
+DerivedData/
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# macOS junk
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# SPM
+.build/
+*.resolved
+
+# CocoaPods (if ever used)
+Pods/
+
+# Misc
+*.swp
+*.swo
+*~
+.devvalue-export.json
+design_doc/

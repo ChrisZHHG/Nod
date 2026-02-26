@@ -5,7 +5,7 @@ import Foundation
 final class SafetyAgent: SafetyAgentProtocol, @unchecked Sendable {
     private let service: GeminiServiceProtocol
     
-    init(service: GeminiServiceProtocol = GeminiService()) {
+    init(service: GeminiServiceProtocol = OpenRouterService()) {
         self.service = service
     }
     

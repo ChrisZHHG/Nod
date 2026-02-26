@@ -12,20 +12,20 @@ protocol GeminiClientProtocol: Sendable {
     func generateImage(prompt: String) async throws -> URL?
 }
 
-/// Live implementation using GeminiService actor
+/// Live implementation using OpenRouterService (OpenAI-compatible)
 struct GeminiClient: GeminiClientProtocol {
-    private let service: GeminiService
-    
+    private let service: any GeminiServiceProtocol
+
     init() {
-        self.service = GeminiService()
+        self.service = OpenRouterService()
     }
-    
+
     func generateContent(prompt: String, images: [Data]) async throws -> String {
         try await service.generateContent(prompt: prompt, images: images, model: .flash)
     }
-    
+
     func generateImage(prompt: String) async throws -> URL? {
-        try await service.generateImage(prompt: prompt, model: "imagen-3.0-fast-generate-001")
+        try await service.generateImage(prompt: prompt, model: "")
     }
 }
 

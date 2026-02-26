@@ -5,7 +5,7 @@ import Foundation
 final class ChefAgent: ChefAgentProtocol, @unchecked Sendable {
     private let service: GeminiServiceProtocol
     
-    init(service: GeminiServiceProtocol = GeminiService()) {
+    init(service: GeminiServiceProtocol = OpenRouterService()) {
         self.service = service
     }
     
@@ -55,7 +55,7 @@ final class ChefAgent: ChefAgentProtocol, @unchecked Sendable {
         
         let jsonString = try await service.generateContent(
             prompt: prompt,
-            model: .pro,
+            model: .flash,
             responseSchema: "application/json"
         )
         
@@ -83,7 +83,7 @@ final class ChefAgent: ChefAgentProtocol, @unchecked Sendable {
         
         let jsonString = try await service.generateContent(
             prompt: prompt,
-            model: .pro,
+            model: .flash,
             responseSchema: "application/json"
         )
         

@@ -5,7 +5,7 @@ import Foundation
 final class DecoderAgent: DecoderAgentProtocol, @unchecked Sendable {
     private let service: GeminiServiceProtocol
     
-    init(service: GeminiServiceProtocol = GeminiService()) {
+    init(service: GeminiServiceProtocol = OpenRouterService()) {
         self.service = service
     }
     
