@@ -36,7 +36,8 @@ final class DecoderAgent: DecoderAgentProtocol, @unchecked Sendable {
       "languageDetected": "en",
       "metadata": {
         "restaurantName": "Restaurant Name or Unknown",
-        "timestamp": "2024-12-24T12:00:00Z"
+        "timestamp": "2024-12-24T12:00:00Z",
+        "cuisineStyle": "Chinese"
       }
     }
     
@@ -46,7 +47,11 @@ final class DecoderAgent: DecoderAgentProtocol, @unchecked Sendable {
     - If you are NOT 100% sure about a dietary tag (e.g. containsGluten), return null instead of false.
     - Use null for missing descriptions
     - Price should be a number, not a string
+    - For cuisineStyle: infer from dish names, language, and visual cues.
+      Use ONE of: "Chinese", "Japanese", "Korean", "Thai", "Vietnamese", "Hotpot",
+      "Italian", "French", "American", "Mexican", "Indian", "Fusion", or "Unknown".
     """
+
     
     func decode(images: [Data]) async throws -> MenuData {
         // "Silky" UX: We tell the Manager we are starting text recognition

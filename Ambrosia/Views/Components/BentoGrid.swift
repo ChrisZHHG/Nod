@@ -125,16 +125,12 @@ struct BentoHeroTile: View {
     var body: some View {
         AmbrosiaBentoTile(size: size, action: action) {
             VStack(alignment: .leading, spacing: AmbrosiaTheme.Spacing.md) {
-                // Animated Icon with Glow
+                // High contrast, clean icon with no pastel blobs
                 ZStack {
                     Circle()
-                        .fill(iconColor.opacity(0.25))
-                        .frame(width: 56, height: 56)
-                        .blur(radius: 8)
-                    
-                    Circle()
-                        .fill(iconColor.opacity(0.15))
+                        .fill(Color.white.opacity(0.4))
                         .frame(width: 52, height: 52)
+                        .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
                     
                     Image(systemName: icon)
                         .font(.system(size: 24, weight: .semibold))
@@ -155,7 +151,7 @@ struct BentoHeroTile: View {
                         .lineLimit(2)
                 }
             }
-            .padding(AmbrosiaTheme.Spacing.lg)
+            .padding(AmbrosiaTheme.Spacing.xl)
             .frame(maxWidth: .infinity, alignment: .leading)
         }
         .onAppear {
@@ -188,7 +184,7 @@ struct BentoStatTile: View {
                     .font(AmbrosiaTheme.Typography.caption)
                     .foregroundStyle(AmbrosiaTheme.Colors.textSecondary)
             }
-            .padding(AmbrosiaTheme.Spacing.lg)
+            .padding(AmbrosiaTheme.Spacing.xl)
             .frame(maxWidth: .infinity, alignment: .leading)
         }
     }
@@ -221,7 +217,7 @@ struct BentoInfoTile: View {
                 
                 Spacer()
             }
-            .padding(AmbrosiaTheme.Spacing.lg)
+            .padding(AmbrosiaTheme.Spacing.xl)
         }
     }
 }

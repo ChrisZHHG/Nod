@@ -8,23 +8,31 @@ struct AppRootView: View {
     var body: some View {
         NavigationStack(path: $store.navigationPath) {
             ZStack {
-                // Background
-                LiquidBackground()
-                
-                // Root View - Mode Selection
+                Color.clear.ignoresSafeArea()
                 ModeSelectionRootView(store: store)
             }
             .navigationDestination(for: AppDestination.self) { destination in
                 switch destination {
                 case .scanner:
-                    ScannerContainerView(store: store)
-                        .navigationBarBackButtonHidden(true)
+                    ScannerView(
+                        images: store.capturedImages,
+                        onCapture: { data in store.captureImage(data) },
+                        onAnalyze: { Task { await store.generateRecommendation() } },
+                        onCancel: { store.resetSession() }
+                    )
+                    .navigationBarBackButtonHidden(true)
                 case .result(let recommendation):
-                    ResultRootView(recommendation: recommendation, store: store)
-                        .navigationBarBackButtonHidden(true)
+                    ChefCardView(
+                        recommendation: recommendation,
+                        onReset: { store.resetSession() }
+                    )
+                    .navigationBarBackButtonHidden(true)
                 case .combo(let combo):
-                    ComboRootView(combo: combo, store: store)
-                        .navigationBarBackButtonHidden(true)
+                    ComboResultView(
+                        combo: combo,
+                        onRefine: { _ in Task { await store.generateRecommendation() } }
+                    )
+                    .navigationBarBackButtonHidden(true)
                 }
             }
         }
@@ -32,193 +40,378 @@ struct AppRootView: View {
     }
 }
 
-// MARK: - Mode Selection Root (Wrapper for existing view)
+// MARK: - Mode Selection Root
 
 struct ModeSelectionRootView: View {
     let store: AppStore
-    
     var body: some View {
-        // Reuse existing Bento Grid layout
         ModeSelectionContent(store: store)
     }
 }
 
-// MARK: - Mode Selection Content (Adapted from ModeSelectionView)
+// MARK: - Hero Images
+
+private let cinematicHeroURLs: [String] = [
+    "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=1200&q=85",
+    "https://images.unsplash.com/photo-1569050467447-ce54b3bbc37d?w=1200&q=85",
+    "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=1200&q=85",
+    "https://images.unsplash.com/photo-1563245372-f21724e3856d?w=1200&q=85",
+    "https://images.unsplash.com/photo-1559339352-11d035aa65de?w=1200&q=85",
+    "https://images.unsplash.com/photo-1555949258-eb67b1ef0ceb?w=1200&q=85",
+]
+
+// MARK: - Mode Selection Content
 
 struct ModeSelectionContent: View {
     let store: AppStore
-    @State private var animateIcons = false
-    
-    var body: some View {
-        ScrollView(.vertical, showsIndicators: false) {
-            VStack(spacing: 0) {
-                headerSection
-                    .padding(.top, 80)
-                    .padding(.bottom, AmbrosiaTheme.Spacing.xxl)
-                
-                bentoGridSection
-                    .padding(.horizontal, AmbrosiaTheme.Spacing.lg)
-                
-                footerSection
-                    .padding(.top, AmbrosiaTheme.Spacing.xxxl)
-                    .padding(.bottom, 40)
-            }
-        }
-        .onAppear { animateIcons = true }
-    }
-    
-    private var headerSection: some View {
-        VStack(spacing: AmbrosiaTheme.Spacing.md) {
-            ZStack {
-                Circle()
-                    .fill(AmbrosiaTheme.Gradients.coralSunset)
-                    .frame(width: 80, height: 80)
-                    .blur(radius: 25)
-                    .opacity(0.5)
-                
-                Image(systemName: "fork.knife.circle.fill")
-                    .font(.system(size: 56))
-                    .foregroundStyle(AmbrosiaTheme.Gradients.coralSunset)
-            }
-            
-            Text("Ambrosia")
-                .font(AmbrosiaTheme.Typography.displayLarge)
-                .foregroundStyle(AmbrosiaTheme.Colors.textPrimary)
-            
-            Text("How are we dining today?")
-                .font(AmbrosiaTheme.Typography.title)
-                .foregroundStyle(AmbrosiaTheme.Colors.textSecondary)
-        }
-    }
-    
-    private var bentoGridSection: some View {
-        BentoGrid(columns: 2) {
-            BentoHeroTile(
-                title: "For Myself",
-                subtitle: "Personal picks for your taste",
-                icon: "person.fill",
-                iconColor: AmbrosiaTheme.Colors.warmOrange,
-                size: .tall
-            ) {
-                store.setMode(.individual)
-                store.startSession()
-            }
-            
-            BentoHeroTile(
-                title: "Sharing",
-                subtitle: "Dishes everyone will love",
-                icon: "person.3.fill",
-                iconColor: AmbrosiaTheme.Colors.coralEnd,
-                size: .tall
-            ) {
-                store.setMode(.group)
-                store.startSession()
-            }
-            
-            BentoInfoTile(
-                title: "AI-Powered Recommendations",
-                description: "Scan any menu and get instant, personalized dish suggestions",
-                gradient: AmbrosiaTheme.Gradients.coralSunset
-            )
-        }
-    }
-    
-    private var footerSection: some View {
-        HStack(spacing: AmbrosiaTheme.Spacing.sm) {
-            Image(systemName: "sparkles")
-                .font(.system(size: 12))
-            Text("Powered by Gemini AI")
-                .font(AmbrosiaTheme.Typography.caption)
-        }
-        .foregroundStyle(AmbrosiaTheme.Colors.textTertiary)
-    }
-}
 
-// MARK: - Scanner Container (TCA-Style)
+    // Per-word opacity (all start at 0.22, sequence breathes them up/down)
+    @State private var opacities: [Double] = [0.22, 0.22, 0.22, 0.22]
 
-struct ScannerContainerView: View {
-    let store: AppStore
-    @State private var showGroupSetup = false
-    
+    // Post-sequence reveals
+    @State private var showButtons = false
+    @State private var nodTilt: Double = 0
+
+    // Hover state for plate buttons
+    @State private var hoveredMode: AppMode? = nil
+    @State private var isPressingGroup = false
+    @State private var isPressingIndividual = false
+
+    private let heroURL: String = cinematicHeroURLs.randomElement()!
+
     var body: some View {
         ZStack {
-            // Base: Camera Scanner
-            ScannerView(
-                images: store.capturedImages,
-                onCapture: { image in store.captureImage(image) },
-                onAnalyze: {
-                    if store.mode == .group {
-                        withAnimation { showGroupSetup = true }
-                    } else {
-                        Task { await store.generateRecommendation() }
-                    }
-                },
-                onCancel: {
-                    store.resetSession()
+            // Full-bleed hero image
+            heroLayer
+
+            // Gradient overlay — lighter at top so glass text reads
+            AmbrosiaTheme.Cinematic.heroOverlay.ignoresSafeArea()
+
+            // Top-left title stack + bottom buttons
+            VStack(alignment: .leading, spacing: 0) {
+
+                // Vertical word stack — always in layout, never added/removed
+                VStack(alignment: .leading, spacing: 16) {
+                    glassWordWithIcon("Snap",   icon: "camera.fill",  index: 0, size: 50, weight: .light)
+                    glassWordWithIcon("Simmer", icon: "flame.fill",   index: 1, size: 50, weight: .light)
+                    glassWordWithIcon("Pick",   icon: "hand.tap.fill", index: 2, size: 50, weight: .light)
+
+                    // NOD — massive title treatment
+                    nodWordGroup
                 }
-            )
-            .allowsHitTesting(!showGroupSetup)
-            
-            // Processing Overlays
-            processingOverlay
-            
-            // Group Setup Sheet
-            if showGroupSetup {
-                GroupSetupView { profile in
-                    store.groupProfile = profile
-                    withAnimation { showGroupSetup = false }
-                    Task { await store.generateRecommendation() }
-                }
-                .transition(.move(edge: .bottom))
-                .zIndex(2)
+                .padding(.top, 64)
+                .padding(.leading, 28)
+
+                Spacer()
+
+                // Bottom place-setting buttons
+                placeSettingSection
+                    .opacity(showButtons ? 1 : 0)
+                    .offset(y: showButtons ? 0 : 40)
+                    .animation(.spring(response: 0.7, dampingFraction: 0.8), value: showButtons)
+                    .padding(.bottom, 50)
             }
+            .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        .ignoresSafeArea()
+        .task {
+            await runBreathingSequence()
         }
     }
-    
+
+    // MARK: - Liquid Glass Word (plain)
+
     @ViewBuilder
-    private var processingOverlay: some View {
-        switch store.appState {
-        case .decoding(let progress):
-            ProcessingView(status: "Reading Menu...", progress: progress)
-        case .reasoning(let stage):
-            ProcessingView(status: stage, progress: 0.5)
-        case .verifying:
-            ProcessingView(status: "Safety Checks...", progress: 0.8)
-        case .error(let message):
-            ErrorView(message: message) {
-                store.resetSession()
+    private func glassWord(
+        _ text: String,
+        index: Int,
+        size: CGFloat,
+        weight: Font.Weight
+    ) -> some View {
+        Text(text)
+            .font(.system(size: size, weight: weight, design: .rounded))
+            .foregroundStyle(.ultraThinMaterial)
+            .shadow(color: .white.opacity(0.28), radius: 4, x: 0, y: 1)
+            .opacity(opacities[index])
+            .animation(.easeInOut(duration: 0.55), value: opacities[index])
+    }
+
+    // MARK: - Liquid Glass Word + trailing SF Symbol icon
+
+    @ViewBuilder
+    private func glassWordWithIcon(
+        _ text: String,
+        icon: String,
+        index: Int,
+        size: CGFloat,
+        weight: Font.Weight
+    ) -> some View {
+        HStack(alignment: .center, spacing: 9) {
+            Text(text)
+                .font(.system(size: size, weight: weight, design: .rounded))
+                .foregroundStyle(.ultraThinMaterial)
+                .shadow(color: .white.opacity(0.28), radius: 4, x: 0, y: 1)
+            Image(systemName: icon)
+                .font(.system(size: size * 0.52, weight: weight))
+                .foregroundStyle(.ultraThinMaterial)
+                .shadow(color: .white.opacity(0.22), radius: 3, x: 0, y: 1)
+        }
+        .opacity(opacities[index])
+        .animation(.easeInOut(duration: 0.55), value: opacities[index])
+    }
+
+    // MARK: - NOD Word Group (large title + tagline)
+
+    private var nodWordGroup: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            // NOD letters — N and D white glass, O amber (nodding)
+            HStack(alignment: .center, spacing: 0) {
+                Text("N")
+                    .font(.cinematicHero(size: 88))
+                    .fontWeight(.black)
+                    .foregroundStyle(.ultraThinMaterial)
+                    .shadow(color: .white.opacity(0.2), radius: 3, x: 0, y: 1)
+
+                // O — amber, bends forward on X axis (nodding yes)
+                Text("O")
+                    .font(.cinematicHero(size: 88))
+                    .fontWeight(.black)
+                    .foregroundColor(AmbrosiaTheme.Cinematic.amber)
+                    .rotation3DEffect(
+                        .degrees(nodTilt),
+                        axis: (x: 1, y: 0, z: 0),
+                        anchor: .bottom,
+                        perspective: 0.3
+                    )
+
+                Text("D")
+                    .font(.cinematicHero(size: 88))
+                    .fontWeight(.black)
+                    .foregroundStyle(.ultraThinMaterial)
+                    .shadow(color: .white.opacity(0.2), radius: 3, x: 0, y: 1)
             }
-        default:
-            EmptyView()
+
+            // Tagline aligned below the D
+            HStack(spacing: 0) {
+                Spacer().frame(width: 120)
+                Text("The effortless consensus.")
+                    .font(.system(size: 10, weight: .light, design: .rounded))
+                    .italic()
+                    .foregroundStyle(.ultraThinMaterial)
+            }
+            .padding(.top, -4)
+        }
+        .shadow(color: .black.opacity(0.5), radius: 14, y: 7)
+        .opacity(opacities[3])
+        .animation(.easeInOut(duration: 0.7), value: opacities[3])
+    }
+
+    // MARK: - Hero Background Layer
+
+    private var heroLayer: some View {
+        GeometryReader { geo in
+            AsyncImage(url: URL(string: heroURL)) { phase in
+                switch phase {
+                case .success(let img):
+                    img.resizable().scaledToFill()
+                        .frame(width: geo.size.width, height: geo.size.height)
+                        .clipped()
+                default:
+                    // Fallback gradient while loading
+                    ZStack {
+                        LinearGradient(
+                            stops: [
+                                .init(color: Color(hex: "2C1810"), location: 0),
+                                .init(color: Color(hex: "150D07"), location: 0.5),
+                                .init(color: Color(hex: "101010"), location: 1)
+                            ],
+                            startPoint: .topTrailing, endPoint: .bottomLeading
+                        )
+                        Circle()
+                            .fill(AmbrosiaTheme.Cinematic.amber.opacity(0.07))
+                            .frame(width: geo.size.width * 1.4)
+                            .offset(y: -geo.size.height * 0.3)
+                            .blur(radius: 80)
+                    }
+                    .frame(width: geo.size.width, height: geo.size.height)
+                }
+            }
+        }
+        .ignoresSafeArea()
+    }
+
+    // MARK: - Place-Setting Section
+
+    private var placeSettingSection: some View {
+        VStack(alignment: .center, spacing: 0) {
+            Text("Who's at the table?")
+                .font(.system(size: 14, weight: .light, design: .rounded))
+                .italic()
+                .tracking(0.5)
+                .foregroundColor(.white.opacity(0.70))
+                .shadow(color: .black, radius: 6)
+                .padding(.bottom, 20)
+
+            HStack(spacing: 28) {
+                placeSettingButton(
+                    mode: .group,
+                    title: "Grand Feast",
+                    subtitle: "The whole table",
+                    isGroup: true,
+                    isPressing: $isPressingGroup
+                ) {
+                    store.setMode(.group)
+                    store.startSession()
+                }
+
+                placeSettingButton(
+                    mode: .individual,
+                    title: "Solo Tasting",
+                    subtitle: "Just for you",
+                    isGroup: false,
+                    isPressing: $isPressingIndividual
+                ) {
+                    store.setMode(.individual)
+                    store.startSession()
+                }
+            }
+            .padding(.horizontal, 32)
+        }
+        .frame(maxWidth: .infinity)
+    }
+
+    // MARK: - Breathing Sequence (looping async/await)
+
+    private func runBreathingSequence() async {
+        let breathIn:  UInt64 = 550_000_000   // 0.55s fade in
+        let hold:      UInt64 = 500_000_000   // 0.5s hold
+        let breathOut: UInt64 = 300_000_000   // 0.3s fade out
+        let gap:       UInt64 = 120_000_000   // 0.12s gap between words
+        var isFirstCycle = true
+
+        try? await Task.sleep(nanoseconds: 400_000_000) // initial pause
+
+        while !Task.isCancelled {
+            // Snap, Simmer, Pick — breathe in, hold, breathe out
+            for i in 0..<3 {
+                withAnimation(.easeInOut(duration: 0.55)) { opacities[i] = 1.0 }
+                try? await Task.sleep(nanoseconds: breathIn + hold)
+                withAnimation(.easeIn(duration: 0.3)) { opacities[i] = 0.22 }
+                try? await Task.sleep(nanoseconds: breathOut + gap)
+            }
+
+            // NOD — breathe in and hold 1.8s (destination word, noticeably longer)
+            withAnimation(.easeOut(duration: 0.6)) { opacities[3] = 1.0 }
+            try? await Task.sleep(nanoseconds: 1_800_000_000)
+
+            if isFirstCycle {
+                isFirstCycle = false
+                // Kick off nodding O and reveal buttons on first cycle only
+                withAnimation(.easeInOut(duration: 0.8).repeatForever(autoreverses: true)) {
+                    nodTilt = 15
+                }
+                try? await Task.sleep(nanoseconds: 400_000_000)
+                showButtons = true
+            }
+
+            // Dim NOD before restarting loop
+            withAnimation(.easeIn(duration: 0.35)) { opacities[3] = 0.22 }
+            try? await Task.sleep(nanoseconds: 400_000_000) // gap before next cycle
         }
     }
-}
 
-// MARK: - Result Root View
+    // MARK: - Plate Setting Button
 
-struct ResultRootView: View {
-    let recommendation: MenuRecommendation
-    let store: AppStore
-    
-    var body: some View {
-        ChefCardView(recommendation: recommendation) {
-            store.resetSession()
+    @ViewBuilder
+    private func placeSettingButton(
+        mode: AppMode,
+        title: String,
+        subtitle: String,
+        isGroup: Bool,
+        isPressing: Binding<Bool>,
+        action: @escaping () -> Void
+    ) -> some View {
+        let isActive = hoveredMode == mode
+        let isOtherActive = hoveredMode != nil && hoveredMode != mode
+
+        VStack(spacing: 14) {
+            // Plate visual
+            ZStack {
+                // Outer ring, highlight on active
+                Circle()
+                    .stroke(
+                        AmbrosiaTheme.Cinematic.amber.opacity(isActive ? 1.0 : 0.30),
+                        lineWidth: isActive ? 2.5 : 1
+                    )
+                    .frame(width: 122, height: 122)
+
+                // Plate fill
+                Circle()
+                    .fill(
+                        isGroup
+                            ? AmbrosiaTheme.Cinematic.amber
+                            : Color(hex: "F5F0E8")
+                    )
+                    .frame(width: 106, height: 106)
+                    .shadow(
+                        color: isGroup
+                            ? AmbrosiaTheme.Cinematic.amber.opacity(isActive ? 0.6 : 0.25)
+                            : Color(hex: "F5F0E8").opacity(isActive ? 0.45 : 0.15),
+                        radius: isActive ? 28 : 12
+                    )
+
+                // Mode icon
+                if isGroup {
+                    Image(systemName: "person.3.fill")
+                        .font(.system(size: 34, weight: .semibold))
+                        .foregroundColor(AmbrosiaTheme.Cinematic.deepBlack)
+                } else {
+                    Image(systemName: "person.fill")
+                        .font(.system(size: 34, weight: .medium))
+                        .foregroundColor(AmbrosiaTheme.Cinematic.deepBlack.opacity(0.75))
+                }
+            }
+            .scaleEffect(isActive ? 1.10 : (isOtherActive ? 0.92 : 1.0))
+            .animation(.spring(response: 0.30, dampingFraction: 0.55), value: hoveredMode)
+
+            // Labels
+            VStack(spacing: 5) {
+                Text(title.uppercased())
+                    .font(.system(size: 15, weight: .black, design: .rounded))
+                    .tracking(1.5)
+                    .foregroundColor(.white)
+                    .shadow(color: .black.opacity(0.85), radius: 5, y: 2)
+
+                Text(subtitle)
+                    .font(.system(size: 11, weight: .regular, design: .rounded))
+                    .foregroundColor(.white.opacity(0.45))
+                    .shadow(color: .black, radius: 5)
+            }
         }
-    }
-}
-
-// MARK: - Combo Root View
-
-struct ComboRootView: View {
-    let combo: ComboRecommendation
-    let store: AppStore
-    
-    var body: some View {
-        ComboResultView(combo: combo) { keyword in
-            var profile = store.groupProfile
-            profile.refinementKeywords.append(keyword)
-            store.groupProfile = profile
-            Task { await store.generateRecommendation() }
-        }
+        .frame(maxWidth: .infinity)
+        // Fade out non-hovered button
+        .opacity(isOtherActive ? 0.30 : 1.0)
+        .animation(.easeInOut(duration: 0.30), value: hoveredMode)
+        // Press to spotlight, release to navigate
+        .simultaneousGesture(
+            DragGesture(minimumDistance: 0)
+                .onChanged { _ in
+                    if !isPressing.wrappedValue {
+                        isPressing.wrappedValue = true
+                        HapticFeedback.selection.trigger()
+                        withAnimation(.spring(response: 0.25, dampingFraction: 0.7)) {
+                            hoveredMode = mode
+                        }
+                    }
+                }
+                .onEnded { _ in
+                    isPressing.wrappedValue = false
+                    HapticFeedback.medium.trigger()
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) { action() }
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                        withAnimation(.easeOut(duration: 0.3)) { hoveredMode = nil }
+                    }
+                }
+        )
     }
 }

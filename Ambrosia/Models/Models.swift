@@ -1,5 +1,21 @@
 import Foundation
 
+// MARK: - Core App State Models
+
+enum AppMode: String, Codable, Equatable, Sendable {
+    case individual
+    case group
+}
+
+enum AppState: Equatable, Sendable {
+    case idle
+    case scanning
+    case decoding(progress: Double)
+    case reasoning(stage: String)
+    case verifying
+    case error(String)
+}
+
 // MARK: - Core Data Models (Schema.org compliant)
 
 /// Represents the top-level structure of a recognized menu
@@ -17,8 +33,12 @@ struct MenuData: Codable, Hashable, Sendable {
 
 struct MenuMetadata: Codable, Hashable, Sendable {
     let restaurantName: String?
-    let timestamp: String  // Changed from Date to String for flexible JSON parsing
+    let timestamp: String
+    /// Cuisine style auto-detected by DecoderAgent from the menu image
+    /// e.g. "Chinese", "Japanese", "Italian", "Hotpot", "Fusion"
+    var cuisineStyle: String?
 }
+
 
 /// Represents a physical section on the menu (e.g., "Starters", "Mains")
 struct MenuSection: Codable, Identifiable, Hashable, Sendable {

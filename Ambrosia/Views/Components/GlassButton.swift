@@ -108,13 +108,13 @@ struct GlassButton: View {
     }
 }
 
-// Floating press animation
+// Floating press animation (Crisp Spring)
 struct FloatingButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .scaleEffect(configuration.isPressed ? 0.96 : 1.0)
-            .opacity(configuration.isPressed ? 0.9 : 1.0)
-            .animation(.spring(response: 0.3, dampingFraction: 0.6), value: configuration.isPressed)
+            .scaleEffect(configuration.isPressed ? 0.94 : 1.0)
+            .opacity(configuration.isPressed ? 0.85 : 1.0)
+            .animation(.interactiveSpring(response: 0.25, dampingFraction: 0.6, blendDuration: 0.1), value: configuration.isPressed)
     }
 }
 

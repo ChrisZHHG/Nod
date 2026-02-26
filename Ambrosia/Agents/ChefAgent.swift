@@ -10,9 +10,14 @@ final class ChefAgent: ChefAgentProtocol, @unchecked Sendable {
     }
     
     // MARK: - Individual Mode (Match Score)
-    private func buildIndividualPrompt(profile: IndividualProfile) -> String {
+    private func buildIndividualPrompt(profile: IndividualProfile, menu: MenuData) -> String {
+        let cuisine = menu.metadata.cuisineStyle ?? "Unknown"
         return """
-        You are 'Bely', a local food expert.
+        You are 'Bely', a local food expert specializing in \(cuisine) cuisine.
+        
+        RESTAURANT CONTEXT: This is a \(cuisine) restaurant. Tailor your recommendation
+        to the cultural norms of this cuisine (e.g., for Hotpot: suggest proteins and dipping sauce;
+        for Italian: consider the pasta/risotto as a main; for Chinese: sharing-friendly dishes).
         
         USER PROFILE:
         - Party Size: \(profile.partySize)
@@ -41,11 +46,12 @@ final class ChefAgent: ChefAgentProtocol, @unchecked Sendable {
         }
         """
     }
+
     
     func recommend(from menu: MenuData, profile: IndividualProfile) async throws -> MenuRecommendation {
-        print("[ChefAgent] 👨‍🍳 Cooking up Individual Recommendation...")
+        print("[ChefAgent] 👨‍🍳 Cooking up Individual Recommendation (\(menu.metadata.cuisineStyle ?? "Unknown") cuisine)...")
         let menuJSON = try String(data: JSONEncoder().encode(menu), encoding: .utf8) ?? "{}"
-        let prompt = buildIndividualPrompt(profile: profile) + "\n\nMENU DATA:\n\(menuJSON)"
+        let prompt = buildIndividualPrompt(profile: profile, menu: menu) + "\n\nMENU DATA:\n\(menuJSON)"
         
         let jsonString = try await service.generateContent(
             prompt: prompt,
@@ -72,7 +78,8 @@ final class ChefAgent: ChefAgentProtocol, @unchecked Sendable {
     func recommendGroupCombo(from menu: MenuData, group: GroupProfile) async throws -> ComboRecommendation {
         print("[ChefAgent] 👨‍🍳 Assembling Group Combo (Knapsack)...")
         let menuJSON = try String(data: JSONEncoder().encode(menu), encoding: .utf8) ?? "{}"
-        let prompt = buildGroupPrompt(group: group) + "\n\nMENU DATA:\n\(menuJSON)"
+        let prompt = buildGroupPrompt(group: group, menu: menu) + "\n\nMENU DATA:\n\(menuJSON)"
+
         
         let jsonString = try await service.generateContent(
             prompt: prompt,
@@ -95,9 +102,17 @@ final class ChefAgent: ChefAgentProtocol, @unchecked Sendable {
         }
     }
 
-    private func buildGroupPrompt(group: GroupProfile) -> String {
+    private func buildGroupPrompt(group: GroupProfile, menu: MenuData) -> String {
+        let cuisine = menu.metadata.cuisineStyle ?? "Unknown"
         return """
-        You are 'Bely', a master event planner.
+        You are 'Bely', a master event planner specializing in \(cuisine) dining.
+        
+        RESTAURANT CONTEXT: \(cuisine) restaurant. Apply cuisine-specific wisdom:
+        - Hotpot: recommend proteins, vegetables, and dipping sauces as a spread
+        - Chinese: family-style sharing dishes that balance flavours
+        - Italian: starters + main + dessert + wine pairing
+        - Japanese: sashimi/sushi board + mains + drinks
+        Adapt as needed for any other cuisineStyle.
         
         GROUP PROFILE:
         - Headcount: \(group.headcount)
@@ -122,4 +137,5 @@ final class ChefAgent: ChefAgentProtocol, @unchecked Sendable {
         }
         """
     }
+
 }

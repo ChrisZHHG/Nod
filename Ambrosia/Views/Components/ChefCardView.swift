@@ -5,110 +5,140 @@ struct ChefCardView: View {
     let onReset: () -> Void
     
     var body: some View {
-        ZStack {
-            // Background
-            ImmersiveBackground()
-            
-            // Main Content
-            ScrollView {
-                VStack(spacing: 0) {
-                    // Top spacing for back button
-                    Spacer().frame(height: 80)
-                    
-                    // Image Header (Full Bleed)
-                    if let url = recommendation.imageURL {
-                        AsyncImage(url: url) { image in
-                            image.resizable()
-                                .aspectRatio(contentMode: .fill)
-                                .frame(height: 280)
-                                .clipped()
-                        } placeholder: {
-                            Rectangle()
-                                .fill(AmbrosiaTheme.Colors.surfaceSecondary)
-                                .overlay(
-                                    Image(systemName: "photo")
-                                        .font(.system(size: 40))
-                                        .foregroundStyle(AmbrosiaTheme.Colors.textTertiary)
-                                )
-                                .frame(height: 280)
-                        }
-                        .clipShape(RoundedRectangle(cornerRadius: AmbrosiaTheme.Radius.xl, style: .continuous))
-                        .padding(.horizontal, AmbrosiaTheme.Spacing.lg)
+        ZStack(alignment: .bottom) {
+            // ── Full-Bleed Food Image ────────────────────────────────────────
+            GeometryReader { geo in
+                AsyncImage(url: recommendation.imageURL) { phase in
+                    if let img = phase.image {
+                        img.resizable()
+                            .scaledToFill()
+                            .frame(width: geo.size.width, height: geo.size.height)
+                            .clipped()
+                    } else {
+                        // Dark placeholder when no image ("premium" matte)
+                        AmbrosiaTheme.Cinematic.richBrown
+                            .frame(width: geo.size.width, height: geo.size.height)
+                            .overlay(
+                                Image(systemName: "fork.knife")
+                                    .font(.system(size: 60, weight: .ultraLight))
+                                    .foregroundColor(.white.opacity(0.15))
+                            )
                     }
+                }
+            }
+            .ignoresSafeArea()
+            
+            // ── Cinematic Gradient ────────────────────────────────────────────
+            AmbrosiaTheme.Cinematic.heroOverlay
+                .ignoresSafeArea()
+            
+            // ── Main Content Scroll ───────────────────────────────────────────
+            ScrollView(.vertical, showsIndicators: false) {
+                VStack(alignment: .leading, spacing: 0) {
+                    // Top spacer so content starts below the fold
+                    Spacer(minLength: UIScreen.main.bounds.height * 0.45)
                     
-                    // Content Body
-                    VStack(spacing: AmbrosiaTheme.Spacing.xl) {
-                        // Badge
-                        HStack {
-                            Spacer()
-                            Text("Chef's Choice")
-                                .font(AmbrosiaTheme.Typography.caption)
-                                .fontWeight(.bold)
-                                .tracking(1.5)
-                                .textCase(.uppercase)
-                                .foregroundStyle(AmbrosiaTheme.Colors.warmOrange)
-                                .padding(.vertical, AmbrosiaTheme.Spacing.sm)
-                                .padding(.horizontal, AmbrosiaTheme.Spacing.md)
-                                .background(AmbrosiaTheme.Colors.warmOrange.opacity(0.15))
-                                .clipShape(Capsule())
-                            Spacer()
-                        }
-                        .padding(.top, AmbrosiaTheme.Spacing.xl)
+                    // ── Info Panel (dark glass) ─────────────────────────────
+                    VStack(alignment: .leading, spacing: 20) {
                         
-                        // Titles
-                        VStack(spacing: AmbrosiaTheme.Spacing.sm) {
-                            Text(recommendation.translation.localizedName)
-                                .font(AmbrosiaTheme.Typography.display)
-                                .foregroundStyle(AmbrosiaTheme.Colors.textPrimary)
-                                .multilineTextAlignment(.center)
+                        // Diet label & category tag row
+                        HStack(spacing: 10) {
+                            Text("CHEF'S CHOICE")
+                                .font(AmbrosiaTheme.Cinematic.sectionTitle)
+                                .tracking(2.5)
+                                .foregroundColor(AmbrosiaTheme.Cinematic.amber)
                             
-                            Text(recommendation.recommendedItem.originalName)
-                                .font(AmbrosiaTheme.Typography.subheadline.italic())
-                                .foregroundStyle(AmbrosiaTheme.Colors.textSecondary)
+                            Spacer()
+                            
+                            if let price = recommendation.recommendedItem.price {
+                                Text(String(format: "$%.2f", price))
+                                    .font(AmbrosiaTheme.Cinematic.sectionTitle)
+                                    .foregroundColor(AmbrosiaTheme.Cinematic.smokeGray)
+                            }
                         }
                         
-                        Divider()
-                            .background(AmbrosiaTheme.Colors.glassBorder)
+                        // Dish name (massive)
+                        Text(recommendation.translation.localizedName)
+                            .font(AmbrosiaTheme.Cinematic.displayHero)
+                            .foregroundColor(.white)
+                            .lineLimit(2)
+                            .minimumScaleFactor(0.6)
                         
-                        // Description
+                        // Original name (italic small)
+                        Text(recommendation.recommendedItem.originalName)
+                            .font(.system(size: 14, weight: .light, design: .default).italic())
+                            .foregroundColor(AmbrosiaTheme.Cinematic.smokeGray)
+                        
+                        // Separator
+                        Rectangle()
+                            .frame(height: 1)
+                            .foregroundColor(AmbrosiaTheme.Cinematic.glassBorder)
+                        
+                        // Cultural context body
                         Text(recommendation.translation.culturalContext)
-                            .font(AmbrosiaTheme.Typography.body)
-                            .foregroundStyle(AmbrosiaTheme.Colors.textSecondary)
-                            .lineSpacing(5)
-                            .multilineTextAlignment(.leading)
-                            .padding(.horizontal, AmbrosiaTheme.Spacing.sm)
+                            .font(AmbrosiaTheme.Cinematic.body)
+                            .foregroundColor(AmbrosiaTheme.Cinematic.smokeGray)
+                            .lineSpacing(7)
                         
                         // Warnings
                         if !recommendation.translation.warnings.isEmpty {
-                            HStack(spacing: AmbrosiaTheme.Spacing.sm) {
-                                ForEach(recommendation.translation.warnings, id: \.self) { warn in
-                                    Text(warn)
-                                        .font(AmbrosiaTheme.Typography.caption)
-                                        .padding(AmbrosiaTheme.Spacing.sm)
-                                        .background(Color.red.opacity(0.2))
-                                        .foregroundColor(.red)
-                                        .clipShape(Capsule())
+                            ScrollView(.horizontal, showsIndicators: false) {
+                                HStack(spacing: 8) {
+                                    ForEach(recommendation.translation.warnings, id: \.self) { warn in
+                                        Text(warn)
+                                            .font(AmbrosiaTheme.Cinematic.caption)
+                                            .foregroundColor(Color(hex: "FF6B6B"))
+                                            .padding(.vertical, 6)
+                                            .padding(.horizontal, 12)
+                                            .background(
+                                                Capsule().fill(Color(hex: "FF6B6B").opacity(0.15))
+                                            )
+                                    }
                                 }
                             }
                         }
                         
-                        Spacer(minLength: AmbrosiaTheme.Spacing.lg)
-                        
-                        GlassButton(title: "Another Course?", icon: "arrow.counterclockwise", variant: .secondary) {
-                            onReset()
+                        // ── CTA Button ─────────────────────────────────────
+                        Button(action: onReset) {
+                            HStack {
+                                Spacer()
+                                Text("Scan Another Menu")
+                                    .font(AmbrosiaTheme.Cinematic.cta)
+                                    .foregroundColor(AmbrosiaTheme.Cinematic.deepBlack)
+                                Spacer()
+                            }
+                            .padding(.vertical, 18)
+                            .background(
+                                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                                    .fill(AmbrosiaTheme.Cinematic.amber)
+                            )
                         }
+                        .buttonStyle(.plain)
+                        .padding(.top, 8)
                     }
-                    .padding(AmbrosiaTheme.Spacing.xl)
-                    .glassCard()
-                    .padding(.horizontal, AmbrosiaTheme.Spacing.lg)
-                    .padding(.top, AmbrosiaTheme.Spacing.lg)
+                    .padding(28)
+                    .background(
+                        ZStack {
+                            Rectangle().fill(.ultraThinMaterial).environment(\.colorScheme, .dark)
+                            AmbrosiaTheme.Cinematic.glassDark
+                        }
+                        .clipShape(
+                            RoundedRectangle(cornerRadius: 28, style: .continuous)
+                        )
+                    )
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 28, style: .continuous)
+                            .stroke(AmbrosiaTheme.Cinematic.glassBorder, lineWidth: 1)
+                    )
+                    .padding(.horizontal, 16)
+                    .padding(.bottom, 40)
                 }
             }
             
-            // Floating Back Button
-            FloatingBackButton {
-                onReset()
-            }
+            // ── Floating Back ─────────────────────────────────────────────────
+            FloatingBackButton { onReset() }
         }
+        .ignoresSafeArea()
+        .preferredColorScheme(.dark)
     }
 }
