@@ -2,6 +2,7 @@ import SwiftUI
 
 struct ComboResultView: View {
     let combo: ComboRecommendation
+    var isEmbedded: Bool = false
     let onRefine: (String) -> Void
     
     @State private var refinementText: String = ""
@@ -44,7 +45,7 @@ struct ComboResultView: View {
                                 .tracking(2.5)
                                 .foregroundColor(AmbrosiaTheme.Cinematic.amber)
                             
-                            Text(combo.name)
+                            Text(combo.optionType)
                                 .font(AmbrosiaTheme.Cinematic.displayHero)
                                 .foregroundColor(.white)
                                 .lineLimit(2)
@@ -90,53 +91,55 @@ struct ComboResultView: View {
                     }
                     
                     // ── Refinement ─────────────────────────────────────────────────
-                    VStack(spacing: 16) {
-                        if isRefining {
-                            HStack(spacing: 0) {
-                                TextField("e.g. More seafood, something fried...", text: $refinementText)
-                                    .font(AmbrosiaTheme.Cinematic.body)
-                                    .foregroundColor(.white)
-                                    .padding(14)
-                                    .background(AmbrosiaTheme.Cinematic.glassDark)
-                                
-                                Button(action: {
-                                    onRefine(refinementText)
-                                    refinementText = ""
-                                    isRefining = false
-                                }) {
-                                    Text("GO")
-                                        .font(AmbrosiaTheme.Cinematic.cta)
-                                        .foregroundColor(AmbrosiaTheme.Cinematic.deepBlack)
-                                        .padding(.horizontal, 24)
-                                        .frame(maxHeight: .infinity)
-                                        .background(AmbrosiaTheme.Cinematic.amber)
+                    if !isEmbedded {
+                        VStack(spacing: 16) {
+                            if isRefining {
+                                HStack(spacing: 0) {
+                                    TextField("e.g. More seafood, something fried...", text: $refinementText)
+                                        .font(AmbrosiaTheme.Cinematic.body)
+                                        .foregroundColor(.white)
+                                        .padding(14)
+                                        .background(AmbrosiaTheme.Cinematic.glassDark)
+                                    
+                                    Button(action: {
+                                        onRefine(refinementText)
+                                        refinementText = ""
+                                        isRefining = false
+                                    }) {
+                                        Text("GO")
+                                            .font(AmbrosiaTheme.Cinematic.cta)
+                                            .foregroundColor(AmbrosiaTheme.Cinematic.deepBlack)
+                                            .padding(.horizontal, 24)
+                                            .frame(maxHeight: .infinity)
+                                            .background(AmbrosiaTheme.Cinematic.amber)
+                                    }
                                 }
-                            }
-                            .frame(height: 52)
-                            .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 14, style: .continuous)
-                                    .stroke(AmbrosiaTheme.Cinematic.glassBorder, lineWidth: 1)
-                            )
-                        } else {
-                            Button(action: { withAnimation(.spring()) { isRefining = true } }) {
-                                HStack {
-                                    Spacer()
-                                    Text("Refine This Selection")
-                                        .font(AmbrosiaTheme.Cinematic.cta)
-                                        .foregroundColor(AmbrosiaTheme.Cinematic.deepBlack)
-                                    Spacer()
-                                }
-                                .padding(.vertical, 18)
-                                .background(
+                                .frame(height: 52)
+                                .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                                .overlay(
                                     RoundedRectangle(cornerRadius: 14, style: .continuous)
-                                        .fill(AmbrosiaTheme.Cinematic.amber)
+                                        .stroke(AmbrosiaTheme.Cinematic.glassBorder, lineWidth: 1)
                                 )
+                            } else {
+                                Button(action: { withAnimation(.spring()) { isRefining = true } }) {
+                                    HStack {
+                                        Spacer()
+                                        Text("Refine This Selection")
+                                            .font(AmbrosiaTheme.Cinematic.cta)
+                                            .foregroundColor(AmbrosiaTheme.Cinematic.deepBlack)
+                                        Spacer()
+                                    }
+                                    .padding(.vertical, 18)
+                                    .background(
+                                        RoundedRectangle(cornerRadius: 14, style: .continuous)
+                                            .fill(AmbrosiaTheme.Cinematic.amber)
+                                    )
+                                }
+                                .buttonStyle(.plain)
                             }
-                            .buttonStyle(.plain)
                         }
+                        .padding(24)
                     }
-                    .padding(24)
                     
                     Spacer(minLength: 60)
                 }
@@ -197,19 +200,52 @@ struct InfoChip: View {
 struct DishRow: View {
     let dish: RecommendedItem
     var body: some View {
-        HStack(alignment: .top, spacing: 16) {
-            VStack(alignment: .leading, spacing: 6) {
-                Text(dish.originalName)
-                    .font(AmbrosiaTheme.Cinematic.itemTitle)
-                    .foregroundColor(.white)
-                    .lineLimit(2)
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(alignment: .top, spacing: 16) {
+                VStack(alignment: .leading, spacing: 6) {
+                    Text(dish.originalName)
+                        .font(AmbrosiaTheme.Cinematic.itemTitle)
+                        .foregroundColor(.white)
+                        .lineLimit(2)
+                        
+                    if let desc = dish.description, !desc.isEmpty {
+                        Text(desc)
+                            .font(AmbrosiaTheme.Cinematic.caption)
+                            .foregroundColor(AmbrosiaTheme.Cinematic.smokeGray)
+                            .lineLimit(2)
+                    }
+                }
+                Spacer()
+                if let price = dish.price {
+                    Text(String(format: "$%.2f", price))
+                        .font(AmbrosiaTheme.Cinematic.body)
+                        .foregroundColor(AmbrosiaTheme.Cinematic.smokeGray)
+                        .padding(.top, 4)
+                }
             }
-            Spacer()
-            if let price = dish.price {
-                Text(String(format: "$%.2f", price))
-                    .font(AmbrosiaTheme.Cinematic.body)
-                    .foregroundColor(AmbrosiaTheme.Cinematic.smokeGray)
-                    .padding(.top, 4)
+            
+            // Dish Image
+            if let imageURL = dish.imageURL {
+                AsyncImage(url: imageURL) { phase in
+                    if let image = phase.image {
+                        image
+                            .resizable()
+                            .scaledToFill()
+                            .frame(height: 180)
+                            .frame(maxWidth: .infinity)
+                            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                    } else if phase.error != nil {
+                        // Error State, hidden
+                        EmptyView()
+                    } else {
+                        // Loading State
+                        RoundedRectangle(cornerRadius: 16, style: .continuous)
+                            .fill(AmbrosiaTheme.Cinematic.glassDark)
+                            .frame(height: 180)
+                            .frame(maxWidth: .infinity)
+                            .overlay(ProgressView().tint(AmbrosiaTheme.Cinematic.amber))
+                    }
+                }
             }
         }
         .padding(.horizontal, 24)

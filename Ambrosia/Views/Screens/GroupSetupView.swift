@@ -129,8 +129,7 @@ struct GroupSetupView: View {
                         print("Generate Feast Tapped") // Debug log
                         var profile = GroupProfile()
                         profile.headcount = headcount
-                        profile.budgetTotal = Int(budget)
-                        profile.collectiveAllergies = Array(selectedAllergies)
+                        profile.vetoes = Array(selectedAllergies)
                         // Pass profile back to parent
                         onConfirm(profile)
                     }

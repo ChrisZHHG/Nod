@@ -68,23 +68,52 @@ struct MenuItem: Codable, Identifiable, Hashable, Sendable {
 
 // MARK: - Recommendation Models
 
-/// Simplified item returned by ChefAgent (doesn't need all MenuItem fields)
+/// Simplified item returned by ChefAgent
 struct RecommendedItem: Codable, Hashable, Sendable {
     let originalName: String
     let description: String?
     let price: Double?
+    var imageURL: URL? = nil
 }
 
+/// A collection of 3 personalized options for a solo diner
+struct SoloRecommendationSet: Codable, Hashable, Sendable {
+    let options: [MenuRecommendation]
+}
+
+/// A single option within the solo recommendation set
 struct MenuRecommendation: Codable, Identifiable, Hashable, Sendable {
-    var id = UUID()
-    let recommendedItem: RecommendedItem  // Changed from MenuItem
+    let id: UUID
+    let optionType: String // e.g., "The Crowd Pleaser", "Local Secret", "Adventurous"
+    let recommendedItem: RecommendedItem
     let translation: CulturalTranslation
     let reasoning: String
     let pairings: [Pairing]?
-    var imageURL: URL? = nil
+    let imageURL: URL? // URL strictly comes from Presentation layer or a copy, not a mutation
+    
+    init(id: UUID = UUID(), optionType: String, recommendedItem: RecommendedItem, translation: CulturalTranslation, reasoning: String, pairings: [Pairing]?, imageURL: URL? = nil) {
+        self.id = id
+        self.optionType = optionType
+        self.recommendedItem = recommendedItem
+        self.translation = translation
+        self.reasoning = reasoning
+        self.pairings = pairings
+        self.imageURL = imageURL
+    }
     
     enum CodingKeys: String, CodingKey {
-        case recommendedItem, translation, reasoning, pairings, imageURL
+        case optionType, recommendedItem, translation, reasoning, pairings, imageURL
+    }
+    
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        self.id = UUID()
+        self.optionType = try container.decode(String.self, forKey: .optionType)
+        self.recommendedItem = try container.decode(RecommendedItem.self, forKey: .recommendedItem)
+        self.translation = try container.decode(CulturalTranslation.self, forKey: .translation)
+        self.reasoning = try container.decode(String.self, forKey: .reasoning)
+        self.pairings = try container.decodeIfPresent([Pairing].self, forKey: .pairings)
+        self.imageURL = try container.decodeIfPresent(URL.self, forKey: .imageURL)
     }
 }
 
@@ -100,35 +129,64 @@ struct CulturalTranslation: Codable, Hashable, Sendable {
 
 }
 
-// MARK: - V2: Individual Profile
+// MARK: - Progressive Profiles
+
+/// Profile for Individual Mode
 struct IndividualProfile: Codable, Hashable, Sendable {
     var partySize: Int = 1
-    var budget: Int = 50
-    var allergies: [String] = []
-    var tastePreference: String = "Spicy" // "Authentic", "Mild"
+    var vetoes: [String] = []       // e.g., "Pork", "Peanuts", "Cilantro"
+    var cravings: [String] = []     // e.g., "Heavy", "Fresh", "Something Else..."
+    var mood: String = "Relaxed"    // Environmental context
 }
 
-// MARK: - V2 Group Models
-
+/// Profile for Group Mode (Sharing)
 struct GroupProfile: Codable, Hashable, Sendable {
     var headcount: Int = 4
-    var budgetTotal: Int = 200
-    var dietaryRestrictions: [String] = [] // "No Pork", "Vegetarian"
-    var collectiveAllergies: [String] = [] // "Peanuts"
-    var refinementKeywords: [String] = []  // "Seafood", "Fried" (The "Something Else" input)
+    var vetoes: [String] = []
+    var cravings: [String] = []
+    var mood: String = "Social"
 }
 
+// MARK: - Multi-Choice Group Recommendation
+
+/// A collection of 3 curated combos for the group
+struct GroupRecommendationSet: Codable, Hashable, Sendable {
+    let combos: [ComboRecommendation]
+}
+
+/// A single proposed combo within the set
 struct ComboRecommendation: Codable, Identifiable, Hashable, Sendable {
-    var id = UUID()
-    let name: String
-    let dishes: [RecommendedItem]  // Changed from MenuItem
+    let id: UUID
+    let optionType: String // e.g., "The Balanced Spread", "Meat Lover's Feast"
+    let dishes: [RecommendedItem]
     let drinks: [DrinkRecommendation]
     let totalPrice: Double
     let reasoning: String
-    var imageURL: URL? = nil
+    let imageURL: URL?
+    
+    init(id: UUID = UUID(), optionType: String, dishes: [RecommendedItem], drinks: [DrinkRecommendation], totalPrice: Double, reasoning: String, imageURL: URL? = nil) {
+        self.id = id
+        self.optionType = optionType
+        self.dishes = dishes
+        self.drinks = drinks
+        self.totalPrice = totalPrice
+        self.reasoning = reasoning
+        self.imageURL = imageURL
+    }
     
     enum CodingKeys: String, CodingKey {
-        case name, dishes, drinks, totalPrice, reasoning, imageURL
+        case optionType, dishes, drinks, totalPrice, reasoning, imageURL
+    }
+    
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        self.id = UUID()
+        self.optionType = try container.decode(String.self, forKey: .optionType)
+        self.dishes = try container.decode([RecommendedItem].self, forKey: .dishes)
+        self.drinks = try container.decode([DrinkRecommendation].self, forKey: .drinks)
+        self.totalPrice = try container.decode(Double.self, forKey: .totalPrice)
+        self.reasoning = try container.decode(String.self, forKey: .reasoning)
+        self.imageURL = try container.decodeIfPresent(URL.self, forKey: .imageURL)
     }
 }
 

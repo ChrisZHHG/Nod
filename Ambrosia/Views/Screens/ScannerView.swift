@@ -85,10 +85,10 @@ struct ScannerView: View {
                     if !images.isEmpty {
                         Button(action: { onAnalyze() }) {
                             HStack(spacing: 10) {
-                                Image(systemName: "sparkles")
-                                    .font(.system(size: 16, weight: .medium))
-                                Text("Analyze Menu")
-                                    .font(.system(size: 17, weight: .semibold, design: .rounded))
+                                Text("Next")
+                                    .font(.system(size: 17, weight: .bold, design: .rounded))
+                                Image(systemName: "arrow.right")
+                                    .font(.system(size: 16, weight: .bold))
                             }
                             .foregroundColor(AmbrosiaTheme.Cinematic.deepBlack)
                             .frame(maxWidth: .infinity)

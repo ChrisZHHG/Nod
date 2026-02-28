@@ -2,6 +2,7 @@ import SwiftUI
 
 struct ChefCardView: View {
     let recommendation: MenuRecommendation
+    var isEmbedded: Bool = false
     let onReset: () -> Void
     
     var body: some View {
@@ -99,22 +100,24 @@ struct ChefCardView: View {
                         }
                         
                         // ── CTA Button ─────────────────────────────────────
-                        Button(action: onReset) {
-                            HStack {
-                                Spacer()
-                                Text("Scan Another Menu")
-                                    .font(AmbrosiaTheme.Cinematic.cta)
-                                    .foregroundColor(AmbrosiaTheme.Cinematic.deepBlack)
-                                Spacer()
+                        if !isEmbedded {
+                            Button(action: onReset) {
+                                HStack {
+                                    Spacer()
+                                    Text("Scan Another Menu")
+                                        .font(AmbrosiaTheme.Cinematic.cta)
+                                        .foregroundColor(AmbrosiaTheme.Cinematic.deepBlack)
+                                    Spacer()
+                                }
+                                .padding(.vertical, 18)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 14, style: .continuous)
+                                        .fill(AmbrosiaTheme.Cinematic.amber)
+                                )
                             }
-                            .padding(.vertical, 18)
-                            .background(
-                                RoundedRectangle(cornerRadius: 14, style: .continuous)
-                                    .fill(AmbrosiaTheme.Cinematic.amber)
-                            )
+                            .buttonStyle(.plain)
+                            .padding(.top, 8)
                         }
-                        .buttonStyle(.plain)
-                        .padding(.top, 8)
                     }
                     .padding(28)
                     .background(
@@ -136,7 +139,9 @@ struct ChefCardView: View {
             }
             
             // ── Floating Back ─────────────────────────────────────────────────
-            FloatingBackButton { onReset() }
+            if !isEmbedded {
+                FloatingBackButton { onReset() }
+            }
         }
         .ignoresSafeArea()
         .preferredColorScheme(.dark)

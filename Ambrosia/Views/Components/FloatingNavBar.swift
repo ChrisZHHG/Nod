@@ -177,22 +177,19 @@ extension View {
 
 /// A simple floating back button for detail views
 struct FloatingBackButton: View {
+    @Environment(\.safeAreaInsets) private var safeAreaInsets
     let action: () -> Void
     
     var body: some View {
-        GeometryReader { geometry in
-            let topSafeArea = geometry.safeAreaInsets.top
-            
-            VStack {
-                HStack {
-                    NavBarButton(icon: "chevron.left", action: action)
-                        .padding(.leading, AmbrosiaTheme.Spacing.lg)
-                        .padding(.top, topSafeArea + AmbrosiaTheme.Spacing.sm)
-                    
-                    Spacer()
-                }
+        VStack {
+            HStack {
+                NavBarButton(icon: "chevron.left", action: action)
+                    .padding(.leading, AmbrosiaTheme.Spacing.lg)
+                    .padding(.top, safeAreaInsets.top + AmbrosiaTheme.Spacing.sm)
+                
                 Spacer()
             }
+            Spacer()
         }
         .ignoresSafeArea(edges: .top)
     }

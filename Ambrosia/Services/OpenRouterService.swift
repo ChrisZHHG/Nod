@@ -92,12 +92,18 @@ actor OpenRouterService: GeminiServiceProtocol {
         return try parseResponse(data)
     }
 
-    /// Image generation is not supported on OpenRouter — returns a stable food placeholder.
+    /// Fallback Image Generation using Pollinations.ai (Free, no API key required text-to-image)
+    /// Since OpenRouter doesn't natively support image generation (DALL-E etc).
     func generateImage(prompt: String, model: String) async throws -> URL? {
-        print("[OpenRouterService] Image generation not supported, returning placeholder.")
-        try await Task.sleep(nanoseconds: 500_000_000)
-        let hash = abs(prompt.hashValue % 1000)
-        return URL(string: "https://loremflickr.com/800/600/food,dinner?lock=\(hash)")
+        print("[OpenRouterService] Generating image via Pollinations.ai...")
+        
+        // Encode the prompt for a URL path
+        guard let encodedPrompt = prompt.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) else {
+            return nil
+        }
+        
+        let endpoint = "https://image.pollinations.ai/prompt/\(encodedPrompt)?width=800&height=800&nologo=true"
+        return URL(string: endpoint)
     }
 
     // MARK: - Private helpers

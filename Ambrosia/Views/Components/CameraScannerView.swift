@@ -38,9 +38,13 @@ struct CameraScannerView: UIViewControllerRepresentable {
 
         Task {
             defer { context.coordinator.isCaptureInFlight = false }
+            // Add a tiny delay to ensure AVFoundation is settled to avoid -17281 errors
+            try? await Task.sleep(nanoseconds: 300_000_000)
             if let image = try? await uiViewController.capturePhoto() {
-                UIImpactFeedbackGenerator(style: .heavy).impactOccurred()
-                context.coordinator.parent.scannedImage = image.jpegData(compressionQuality: 0.8)
+                await MainActor.run {
+                    UIImpactFeedbackGenerator(style: .heavy).impactOccurred()
+                    context.coordinator.parent.scannedImage = image.jpegData(compressionQuality: 0.8)
+                }
             }
         }
     }

@@ -52,8 +52,8 @@ struct DecoderClient: DecoderClientProtocol {
 
 /// Client for generating food recommendations
 protocol ChefClientProtocol: Sendable {
-    func recommend(from menu: MenuData, profile: IndividualProfile) async throws -> MenuRecommendation
-    func recommendCombo(from menu: MenuData, group: GroupProfile) async throws -> ComboRecommendation
+    func recommend(from menu: MenuData, profile: IndividualProfile, research: RestaurantResearchData?) async throws -> SoloRecommendationSet
+    func recommendCombo(from menu: MenuData, group: GroupProfile, research: RestaurantResearchData?) async throws -> GroupRecommendationSet
 }
 
 struct ChefClient: ChefClientProtocol {
@@ -63,12 +63,12 @@ struct ChefClient: ChefClientProtocol {
         self.agent = ChefAgent()
     }
     
-    func recommend(from menu: MenuData, profile: IndividualProfile) async throws -> MenuRecommendation {
-        try await agent.recommend(from: menu, profile: profile)
+    func recommend(from menu: MenuData, profile: IndividualProfile, research: RestaurantResearchData?) async throws -> SoloRecommendationSet {
+        try await agent.recommend(from: menu, profile: profile, research: research)
     }
     
-    func recommendCombo(from menu: MenuData, group: GroupProfile) async throws -> ComboRecommendation {
-        try await agent.recommendGroupCombo(from: menu, group: group)
+    func recommendCombo(from menu: MenuData, group: GroupProfile, research: RestaurantResearchData?) async throws -> GroupRecommendationSet {
+        try await agent.recommendGroupCombo(from: menu, group: group, research: research)
     }
 }
 
@@ -76,8 +76,8 @@ struct ChefClient: ChefClientProtocol {
 
 /// Client for auditing recommendations for safety
 protocol SafetyClientProtocol: Sendable {
-    func audit(draft: MenuRecommendation, context: MenuData, profile: IndividualProfile) async throws -> MenuRecommendation
-    func auditCombo(draft: ComboRecommendation, context: MenuData, group: GroupProfile) async throws -> ComboRecommendation
+    func audit(draft: SoloRecommendationSet, context: MenuData, profile: IndividualProfile) async throws -> SoloRecommendationSet
+    func auditCombo(draft: GroupRecommendationSet, context: MenuData, group: GroupProfile) async throws -> GroupRecommendationSet
 }
 
 struct SafetyClient: SafetyClientProtocol {
@@ -87,11 +87,11 @@ struct SafetyClient: SafetyClientProtocol {
         self.agent = SafetyAgent()
     }
     
-    func audit(draft: MenuRecommendation, context: MenuData, profile: IndividualProfile) async throws -> MenuRecommendation {
+    func audit(draft: SoloRecommendationSet, context: MenuData, profile: IndividualProfile) async throws -> SoloRecommendationSet {
         try await agent.audit(draft: draft, context: context, profile: profile)
     }
     
-    func auditCombo(draft: ComboRecommendation, context: MenuData, group: GroupProfile) async throws -> ComboRecommendation {
+    func auditCombo(draft: GroupRecommendationSet, context: MenuData, group: GroupProfile) async throws -> GroupRecommendationSet {
         try await agent.auditCombo(draft: draft, context: context, group: group)
     }
 }
@@ -115,6 +115,25 @@ struct VisualizerClient: VisualizerClientProtocol {
     }
 }
 
+// MARK: - Research Client
+
+/// Client for researching restaurant details
+protocol ResearchClientProtocol: Sendable {
+    func researchRestaurant(name: String, location: String?) async throws -> RestaurantResearchData
+}
+
+struct ResearchClient: ResearchClientProtocol {
+    private let agent: ResearchAgentProtocol
+    
+    init() {
+        self.agent = ResearchAgent()
+    }
+    
+    func researchRestaurant(name: String, location: String?) async throws -> RestaurantResearchData {
+        try await agent.researchRestaurant(name: name, location: location)
+    }
+}
+
 // MARK: - Dependency Container
 
 /// Container for all app dependencies - enables easy swapping for tests
@@ -125,16 +144,19 @@ final class DependencyContainer: @unchecked Sendable {
     let chef: ChefClientProtocol
     let safety: SafetyClientProtocol
     let visualizer: VisualizerClientProtocol
+    let research: ResearchClientProtocol
     
     init(
         decoder: DecoderClientProtocol = DecoderClient(),
         chef: ChefClientProtocol = ChefClient(),
         safety: SafetyClientProtocol = SafetyClient(),
-        visualizer: VisualizerClientProtocol = VisualizerClient()
+        visualizer: VisualizerClientProtocol = VisualizerClient(),
+        research: ResearchClientProtocol = ResearchClient()
     ) {
         self.decoder = decoder
         self.chef = chef
         self.safety = safety
         self.visualizer = visualizer
+        self.research = research
     }
 }

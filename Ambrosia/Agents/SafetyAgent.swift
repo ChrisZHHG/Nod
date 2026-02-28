@@ -10,17 +10,18 @@ final class SafetyAgent: SafetyAgentProtocol, @unchecked Sendable {
     }
     
     /// The Guardrail Prompt
-    private func buildAuditPrompt(profile: IndividualProfile, recommendation: MenuRecommendation) -> String {
+    private func buildAuditPrompt(profile: IndividualProfile, recommendation: SoloRecommendationSet) throws -> String {
+        let draftJSON = try String(data: JSONEncoder().encode(recommendation), encoding: .utf8) ?? "{}"
         return """
         You are a Safety Auditor.
         
-        USER ALLERGIES: [\(profile.allergies.joined(separator: ", "))]
-        RECOMMENDED DISH: \(recommendation.translation.localizedName)
-        DESCRIPTION: \(recommendation.translation.culturalContext)
-        INGREDIENTS (Inferred): \(recommendation.reasoning)
+        USER VETOES (STRICT Avoidance): [\(profile.vetoes.joined(separator: ", "))]
+        
+        RECOMMENDED SET JSON:
+        \(draftJSON)
         
         TASK:
-        Check if the Recommended Dish violates ANY user allergy.
+        Check if ANY item in ANY of the 3 options violates ANY user vetoes.
         Be conservative. If unsure, flagging is better than missing.
         
         OUTPUT JSON:
@@ -31,23 +32,21 @@ final class SafetyAgent: SafetyAgentProtocol, @unchecked Sendable {
         OR
         {
           "isSafe": false,
-          "violationReason": "Contains Peanuts which violates user allergy."
+          "violationReason": "In Option A, the dish contains Peanuts which violates user veto."
         }
         """
     }
     
-    func audit(draft: MenuRecommendation, context: MenuData, profile: IndividualProfile) async throws -> MenuRecommendation {
-        // Optimization: If no allergies, skip API call to save latency
-        if profile.allergies.isEmpty {
-            print("[SafetyAgent] 🛡️ No allergies listed. Skipping audit.")
+    func audit(draft: SoloRecommendationSet, context: MenuData, profile: IndividualProfile) async throws -> SoloRecommendationSet {
+        if profile.vetoes.isEmpty {
+            print("[SafetyAgent] 🛡️ No vetoes listed. Skipping individual audit.")
             return draft
         }
         
-        print("[SafetyAgent] 🛡️ Auditing individual recommendation for safety...")
+        print("[SafetyAgent] 🛡️ Auditing all 3 individual recommendations for safety...")
         
-        let prompt = buildAuditPrompt(profile: profile, recommendation: draft)
+        let prompt = try buildAuditPrompt(profile: profile, recommendation: draft)
         
-        // Call Gemini Flash (Fast Check)
         let jsonString = try await service.generateContent(
             prompt: prompt,
             model: .flash,
@@ -62,23 +61,23 @@ final class SafetyAgent: SafetyAgentProtocol, @unchecked Sendable {
             ])
         }
         
-        print("[SafetyAgent] ✅ Individual Audit Passed.")
+        print("[SafetyAgent] ✅ Individual Set Audit Passed.")
         return draft
     }
     
     // MARK: - Group Audit
     
-    func auditCombo(draft: ComboRecommendation, context: MenuData, group: GroupProfile) async throws -> ComboRecommendation {
-        let allAllergies = group.collectiveAllergies + group.dietaryRestrictions
-        
-        if allAllergies.isEmpty {
-            print("[SafetyAgent] 🛡️ No group allergies listed. Skipping combo audit.")
+    // MARK: - Group Audit
+    
+    func auditCombo(draft: GroupRecommendationSet, context: MenuData, group: GroupProfile) async throws -> GroupRecommendationSet {
+        if group.vetoes.isEmpty {
+            print("[SafetyAgent] 🛡️ No group vetoes listed. Skipping combo audit.")
             return draft
         }
         
-        print("[SafetyAgent] 🛡️ Auditing group combo for safety...")
+        print("[SafetyAgent] 🛡️ Auditing all 3 group combos for safety...")
         
-        let prompt = buildComboAuditPrompt(group: group, combo: draft)
+        let prompt = try buildComboAuditPrompt(group: group, combo: draft)
         
         let jsonString = try await service.generateContent(
             prompt: prompt,
@@ -94,24 +93,23 @@ final class SafetyAgent: SafetyAgentProtocol, @unchecked Sendable {
             ])
         }
         
-        print("[SafetyAgent] ✅ Group Combo Audit Passed.")
+        print("[SafetyAgent] ✅ Group Combos Audit Passed.")
         return draft
     }
     
-    private func buildComboAuditPrompt(group: GroupProfile, combo: ComboRecommendation) -> String {
+    private func buildComboAuditPrompt(group: GroupProfile, combo: GroupRecommendationSet) throws -> String {
+        let draftJSON = try String(data: JSONEncoder().encode(combo), encoding: .utf8) ?? "{}"
         return """
         You are a Safety Auditor for group dining.
         
-        GROUP ALLERGIES: [\(group.collectiveAllergies.joined(separator: ", "))]
-        DIETARY RESTRICTIONS: [\(group.dietaryRestrictions.joined(separator: ", "))]
+        GROUP VETOES (STRICT AVOIDANCE): [\(group.vetoes.joined(separator: ", "))]
         
-        COMBO NAME: \(combo.name)
-        DISHES: \(combo.dishes.map { $0.originalName }.joined(separator: ", "))
-        DRINKS: \(combo.drinks.map { $0.name }.joined(separator: ", "))
+        RECOMMENDED COMBOS JSON:
+        \(draftJSON)
         
         TASK:
-        Check if ANY item in this combo violates ANY user allergy or dietary restriction.
-        Special Note: If "Vegetarian" is restricted, ensure no meat dishes are present.
+        Check if ANY item in ANY of the 3 combos violates ANY group veto.
+        Special Note: If "Vegetarian" is restricted/vetoed, ensure meat is avoided.
         
         OUTPUT JSON:
         {
@@ -121,7 +119,7 @@ final class SafetyAgent: SafetyAgentProtocol, @unchecked Sendable {
         OR
         {
           "isSafe": false,
-          "violationReason": "Dish [X] contains Pork which violates DIETARY RESTRICTION [No Pork]."
+          "violationReason": "In Combo B, Dish [X] contains Pork which violates GROUP VETO [Pork]."
         }
         """
     }

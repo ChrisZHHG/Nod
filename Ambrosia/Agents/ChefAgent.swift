@@ -9,49 +9,66 @@ final class ChefAgent: ChefAgentProtocol, @unchecked Sendable {
         self.service = service
     }
     
-    // MARK: - Individual Mode (Match Score)
-    private func buildIndividualPrompt(profile: IndividualProfile, menu: MenuData) -> String {
+    // MARK: - Individual Mode (Multi-Choice)
+    private func buildIndividualPrompt(profile: IndividualProfile, menu: MenuData, research: RestaurantResearchData?) -> String {
         let cuisine = menu.metadata.cuisineStyle ?? "Unknown"
         return """
-        You are 'Bely', a local food expert specializing in \(cuisine) cuisine.
+        You are 'Bely', a world-class AI Sommelier and local food expert specializing in \(cuisine) cuisine.
         
-        RESTAURANT CONTEXT: This is a \(cuisine) restaurant. Tailor your recommendation
-        to the cultural norms of this cuisine (e.g., for Hotpot: suggest proteins and dipping sauce;
-        for Italian: consider the pasta/risotto as a main; for Chinese: sharing-friendly dishes).
+        RESTAURANT CONTEXT: This is a \(cuisine) restaurant. Tailor your recommendation to its cultural norms.
         
-        USER PROFILE:
+        USER PROFILE & ENVIRONMENTAL CONTEXT:
         - Party Size: \(profile.partySize)
-        - Budget: $\(profile.budget)
-        - Taste: \(profile.tastePreference)
-        - Allergies: \(profile.allergies.joined(separator: ", "))
+        - Vetoes/Allergies (STRICT AVOIDANCE): \(profile.vetoes.isEmpty ? "None" : profile.vetoes.joined(separator: ", "))
+        - Cravings/Preferences: \(profile.cravings.isEmpty ? "None" : profile.cravings.joined(separator: ", "))
+        - User's Mood/Vibe: \(profile.mood)
         
-        TASK: Pick ONE best dish from the menu and explain it.
+        GOOGLE PLACES RESEARCH (IF AVAILABLE):
+        - General Vibe: \(research?.generalVibe ?? "Not available")
+        - Rating: \(research?.rating.map { "\($0) stars" } ?? "Not available")
+        - Popular Dishes/Specialties (Prioritize these if they match cravings and avoid vetoes): \(research?.popularDishes.isEmpty == false ? research!.popularDishes.joined(separator: ", ") : "Not available")
+        
+        TASK:
+        The customer requested personalized options. You must provide EXACTLY THREE distinct choices from the provided MENU DATA:
+        1. "The Safe Crowd-Pleaser" (Classic, popular, universally loved)
+        2. "The Local Secret" (Authentic, signature, or regional specialty)
+        3. "The Adventurous Pick" (Surprising, unique, or perfectly matches their specific craving)
+        
+        CRITICAL INSTRUCTIONS: 
+        1. You MUST ONLY select dishes that exist in the provided MENU DATA. DO NOT invent or hallucinate dishes.
+        2. Your `reasoning` must be highly persuasive and explicitly mention how the dish matches the user's `Mood` or `Cravings`.
         
         Return ONLY valid JSON with this EXACT structure:
         {
-          "recommendedItem": {
-            "originalName": "Dish Name",
-            "description": "Brief description",
-            "price": 12.99
-          },
-          "translation": {
-            "localizedName": "English Name",
-            "culturalContext": "Cultural explanation",
-            "warnings": []
-          },
-          "reasoning": "Why this dish is recommended",
-          "pairings": [
-            { "originalName": "Drink/Side Name", "reason": "Why it pairs well" }
+          "options": [
+            {
+              "optionType": "The Safe Crowd-Pleaser",
+              "recommendedItem": {
+                "originalName": "Dish Name",
+                "description": "Brief description",
+                "price": 12.99
+              },
+              "translation": {
+                "localizedName": "English Name",
+                "culturalContext": "Cultural explanation",
+                "warnings": []
+              },
+              "reasoning": "Why this fits their mood and cravings.",
+              "pairings": [
+                { "originalName": "Drink/Side Name", "reason": "Why it pairs well" }
+              ]
+            }
           ]
         }
+        (Ensure you output 3 items in the `options` array).
         """
     }
 
     
-    func recommend(from menu: MenuData, profile: IndividualProfile) async throws -> MenuRecommendation {
+    func recommend(from menu: MenuData, profile: IndividualProfile, research: RestaurantResearchData?) async throws -> SoloRecommendationSet {
         print("[ChefAgent] 👨‍🍳 Cooking up Individual Recommendation (\(menu.metadata.cuisineStyle ?? "Unknown") cuisine)...")
         let menuJSON = try String(data: JSONEncoder().encode(menu), encoding: .utf8) ?? "{}"
-        let prompt = buildIndividualPrompt(profile: profile, menu: menu) + "\n\nMENU DATA:\n\(menuJSON)"
+        let prompt = buildIndividualPrompt(profile: profile, menu: menu, research: research) + "\n\nMENU DATA:\n\(menuJSON)"
         
         let jsonString = try await service.generateContent(
             prompt: prompt,
@@ -67,7 +84,7 @@ final class ChefAgent: ChefAgentProtocol, @unchecked Sendable {
         guard let data = jsonString.data(using: .utf8) else { throw NSError(domain: "ChefAgent", code: 0, userInfo: nil) }
         
         do {
-            return try JSONDecoder().decode(MenuRecommendation.self, from: data)
+            return try JSONDecoder().decode(SoloRecommendationSet.self, from: data)
         } catch {
             print("[ChefAgent] ❌ JSON Decode Error: \(error)")
             throw error
@@ -75,66 +92,75 @@ final class ChefAgent: ChefAgentProtocol, @unchecked Sendable {
     }
 
     // MARK: - Group Mode (The Combo Engine)
-    func recommendGroupCombo(from menu: MenuData, group: GroupProfile) async throws -> ComboRecommendation {
-        print("[ChefAgent] 👨‍🍳 Assembling Group Combo (Knapsack)...")
+    func recommendGroupCombo(from menu: MenuData, group: GroupProfile, research: RestaurantResearchData?) async throws -> GroupRecommendationSet {
+        print("[ChefAgent] 👨‍🍳 Assembling Group Combos...")
         let menuJSON = try String(data: JSONEncoder().encode(menu), encoding: .utf8) ?? "{}"
-        let prompt = buildGroupPrompt(group: group, menu: menu) + "\n\nMENU DATA:\n\(menuJSON)"
+        let prompt = buildGroupPrompt(group: group, menu: menu, research: research) + "\n\nMENU DATA:\n\(menuJSON)"
 
-        
         let jsonString = try await service.generateContent(
             prompt: prompt,
             model: .flash,
             responseSchema: "application/json"
         )
         
-        // DEBUG: Print raw response
-        print("[ChefAgent] ===== GROUP RAW JSON RESPONSE =====")
-        print(jsonString)
-        print("[ChefAgent] ===== END GROUP RAW JSON =====")
-        
         guard let data = jsonString.data(using: .utf8) else { throw NSError(domain: "ChefAgent", code: 0, userInfo: nil) }
         
         do {
-            return try JSONDecoder().decode(ComboRecommendation.self, from: data)
+            return try JSONDecoder().decode(GroupRecommendationSet.self, from: data)
         } catch {
             print("[ChefAgent] ❌ Group JSON Decode Error: \(error)")
             throw error
         }
     }
 
-    private func buildGroupPrompt(group: GroupProfile, menu: MenuData) -> String {
+    private func buildGroupPrompt(group: GroupProfile, menu: MenuData, research: RestaurantResearchData?) -> String {
         let cuisine = menu.metadata.cuisineStyle ?? "Unknown"
         return """
-        You are 'Bely', a master event planner specializing in \(cuisine) dining.
+        You are 'Bely', a master event planner and Sommelier specializing in \(cuisine) dining.
         
-        RESTAURANT CONTEXT: \(cuisine) restaurant. Apply cuisine-specific wisdom:
-        - Hotpot: recommend proteins, vegetables, and dipping sauces as a spread
-        - Chinese: family-style sharing dishes that balance flavours
-        - Italian: starters + main + dessert + wine pairing
-        - Japanese: sashimi/sushi board + mains + drinks
-        Adapt as needed for any other cuisineStyle.
+        RESTAURANT CONTEXT: \(cuisine) restaurant. Apply cuisine-specific wisdom for sharing.
         
-        GROUP PROFILE:
+        GROUP PROFILE & ENVIRONMENTAL CONTEXT:
         - Headcount: \(group.headcount)
-        - Budget: $\(group.budgetTotal)
-        - Allergies (STRICT): \(group.collectiveAllergies.joined(separator: ", "))
-        - Restrictions: \(group.dietaryRestrictions.joined(separator: ", "))
+        - Vetoes/Allergies (STRICT AVOIDANCE): \(group.vetoes.isEmpty ? "None" : group.vetoes.joined(separator: ", "))
+        - Cravings/Preferences: \(group.cravings.isEmpty ? "None" : group.cravings.joined(separator: ", "))
+        - Group Vibe/Mood: \(group.mood)
         
-        TASK: Create a group dining combo from the menu.
+        GOOGLE PLACES RESEARCH (IF AVAILABLE):
+        - General Vibe: \(research?.generalVibe ?? "Not available")
+        - Rating: \(research?.rating.map { "\($0) stars" } ?? "Not available")
+        - Popular Dishes/Specialties (Prioritize these if they match cravings and avoid vetoes): \(research?.popularDishes.isEmpty == false ? research!.popularDishes.joined(separator: ", ") : "Not available")
+        
+        TASK:
+        The group is sharing plates. Create EXACTLY THREE completely different combo sets that avoid all vetoes, choosing ONLY from the provided MENU DATA:
+        1. "The Balanced Spread" (A perfect mix of proteins, veg, and carbs)
+        2. "The Heavy Feast" (Or vegetarian equivalent, depending on cravings)
+        3. "The Chef's Tasting" (A premium, varied selection)
+        
+        CRITICAL INSTRUCTIONS: 
+        1. You MUST ONLY select dishes that exist in the provided MENU DATA. DO NOT invent or hallucinate dishes.
+        2. EXCLUDE ANY DISH that contains ANY of the Vetoes/Allergies (\(group.vetoes.isEmpty ? "None" : group.vetoes.joined(separator: ", "))). This is a fatal safety violation if missed.
+        3. QUANTITY: The combos MUST contain enough distinct dishes to satisfy exactly \(group.headcount) people. (e.g. 4 people = ~5-7 dishes).
+        4. Your `reasoning` must highly explicitly mention how the combo matches the group's `Mood` or `Cravings`.
         
         Return ONLY valid JSON with this EXACT structure:
         {
-          "name": "Combo Name",
-          "dishes": [
-            {"originalName": "Dish 1", "description": "...", "price": 10.99},
-            {"originalName": "Dish 2", "description": "...", "price": 15.99}
-          ],
-          "drinks": [
-            {"name": "Drink Name", "type": "Alcoholic", "description": "...", "pairingReason": "..."}
-          ],
-          "totalPrice": 120.50,
-          "reasoning": "Why this combo works"
+          "combos": [
+            {
+              "optionType": "The Balanced Spread",
+              "dishes": [
+                {"originalName": "Dish 1", "description": "...", "price": 10.99},
+                {"originalName": "Dish 2", "description": "...", "price": 15.99}
+              ],
+              "drinks": [
+                {"name": "Drink Name", "type": "Alcoholic", "description": "...", "pairingReason": "..."}
+              ],
+              "totalPrice": 120.50,
+              "reasoning": "Why this combo works for their vibe."
+            }
+          ]
         }
+        (Ensure you output 3 items in the `combos` array).
         """
     }
 

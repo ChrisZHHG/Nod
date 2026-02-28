@@ -32,20 +32,27 @@ struct AppRootView: View {
                         ScannerView(
                             images: store.capturedImages,
                             onCapture: { data in store.captureImage(data) },
-                            onAnalyze: { Task { await store.generateRecommendation() } },
+                            onAnalyze: { store.navigationPath.append(.wizard) },
                             onCancel: { store.resetSession() }
                         )
                         .navigationBarBackButtonHidden(true)
-                    case .result(let recommendation):
-                        ChefCardView(
-                            recommendation: recommendation,
-                            onReset: { store.resetSession() }
+                    case .wizard:
+                        ProgressiveWizardView(store: store)
+                            .navigationBarBackButtonHidden(true)
+                    case .soloResult(let recommendationSet):
+                        MultiChoiceResultCarousel(
+                            store: store,
+                            mode: .individual,
+                            soloSet: recommendationSet,
+                            groupSet: nil
                         )
                         .navigationBarBackButtonHidden(true)
-                    case .combo(let combo):
-                        ComboResultView(
-                            combo: combo,
-                            onRefine: { _ in Task { await store.generateRecommendation() } }
+                    case .groupResult(let comboSet):
+                        MultiChoiceResultCarousel(
+                            store: store,
+                            mode: .group,
+                            soloSet: nil,
+                            groupSet: comboSet
                         )
                         .navigationBarBackButtonHidden(true)
                     }
@@ -55,7 +62,7 @@ struct AppRootView: View {
 
             // ── Simmer overlay — covers the whole app during AI processing ──
             if isProcessing {
-                ProcessingView(appState: store.appState)
+                ProcessingView(store: store)
                     .zIndex(99)
                     .transition(.opacity.animation(.easeInOut(duration: 0.4)))
             }

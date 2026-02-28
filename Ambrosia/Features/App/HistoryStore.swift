@@ -236,7 +236,7 @@ struct HistoryRowView: View {
         case .individual(let rec):
             return rec.translation.localizedName
         case .group(let combo):
-            return combo.name
+            return combo.optionType
         }
     }
     

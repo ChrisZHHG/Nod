@@ -11,9 +11,12 @@ final class AppStore {
     
     var mode: AppMode = .individual
     var appState: AppState = .idle
-    var individualProfile: IndividualProfile = .init()
-    var groupProfile: GroupProfile = .init()
+    // Enforce private(set) to stop external UI mutations
+    private(set) var individualProfile: IndividualProfile = .init()
+    private(set) var groupProfile: GroupProfile = .init()
     var capturedImages: [Data] = []
+    var cachedParsedMenu: MenuData? = nil
+    private var decodingTask: Task<MenuData, Error>?
     var timelineLog: [String] = []
     
     // Navigation (using enum path for type-safe navigation)
@@ -35,6 +38,17 @@ final class AppStore {
         log("🔄 Switched to \(mode) mode.")
     }
     
+    // Explicit Intent to modify profiles centrally
+    func updateIndividualProfile(_ update: (inout IndividualProfile) -> Void) {
+        update(&individualProfile)
+        log("👤 Individual Profile Updated: Vetoes[\(individualProfile.vetoes.count)] Cravings[\(individualProfile.cravings.count)]")
+    }
+    
+    func updateGroupProfile(_ update: (inout GroupProfile) -> Void) {
+        update(&groupProfile)
+        log("👥 Group Profile Updated: Size[\(groupProfile.headcount)] Vetoes[\(groupProfile.vetoes.count)] Cravings[\(groupProfile.cravings.count)]")
+    }
+    
     func startSession() {
         self.appState = .scanning
         navigationPath.append(.scanner)
@@ -45,13 +59,28 @@ final class AppStore {
         self.appState = .idle
         self.navigationPath = []
         self.capturedImages = []
+        self.cachedParsedMenu = nil
+        self.decodingTask?.cancel()
+        self.decodingTask = nil
         log("🔄 Session Reset.")
     }
     
     func captureImage(_ imageData: Data) {
         guard appState == .scanning else { return }
         capturedImages.append(imageData)
+        self.cachedParsedMenu = nil // Invalidate on new photo
+        self.decodingTask?.cancel()
         log("📸 Image Captured. Total: \(capturedImages.count)")
+        
+        // CONCURRENCY TRICK: Start the heavy OCR immediately, 
+        // hiding the latency behind the upcoming Progressive UI Wizard.
+        self.decodingTask = Task {
+            log("👀 Decoder Agent: Background Scanning Menu...")
+            let data = try await dependencies.decoder.decode(images: capturedImages)
+            self.cachedParsedMenu = data
+            log("👀 Decoder Agent: Background Scan Complete.")
+            return data
+        }
     }
     
     // MARK: - Effects (Async Operations)
@@ -63,16 +92,43 @@ final class AppStore {
         }
         
         do {
-            // Step 1: Decode
-            self.appState = .decoding(progress: 0.2)
-            log("👀 Decoder Agent: Scanning Menu...")
-            let menuData = try await dependencies.decoder.decode(images: capturedImages)
+            // Step 1: Decode & Research (Concurrent Fetch)
+            
+            self.appState = .decoding(progress: 0.5)
+            log("👀 Gathering Menu and Restaurant Insights concurrently...")
+            
+            async let fetchResearch = dependencies.research.researchRestaurant(
+                name: "Current Restaurant", // TODO: Replace with dynamic user location or photo metadata
+                location: nil
+            )
+            
+            let menuData: MenuData
+            if let cached = cachedParsedMenu {
+                log("👀 Using cached menu parsing. Skipping OCR...")
+                menuData = cached
+            } else if let pendingTask = decodingTask {
+                log("👀 Waiting for background Decoder Agent to finish...")
+                menuData = try await pendingTask.value
+                self.cachedParsedMenu = menuData
+            } else {
+                log("👀 Decoder Agent: Scanning Menu (Synchronous Fallback)...")
+                menuData = try await dependencies.decoder.decode(images: capturedImages)
+                self.cachedParsedMenu = menuData
+            }
+            
+            // Wait for research to finish if it hasn't already
+            let researchData = try? await fetchResearch
+            if let research = researchData {
+                log("🔍 Fetched Google Research: \(research.rating ?? 0) stars, Vibe: \(research.generalVibe)")
+            } else {
+                log("🔍 Failed or skipped fetching Google Research.")
+            }
             
             // Step 2: Fork based on Mode
             if mode == .individual {
-                try await handleIndividualFlow(using: menuData)
+                try await handleIndividualFlow(using: menuData, research: researchData)
             } else {
-                try await handleGroupFlow(using: menuData)
+                try await handleGroupFlow(using: menuData, research: researchData)
             }
             
         } catch {
@@ -83,61 +139,125 @@ final class AppStore {
     
     // MARK: - Private Effects
     
-    private func handleIndividualFlow(using menuData: MenuData) async throws {
+    private func handleIndividualFlow(using menuData: MenuData, research: RestaurantResearchData?) async throws {
         self.appState = .reasoning(stage: "Personalizing for You...")
-        log("👨‍🍳 Chef Agent: Crafting recommendation...")
+        log("👨‍🍳 Chef Agent: Crafting 3 recommendations...")
         
-        var draft = try await dependencies.chef.recommend(from: menuData, profile: individualProfile)
+        var draftSet = try await dependencies.chef.recommend(from: menuData, profile: individualProfile, research: research)
         
-        // Visualizer
-        if let imageURL = try? await dependencies.visualizer.visualize(
-            dishName: draft.translation.localizedName,
-            description: draft.translation.culturalContext
-        ) {
-            draft.imageURL = imageURL
+        // Visualizer (Parallel tasking for all 3 options without mutating models in place)
+        let visualUrls: [Int: URL?] = await withTaskGroup(of: (Int, URL?).self) { group in
+            for (index, option) in draftSet.options.enumerated() {
+                let dishName = option.translation.localizedName
+                let desc = option.translation.culturalContext
+                group.addTask {
+                    let url = try? await self.dependencies.visualizer.visualize(dishName: dishName, description: desc)
+                    return (index, url)
+                }
+            }
+            
+            var results: [Int: URL?] = [:]
+            for await (index, url) in group {
+                results[index] = url
+            }
+            return results
         }
+        
+        // Rebuild immutable array
+        let updatedOptions = draftSet.options.enumerated().map { (index, oldOption) in
+            MenuRecommendation(
+                id: oldOption.id,
+                optionType: oldOption.optionType,
+                recommendedItem: oldOption.recommendedItem,
+                translation: oldOption.translation,
+                reasoning: oldOption.reasoning,
+                pairings: oldOption.pairings,
+                imageURL: visualUrls[index] ?? nil
+            )
+        }
+        draftSet = SoloRecommendationSet(options: updatedOptions)
         
         // Safety Audit
         self.appState = .verifying
-        log("🛡️ Safety Agent: Auditing...")
-        let verifiedResult = try await dependencies.safety.audit(
-            draft: draft,
-            context: menuData,
-            profile: individualProfile
-        )
+        log("🛡️ Safety Agent: Auditing sets...")
+        let verifiedResult = try await dependencies.safety.audit(draft: draftSet, context: menuData, profile: individualProfile)
         
         self.appState = .idle
-        navigationPath.append(.result(verifiedResult))
-        log("🎉 Individual Recommendation Ready.")
+        navigationPath.append(.soloResult(verifiedResult))
+        log("🎉 Individual Recommendations Ready.")
     }
     
-    private func handleGroupFlow(using menuData: MenuData) async throws {
-        self.appState = .reasoning(stage: "Assembling Group Combo...")
-        log("👨‍🍳 Chef Agent: Solving Knapsack for \(groupProfile.headcount) people...")
+    private func handleGroupFlow(using menuData: MenuData, research: RestaurantResearchData?) async throws {
+        self.appState = .reasoning(stage: "Assembling Group Combos...")
+        log("👨‍🍳 Chef Agent: Crafting 3 combos for \(groupProfile.headcount) people...")
         
-        var combo = try await dependencies.chef.recommendCombo(from: menuData, group: groupProfile)
+        var draftSet = try await dependencies.chef.recommendCombo(from: menuData, group: groupProfile, research: research)
         
-        // Visualizer
-        let dishNames = combo.dishes.map { $0.originalName }.joined(separator: ", ")
-        if let imageURL = try? await dependencies.visualizer.visualize(
-            dishName: combo.name,
-            description: "A banquet table spread with \(combo.dishes.count) dishes: \(dishNames)"
-        ) {
-            combo.imageURL = imageURL
+        // Visualizer: Fetch Hero image + all Dish images concurrently
+        // We will store the results in a nested dictionary [ComboIndex: [DishIndex: URL?]]
+        // Use -1 for the DishIndex to represent the Combo's Hero image.
+        
+        let visualResults: [Int: [Int: URL?]] = await withTaskGroup(of: (Int, Int, URL?).self) { taskGroup in
+            for (comboIndex, combo) in draftSet.combos.enumerated() {
+                // 1. Fetch Hero Image
+                let comboName = combo.optionType
+                let comboDesc = combo.dishes.map { $0.originalName }.joined(separator: ", ")
+                taskGroup.addTask {
+                    let url = try? await self.dependencies.visualizer.visualize(dishName: comboName, description: comboDesc)
+                    return (comboIndex, -1, url)
+                }
+                
+                // 2. Fetch Dish Images
+                for (dishIndex, dish) in combo.dishes.enumerated() {
+                    let dishName = dish.originalName
+                    let dishDesc = dish.description ?? ""
+                    taskGroup.addTask {
+                        let url = try? await self.dependencies.visualizer.visualize(dishName: dishName, description: dishDesc)
+                        return (comboIndex, dishIndex, url)
+                    }
+                }
+            }
+            
+            var results: [Int: [Int: URL?]] = [:]
+            for await (comboIdx, dishIdx, url) in taskGroup {
+                if results[comboIdx] == nil {
+                    results[comboIdx] = [:]
+                }
+                results[comboIdx]?[dishIdx] = url
+            }
+            return results
         }
+        
+        // Rebuild immutable array with injected images
+        let updatedCombos = draftSet.combos.enumerated().map { (comboIndex, oldCombo) in
+            // Rebuild dishes for this combo
+            let updatedDishes = oldCombo.dishes.enumerated().map { (dishIndex, oldDish) in
+                var newDish = oldDish
+                // Grab the specific dish image URL out of the dictionary, if any
+                newDish.imageURL = visualResults[comboIndex]?[dishIndex] ?? nil
+                return newDish
+            }
+            
+            return ComboRecommendation(
+                id: oldCombo.id,
+                optionType: oldCombo.optionType,
+                dishes: updatedDishes,
+                drinks: oldCombo.drinks,
+                totalPrice: oldCombo.totalPrice,
+                reasoning: oldCombo.reasoning,
+                imageURL: visualResults[comboIndex]?[-1] ?? nil
+            )
+        }
+        draftSet = GroupRecommendationSet(combos: updatedCombos)
         
         // Safety Audit
         self.appState = .verifying
-        log("🛡️ Safety Agent: Auditing group combo...")
-        let verifiedCombo = try await dependencies.safety.auditCombo(
-            draft: combo,
-            context: menuData,
-            group: groupProfile
-        )
+        log("🛡️ Safety Agent: Auditing group combos...")
+        let verifiedCombo = try await dependencies.safety.auditCombo(draft: draftSet, context: menuData, group: groupProfile)
         
         self.appState = .idle
-        navigationPath.append(.combo(verifiedCombo))
-        log("🎉 Group Feast Ready and Verified.")
+        navigationPath.append(.groupResult(verifiedCombo))
+        log("🎉 Group Feast Options Ready and Verified.")
     }
     
     // MARK: - Logging
@@ -152,6 +272,7 @@ final class AppStore {
 
 enum AppDestination: Hashable {
     case scanner
-    case result(MenuRecommendation)
-    case combo(ComboRecommendation)
+    case wizard
+    case soloResult(SoloRecommendationSet)
+    case groupResult(GroupRecommendationSet)
 }

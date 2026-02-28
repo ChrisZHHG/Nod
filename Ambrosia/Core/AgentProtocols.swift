@@ -7,13 +7,13 @@ protocol DecoderAgentProtocol: Sendable {
 }
 
 protocol ChefAgentProtocol: Sendable {
-    func recommend(from menu: MenuData, profile: IndividualProfile) async throws -> MenuRecommendation
-    func recommendGroupCombo(from menu: MenuData, group: GroupProfile) async throws -> ComboRecommendation
+    func recommend(from menu: MenuData, profile: IndividualProfile, research: RestaurantResearchData?) async throws -> SoloRecommendationSet
+    func recommendGroupCombo(from menu: MenuData, group: GroupProfile, research: RestaurantResearchData?) async throws -> GroupRecommendationSet
 }
 
 protocol SafetyAgentProtocol: Sendable {
-    func audit(draft: MenuRecommendation, context: MenuData, profile: IndividualProfile) async throws -> MenuRecommendation
-    func auditCombo(draft: ComboRecommendation, context: MenuData, group: GroupProfile) async throws -> ComboRecommendation
+    func audit(draft: SoloRecommendationSet, context: MenuData, profile: IndividualProfile) async throws -> SoloRecommendationSet
+    func auditCombo(draft: GroupRecommendationSet, context: MenuData, group: GroupProfile) async throws -> GroupRecommendationSet
 }
 
 protocol VisualizerAgentProtocol: Sendable {

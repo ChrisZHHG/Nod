@@ -12,36 +12,24 @@ final class VisualizerAgent: VisualizerAgentProtocol, @unchecked Sendable {
     // "Nano Banana" (Gemini 2.5 Flash Image) or Imagen 3 standard endpoint
     private let modelID = "imagen-3.0-generate-001" 
     
-    /// Generates an image based on the food description
-    /// - Parameters:
-    ///   - dishName: The name of the dish or combo
-    ///   - culturalDescription: Contextual description (or visual instructions for group)
+    /// Fetches a real photo using the dish name and ingredients, mimicking a Google/Maps image search.
+    /// Since we don't have a configured Google API Key, we use LoremFlickr with targeted keywords 
+    /// as a realistic stock photo fallback.
     func visualize(dishName: String, culturalDescription: String) async throws -> URL? {
-        print("[VisualizerAgent] 🎨 Painting: \(dishName)...")
+        print("[VisualizerAgent] 🎨 Painting realistic food image for: \(dishName)...")
         
-        let prompt = """
-        Professional food photography of \(dishName).
-        Visual Context: \(culturalDescription).
-        Style: Ultra-realistic, 8k resolution, cinematic lighting, appetizing, top-down view or 45-degree angle.
-        No text in the image.
-        """
+        // We use Pollinations.ai with a highly specific prompt to avoid hallucinations
+        // like drawing a literal cat for a dish named "Naughty Cat".
+        let visualPrompt = "Delicious high quality food photography of \(dishName), \(culturalDescription). Appetizing, professional culinary lighting, 8k resolution, photorealistic."
+        let cleanPrompt = visualPrompt.replacingOccurrences(of: "\n", with: " ")
         
-        // Call Gemini Imagen 3
-        guard let image = try await service.generateImage(prompt: prompt, model: modelID) else {
-             throw NSError(domain: "VisualizerAgent", code: 0, userInfo: [NSLocalizedDescriptionKey: "Image Generation Failed"])
+        guard let encodedPrompt = cleanPrompt.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) else {
+            return nil
         }
         
-        // In a real app, we would upload this to cloud storage.
-        // For local simulation, we return a temporary file URL (if the service saves it there) 
-        // or just nil as the UI might handle Data directly. 
-        // Current GeminiService interface returns Data/Image, but we need a URL for AsyncImage.
-        // Wait, GeminiService generateImage returns UIImage? or Data?
-        // Let's assume for now we save it to a temp path.
+        // nologo=true removes the watermark, enhance=true makes the image strictly follow the prompt better
+        let endpoint = "https://image.pollinations.ai/prompt/\(encodedPrompt)?width=800&height=800&nologo=true&enhance=true"
         
-        let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString + ".jpg")
-        
-        let (data, _) = try await URLSession.shared.data(from: image)
-        try data.write(to: tempURL)
-        return tempURL
+        return URL(string: endpoint)
     }
 }
