@@ -92,15 +92,8 @@ final class AppStore {
         }
         
         do {
-            // Step 1: Decode & Research (Concurrent Fetch)
-            
+            // Step 1: Decode first (we need the name for Research)
             self.appState = .decoding(progress: 0.5)
-            log("👀 Gathering Menu and Restaurant Insights concurrently...")
-            
-            async let fetchResearch = dependencies.research.researchRestaurant(
-                name: "Current Restaurant", // TODO: Replace with dynamic user location or photo metadata
-                location: nil
-            )
             
             let menuData: MenuData
             if let cached = cachedParsedMenu {
@@ -116,10 +109,15 @@ final class AppStore {
                 self.cachedParsedMenu = menuData
             }
             
-            // Wait for research to finish if it hasn't already
-            let researchData = try? await fetchResearch
+            // Step 1.5: Research (Now we have the restaurant name)
+            log("🔍 Gathering Restaurant Insights for '\(menuData.metadata.restaurantName ?? "Unknown")'...")
+            let researchData = try? await dependencies.research.researchRestaurant(
+                name: menuData.metadata.restaurantName ?? "Restaurant",
+                location: nil // Could optionally pass CoreLocation data here later
+            )
+            
             if let research = researchData {
-                log("🔍 Fetched Google Research: \(research.rating ?? 0) stars, Vibe: \(research.generalVibe)")
+                log("🔍 Fetched Google Research: \(research.rating ?? 0) stars, Vibe: \(research.generalVibe.prefix(30))...")
             } else {
                 log("🔍 Failed or skipped fetching Google Research.")
             }
