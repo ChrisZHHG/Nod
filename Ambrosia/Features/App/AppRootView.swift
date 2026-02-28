@@ -15,7 +15,7 @@ struct AppRootView: View {
 
     /// Extract error message from AppState.error, if any
     private var errorMessage: String? {
-        if case .error(let msg) = store.appState { return msg }
+        if case .error(let error) = store.appState { return error.localizedDescription }
         return nil
     }
 

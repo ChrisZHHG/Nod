@@ -1,31 +1,13 @@
 import Foundation
 
-// MARK: - Core App State Models
+/// Pure Domain Models (Schema.org compliant) - Zero UI Dependencies
 
-enum AppMode: String, Codable, Equatable, Sendable {
-    case individual
-    case group
-}
-
-enum AppState: Equatable, Sendable {
-    case idle
-    case scanning
-    case decoding(progress: Double)
-    case reasoning(stage: String)
-    case verifying
-    case error(String)
-}
-
-// MARK: - Core Data Models (Schema.org compliant)
-
-/// Represents the top-level structure of a recognized menu
 struct MenuData: Codable, Hashable, Sendable {
     let sections: [MenuSection]
     let currency: String
     let languageDetected: String
     let metadata: MenuMetadata
     
-    // Helper to flatten items for counting
     var totalItems: Int {
         sections.reduce(0) { $0 + $1.items.count }
     }
@@ -34,20 +16,15 @@ struct MenuData: Codable, Hashable, Sendable {
 struct MenuMetadata: Codable, Hashable, Sendable {
     let restaurantName: String?
     let timestamp: String
-    /// Cuisine style auto-detected by DecoderAgent from the menu image
-    /// e.g. "Chinese", "Japanese", "Italian", "Hotpot", "Fusion"
     var cuisineStyle: String?
 }
 
-
-/// Represents a physical section on the menu (e.g., "Starters", "Mains")
 struct MenuSection: Codable, Identifiable, Hashable, Sendable {
     var id: String { name }
     let name: String
     let items: [MenuItem]
 }
 
-/// A specific dish or drink
 struct MenuItem: Codable, Identifiable, Hashable, Sendable {
     var id: String { originalName }
     
@@ -55,20 +32,17 @@ struct MenuItem: Codable, Identifiable, Hashable, Sendable {
     let description: String?
     let price: Double?
     
-    // AI-Inferred Attributes (Optional to reflect "Unknown" state)
     var isSpicy: Bool? = nil
     var isVegetarian: Bool? = nil
     var containsGluten: Bool? = nil
     var containsPeanuts: Bool? = nil
     var containsSeafood: Bool? = nil
     
-    // For V2: Recommendation Score
     var matchScore: Double? = nil
 }
 
 // MARK: - Recommendation Models
 
-/// Simplified item returned by ChefAgent
 struct RecommendedItem: Codable, Hashable, Sendable {
     let originalName: String
     let description: String?
@@ -77,20 +51,18 @@ struct RecommendedItem: Codable, Hashable, Sendable {
     var imageURL: URL? = nil
 }
 
-/// A collection of 3 personalized options for a solo diner
 struct SoloRecommendationSet: Codable, Hashable, Sendable {
     let options: [MenuRecommendation]
 }
 
-/// A single option within the solo recommendation set
 struct MenuRecommendation: Codable, Identifiable, Hashable, Sendable {
     let id: UUID
-    let optionType: String // e.g., "The Crowd Pleaser", "Local Secret", "Adventurous"
+    let optionType: String
     let recommendedItem: RecommendedItem
     let translation: CulturalTranslation
     let reasoning: String
     let pairings: [Pairing]?
-    let imageURL: URL? // URL strictly comes from Presentation layer or a copy, not a mutation
+    var imageURL: URL?
     
     init(id: UUID = UUID(), optionType: String, recommendedItem: RecommendedItem, translation: CulturalTranslation, reasoning: String, pairings: [Pairing]?, imageURL: URL? = nil) {
         self.id = id
@@ -127,20 +99,17 @@ struct CulturalTranslation: Codable, Hashable, Sendable {
     let localizedName: String
     let culturalContext: String
     let warnings: [String]
-
 }
 
 // MARK: - Progressive Profiles
 
-/// Profile for Individual Mode
 struct IndividualProfile: Codable, Hashable, Sendable {
     var partySize: Int = 1
-    var vetoes: [String] = []       // e.g., "Pork", "Peanuts", "Cilantro"
-    var cravings: [String] = []     // e.g., "Heavy", "Fresh", "Something Else..."
-    var mood: String = "Relaxed"    // Environmental context
+    var vetoes: [String] = []
+    var cravings: [String] = []
+    var mood: String = "Relaxed"
 }
 
-/// Profile for Group Mode (Sharing)
 struct GroupProfile: Codable, Hashable, Sendable {
     var headcount: Int = 4
     var vetoes: [String] = []
@@ -148,22 +117,20 @@ struct GroupProfile: Codable, Hashable, Sendable {
     var mood: String = "Social"
 }
 
-// MARK: - Multi-Choice Group Recommendation
+// MARK: - Group Recommendation
 
-/// A collection of 3 curated combos for the group
 struct GroupRecommendationSet: Codable, Hashable, Sendable {
     let combos: [ComboRecommendation]
 }
 
-/// A single proposed combo within the set
 struct ComboRecommendation: Codable, Identifiable, Hashable, Sendable {
     let id: UUID
-    let optionType: String // e.g., "The Balanced Spread", "Meat Lover's Feast"
-    let dishes: [RecommendedItem]
+    let optionType: String
+    var dishes: [RecommendedItem]
     let drinks: [DrinkRecommendation]
     let totalPrice: Double
     let reasoning: String
-    let imageURL: URL?
+    var imageURL: URL?
     
     init(id: UUID = UUID(), optionType: String, dishes: [RecommendedItem], drinks: [DrinkRecommendation], totalPrice: Double, reasoning: String, imageURL: URL? = nil) {
         self.id = id
@@ -194,10 +161,7 @@ struct ComboRecommendation: Codable, Identifiable, Hashable, Sendable {
 struct DrinkRecommendation: Codable, Identifiable, Hashable, Sendable {
     var id: String { name }
     let name: String
-    let type: String // "Alcoholic", "Zero-Proof"
+    let type: String
     let description: String
     let pairingReason: String
 }
-
-// MARK: - Temp UserProfile for SafetyAgent
-// Obsolete UserProfile removed to avoid confusion with IndividualProfile
