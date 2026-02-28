@@ -39,6 +39,7 @@ final class ChefAgent: ChefAgentProtocol, @unchecked Sendable {
         2. Your `reasoning` must be highly persuasive and explicitly mention how the dish matches the user's `Mood` or `Cravings`.
         
         Return ONLY valid JSON with this EXACT structure:
+        Return ONLY valid JSON with this EXACT structure:
         {
           "options": [
             {
@@ -46,7 +47,8 @@ final class ChefAgent: ChefAgentProtocol, @unchecked Sendable {
               "recommendedItem": {
                 "originalName": "Dish Name",
                 "description": "Brief description",
-                "price": 12.99
+                "price": 12.99,
+                "ingredients": ["Tomato", "Basil", "Mozzarella"]
               },
               "translation": {
                 "localizedName": "English Name",
@@ -144,13 +146,14 @@ final class ChefAgent: ChefAgentProtocol, @unchecked Sendable {
         4. Your `reasoning` must highly explicitly mention how the combo matches the group's `Mood` or `Cravings`.
         
         Return ONLY valid JSON with this EXACT structure:
+        Return ONLY valid JSON with this EXACT structure:
         {
           "combos": [
             {
               "optionType": "The Balanced Spread",
               "dishes": [
-                {"originalName": "Dish 1", "description": "...", "price": 10.99},
-                {"originalName": "Dish 2", "description": "...", "price": 15.99}
+                {"originalName": "Dish 1", "description": "...", "price": 10.99, "ingredients": ["Tofu", "Chili"]},
+                {"originalName": "Dish 2", "description": "...", "price": 15.99, "ingredients": ["Beef", "Broccoli"]}
               ],
               "drinks": [
                 {"name": "Drink Name", "type": "Alcoholic", "description": "...", "pairingReason": "..."}

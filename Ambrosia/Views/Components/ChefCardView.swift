@@ -36,8 +36,41 @@ struct ChefCardView: View {
             // ── Main Content Scroll ───────────────────────────────────────────
             ScrollView(.vertical, showsIndicators: false) {
                 VStack(alignment: .leading, spacing: 0) {
-                    // Top spacer so content starts below the fold
-                    Spacer(minLength: UIScreen.main.bounds.height * 0.45)
+                    
+                    // Push content down to expose the massive image
+                    Spacer(minLength: UIScreen.main.bounds.height * 0.40)
+                    
+                    // ── Instagram-Style Floating Ingredient Tags ────────────
+                    if let ingredients = recommendation.recommendedItem.ingredients, !ingredients.isEmpty {
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack(spacing: 8) {
+                                ForEach(ingredients, id: \.self) { ingredient in
+                                    HStack(spacing: 4) {
+                                        Image(systemName: "tag.fill")
+                                            .font(.system(size: 8))
+                                            .foregroundColor(.white.opacity(0.9))
+                                        Text(ingredient.uppercased())
+                                            .font(.system(size: 10, weight: .bold, design: .rounded))
+                                            .tracking(1)
+                                            .foregroundColor(.white)
+                                    }
+                                    .padding(.vertical, 6)
+                                    .padding(.horizontal, 10)
+                                    // Ultra thin elegant glass effect (ins style)
+                                    .background(.ultraThinMaterial)
+                                    .environment(\.colorScheme, .dark)
+                                    .clipShape(Capsule())
+                                    .overlay(
+                                        Capsule().stroke(Color.white.opacity(0.3), lineWidth: 0.5)
+                                    )
+                                    // Subtle drop shadow to pop against bright food
+                                    .shadow(color: .black.opacity(0.3), radius: 4, y: 2)
+                                }
+                            }
+                            .padding(.horizontal, 16)
+                            .padding(.bottom, 16)
+                        }
+                    }
                     
                     // ── Info Panel (dark glass) ─────────────────────────────
                     VStack(alignment: .leading, spacing: 20) {

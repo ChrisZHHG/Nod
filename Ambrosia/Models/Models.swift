@@ -73,6 +73,7 @@ struct RecommendedItem: Codable, Hashable, Sendable {
     let originalName: String
     let description: String?
     let price: Double?
+    var ingredients: [String]? = nil
     var imageURL: URL? = nil
 }
 

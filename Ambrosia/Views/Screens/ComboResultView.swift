@@ -9,36 +9,42 @@ struct ComboResultView: View {
     @State private var isRefining: Bool = false
     
     var body: some View {
-        ZStack {
+        ZStack(alignment: .top) {
             AmbrosiaTheme.Cinematic.deepBlack.ignoresSafeArea()
+            
+            // ── Full-Bleed Hero Image Background ────────────────────────────────
+            GeometryReader { geo in
+                AsyncImage(url: combo.imageURL) { phase in
+                    if let img = phase.image {
+                        img.resizable()
+                            .scaledToFill()
+                            .frame(width: geo.size.width, height: geo.size.height)
+                            .clipped()
+                    } else {
+                        AmbrosiaTheme.Cinematic.richBrown
+                            .frame(width: geo.size.width, height: geo.size.height)
+                            .overlay(
+                                Image(systemName: "fork.knife")
+                                    .font(.system(size: 60, weight: .ultraLight))
+                                    .foregroundColor(.white.opacity(0.15))
+                            )
+                    }
+                }
+            }
+            .ignoresSafeArea()
+            
+            // ── Cinematic Gradient ──────────────────────────────────────────────
+            AmbrosiaTheme.Cinematic.heroOverlay
+                .ignoresSafeArea()
             
             ScrollView(.vertical, showsIndicators: false) {
                 VStack(spacing: 0) {
                     
-                    // ── Hero Image ───────────────────────────────────────────────
-                    ZStack(alignment: .bottomLeading) {
-                        AsyncImage(url: combo.imageURL) { phase in
-                            if let img = phase.image {
-                                img.resizable()
-                                    .scaledToFill()
-                                    .frame(height: 320)
-                                    .clipped()
-                            } else {
-                                AmbrosiaTheme.Cinematic.richBrown
-                                    .frame(height: 320)
-                                    .overlay(
-                                        Image(systemName: "fork.knife")
-                                            .font(.system(size: 50, weight: .ultraLight))
-                                            .foregroundColor(.white.opacity(0.15))
-                                    )
-                            }
-                        }
-                        
-                        // Gradient vignette
-                        AmbrosiaTheme.Cinematic.cardOverlay
-                            .frame(height: 320)
-                        
-                        // Combo name overlay
+                    // Push content down to expose the massive hero image
+                    Spacer(minLength: UIScreen.main.bounds.height * 0.35)
+                    
+                    // ── Combo Name & Quick Stats ──────────────────────────────────
+                    VStack(alignment: .leading, spacing: 0) {
                         VStack(alignment: .leading, spacing: 6) {
                             Text("FEAST FOR \(combo.dishes.count + combo.drinks.count)")
                                 .font(AmbrosiaTheme.Cinematic.sectionTitle)
@@ -51,7 +57,8 @@ struct ComboResultView: View {
                                 .lineLimit(2)
                                 .minimumScaleFactor(0.65)
                         }
-                        .padding(24)
+                        .padding(.horizontal, 24)
+                        .padding(.bottom, 24)
                     }
                     
                     // ── Quick Stats strip ─────────────────────────────────────────
@@ -213,6 +220,34 @@ struct DishRow: View {
                             .font(AmbrosiaTheme.Cinematic.caption)
                             .foregroundColor(AmbrosiaTheme.Cinematic.smokeGray)
                             .lineLimit(2)
+                    }
+                    
+                    // ── Instagram-Style Ingredient Tags ─────────────────────
+                    if let ingredients = dish.ingredients, !ingredients.isEmpty {
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack(spacing: 6) {
+                                ForEach(ingredients, id: \.self) { ingredient in
+                                    HStack(spacing: 3) {
+                                        Image(systemName: "tag.fill")
+                                            .font(.system(size: 7))
+                                            .foregroundColor(.white.opacity(0.9))
+                                        Text(ingredient.uppercased())
+                                            .font(.system(size: 9, weight: .bold, design: .rounded))
+                                            .tracking(1)
+                                            .foregroundColor(.white)
+                                    }
+                                    .padding(.vertical, 4)
+                                    .padding(.horizontal, 8)
+                                    .background(.ultraThinMaterial)
+                                    .environment(\.colorScheme, .dark)
+                                    .clipShape(Capsule())
+                                    .overlay(
+                                        Capsule().stroke(Color.white.opacity(0.2), lineWidth: 0.5)
+                                    )
+                                }
+                            }
+                        }
+                        .padding(.top, 4)
                     }
                 }
                 Spacer()
