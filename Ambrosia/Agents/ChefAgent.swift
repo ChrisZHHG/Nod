@@ -74,7 +74,7 @@ final class ChefAgent: ChefAgentProtocol, @unchecked Sendable {
         
         let jsonString = try await service.generateContent(
             prompt: prompt,
-            model: .flash,
+            model: .pro, // Utilizing Claude 3.5 Sonnet mapping for higher reasoning
             responseSchema: "application/json"
         )
         
@@ -101,7 +101,7 @@ final class ChefAgent: ChefAgentProtocol, @unchecked Sendable {
 
         let jsonString = try await service.generateContent(
             prompt: prompt,
-            model: .flash,
+            model: .pro, // Utilizing Claude 3.5 Sonnet mapping for sophisticated group combos
             responseSchema: "application/json"
         )
         

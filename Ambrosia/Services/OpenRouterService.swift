@@ -5,6 +5,10 @@ import Foundation
 enum OpenRouterModel: String {
     /// Best all-rounder for vision + text — cheap & very capable
     case geminiFlash   = "google/gemini-2.0-flash-001"
+    /// State-of-the-art reasoning model for complex food pairings and nuanced prose
+    case claudeSonnet  = "anthropic/claude-3.5-sonnet:beta"
+    /// Deep, open-weights fallback
+    case llama70B      = "meta-llama/llama-3.3-70b-instruct"
     /// Free tier vision model — good fallback (rate-limited)
     case llamaVision   = "meta-llama/llama-3.2-11b-vision-instruct:free"
 }
@@ -64,7 +68,9 @@ actor OpenRouterService: GeminiServiceProtocol {
 
         var body: [String: Any] = [
             "model": orModel,
-            "messages": [["role": "user", "content": contentParts]]
+            "messages": [["role": "user", "content": contentParts]],
+            // Push for slightly higher creativity in food descriptions
+            "temperature": 0.7 
         ]
 
         // Ask for JSON output when schema is requested
@@ -97,12 +103,16 @@ actor OpenRouterService: GeminiServiceProtocol {
     func generateImage(prompt: String, model: String) async throws -> URL? {
         print("[OpenRouterService] Generating image via Pollinations.ai...")
         
+        // Force 'flux' model for significantly better photorealism compared to default turbo models.
+        // Also append strict style guidelines to the raw prompt to prevent cartoonish/abstract renders.
+        let augmentedPrompt = "\(prompt), highly detailed food photography, depth of field, natural lighting, bokeh, 8k resolution, photorealistic"
+        
         // Encode the prompt for a URL path
-        guard let encodedPrompt = prompt.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) else {
+        guard let encodedPrompt = augmentedPrompt.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) else {
             return nil
         }
         
-        let endpoint = "https://image.pollinations.ai/prompt/\(encodedPrompt)?width=800&height=800&nologo=true"
+        let endpoint = "https://image.pollinations.ai/prompt/\(encodedPrompt)?width=800&height=800&nologo=true&model=flux"
         return URL(string: endpoint)
     }
 
@@ -111,7 +121,7 @@ actor OpenRouterService: GeminiServiceProtocol {
     private func mapModel(_ model: GeminiModel) -> String {
         switch model {
         case .flash: return OpenRouterModel.geminiFlash.rawValue
-        case .pro:   return OpenRouterModel.geminiFlash.rawValue  // pro → flash, quota-safe
+        case .pro:   return OpenRouterModel.claudeSonnet.rawValue  // Map 'pro' requests to Claude 3.5 Sonnet for top-tier reasoning
         }
     }
 
