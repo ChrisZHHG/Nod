@@ -55,8 +55,8 @@ struct ChatMessage: Codable, Identifiable, Equatable, Hashable, Sendable {
 
 /// The initialization package sent by the Host to start the chat.
 struct SoulBroadcastPayload: Codable, Sendable {
-    /// The strict `COMMANDMENTS` defining the boundaries of the LLM chat.
-    let moderatorSoulRules: String
+    /// The name of the restaurant parsed from the menu.
+    let restaurantName: String
     /// The OCR'd menu, serialized so Delegates know what food is available.
     let serializedMenuData: Data
     /// The number of dishes the agents must agree upon.

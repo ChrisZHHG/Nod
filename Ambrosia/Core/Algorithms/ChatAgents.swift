@@ -19,6 +19,13 @@ final class ModeratorAgent: SoulAgentProtocol {
     ) async throws -> ChatMessage {
         
         var prompt = "\(soulCommandments)\n\n"
+        
+        if let menu = menuData {
+             if let data = try? JSONEncoder().encode(menu), let str = String(data: data, encoding: .utf8) {
+                 prompt += "--- AVAILABLE MENU ---\n\(str)\n\n"
+             }
+        }
+        
         prompt += "--- CONVERSATION HISTORY ---\n"
         
         for msg in transcript {
@@ -60,13 +67,7 @@ final class DelegateAgent: SoulAgentProtocol {
         menuData: MenuData?
     ) async throws -> ChatMessage {
         
-        let vetoesStr = profile.vetoes.isEmpty ? "None" : profile.vetoes.joined(separator: ", ")
-        let cravingsStr = profile.cravings.isEmpty ? "Surprise me" : profile.cravings.joined(separator: ", ")
-        
-        // Inject the specific human data into the generic Soul Blueprint
-        let dynamicSoul = String(format: soulCommandments, delegateName, vetoesStr, cravingsStr, delegateName, delegateName, delegateName)
-        
-        var prompt = "\(dynamicSoul)\n\n"
+        var prompt = "\(soulCommandments)\n\n"
         if let menu = menuData {
              if let data = try? JSONEncoder().encode(menu), let str = String(data: data, encoding: .utf8) {
                  prompt += "--- AVAILABLE MENU ---\n\(str)\n\n"
@@ -78,8 +79,11 @@ final class DelegateAgent: SoulAgentProtocol {
             prompt += "[\(msg.agentName)]: \(msg.text)\n"
         }
         
+        let vetoesStr = profile.vetoes.isEmpty ? "None" : profile.vetoes.joined(separator: ", ")
+        let cravingsStr = profile.cravings.isEmpty ? "Surprise me" : profile.cravings.joined(separator: ", ")
+        
         prompt += "\n--- YOUR DIRECTIVE ---\n"
-        prompt += "As \(delegateName)'s Agent, analyze the history. If a proposed dish violates \(vetoesStr), REJECT IT IMMEDIATELY. "
+        prompt += "As \(delegateName), analyze the history. If a proposed dish violates \(vetoesStr), REJECT IT IMMEDIATELY. "
         prompt += "Otherwise, ACCEPT IT or propose a new dish from the menu that fits: \(cravingsStr). "
         prompt += "MAX 2 SENTENCES. NO SMALL TALK. RESPOND WITH YOUR NEXT MESSAGE ONLY:"
         

@@ -123,28 +123,30 @@ struct AgentChatView: View {
                 let msg = try JSONDecoder().decode(ChatMessage.self, from: payload.data)
                 store.chatTranscript.append(msg)
                 
-                // If Host, and we just received a message from a Delegate, the Host must reply
                 if isHost {
                     if msg.isFinalConsensus {
                         triggerConsensusFound()
-                    } else {
+                    } else if !msg.agentName.contains("Host") {
+                        // Host replies to Delegate messages
+                        try? await Task.sleep(nanoseconds: 2_000_000_000)
                         await triggerHostLLMReply()
                     }
                 } else {
-                    // If Delegate, check if this message demands a response from us.
-                    // For simplicity, everyone replies when Host prompts, but to avoid infinite loops, we need a turn-based system.
-                    // The Host calls out who should speak, but in our design, delegates speak when they hear the Host.
-                    // We'll wire up the LLM integration in the next step.
                     if msg.isFinalConsensus {
                          triggerConsensusFound()
+                    } else if msg.agentName.contains("Host") {
+                        // Delegate replies strictly to the Host's prompts
+                        // Add a natural varied delay so multiple delegates don't speak exactly at once
+                        let delay = UInt64(Double.random(in: 1.5...3.5) * 1_000_000_000)
+                        try? await Task.sleep(nanoseconds: delay)
+                        await triggerDelegateLLMReply(restaurantName: store.cachedParsedMenu?.metadata.restaurantName ?? "This Restaurant")
                     }
                 }
             case .soulBroadcast:
                 let soulData = try JSONDecoder().decode(SoulBroadcastPayload.self, from: payload.data)
                 hasStartedChat = true
                 store.cachedParsedMenu = try JSONDecoder().decode(MenuData.self, from: soulData.serializedMenuData)
-                // The Delegate LLM should now speak based on this injection
-                await triggerDelegateLLMReply(soulRules: soulData.moderatorSoulRules)
+                // Delegate waits for the Host's first chatMessage to arrive before speaking.
             default: break
             }
         } catch {
@@ -158,7 +160,7 @@ struct AgentChatView: View {
         // Host broadcasts the Soul and Menu to all delegates to begin
         let menuBytes = (try? JSONEncoder().encode(store.cachedParsedMenu)) ?? Data()
         let soulPayload = SoulBroadcastPayload(
-            moderatorSoulRules: AgentSoul.hostModeratorCommandments,
+            restaurantName: store.cachedParsedMenu?.metadata.restaurantName ?? "This Restaurant",
             serializedMenuData: menuBytes,
             requiredDishCount: 3
         )
@@ -175,7 +177,10 @@ struct AgentChatView: View {
     
     private func triggerHostLLMReply() async {
         let agent = ModeratorAgent()
-        if let reply = try? await agent.generateChatReply(transcript: store.chatTranscript, soulCommandments: AgentSoul.hostModeratorCommandments, menuData: store.cachedParsedMenu) {
+        let rName = store.cachedParsedMenu?.metadata.restaurantName ?? "This Restaurant"
+        let soul = AgentSoul.hostModeratorCommandments(restaurantName: rName, requiredDishes: 3)
+        
+        if let reply = try? await agent.generateChatReply(transcript: store.chatTranscript, soulCommandments: soul, menuData: store.cachedParsedMenu) {
             store.chatTranscript.append(reply)
             if let bData = try? JSONEncoder().encode(reply) {
                 let env = A2APayload(type: .chatMessage, senderID: UUID(), data: bData)
@@ -187,9 +192,19 @@ struct AgentChatView: View {
         }
     }
     
-    private func triggerDelegateLLMReply(soulRules: String) async {
+    private func triggerDelegateLLMReply(restaurantName: String) async {
         let agent = DelegateAgent(profile: store.individualProfile, delegateName: UIDevice.current.name)
-        if let reply = try? await agent.generateChatReply(transcript: store.chatTranscript, soulCommandments: AgentSoul.delegateCommandments, menuData: store.cachedParsedMenu) {
+        
+        let vetoesStr = store.individualProfile.vetoes.isEmpty ? "None" : store.individualProfile.vetoes.joined(separator: ", ")
+        let cravingsStr = store.individualProfile.cravings.isEmpty ? "Surprise me" : store.individualProfile.cravings.joined(separator: ", ")
+        
+        let soul = AgentSoul.delegateCommandments(
+            delegateName: UIDevice.current.name,
+            vetoes: vetoesStr,
+            cravings: cravingsStr
+        )
+        
+        if let reply = try? await agent.generateChatReply(transcript: store.chatTranscript, soulCommandments: soul, menuData: store.cachedParsedMenu) {
             store.chatTranscript.append(reply)
             if let bData = try? JSONEncoder().encode(reply) {
                 let env = A2APayload(type: .chatMessage, senderID: UUID(), data: bData)
