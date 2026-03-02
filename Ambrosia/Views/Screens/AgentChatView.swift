@@ -6,6 +6,8 @@ struct AgentChatView: View {
     
     // Internal States
     @State private var hasStartedChat = false
+    @State private var typingAgent: String? = nil
+    @State private var isProcessingConsensus = false
 
     var body: some View {
         ZStack {
@@ -83,6 +85,20 @@ struct AgentChatView: View {
                                     ChatBubble(message: msg, isMe: msg.agentName.contains("Host"))
                                         .id(msg.id)
                                 }
+                                
+                                if let typing = typingAgent {
+                                    HStack {
+                                        if typing.contains("Host") { Spacer() }
+                                        Text("\(typing) is typing...")
+                                            .font(.caption)
+                                            .italic()
+                                            .foregroundColor(.white.opacity(0.5))
+                                            .padding(.horizontal)
+                                            .transition(.opacity)
+                                        if !typing.contains("Host") { Spacer() }
+                                    }
+                                    .id("TYPING_INDICATOR")
+                                }
                             }
                             .padding()
                         }
@@ -93,8 +109,28 @@ struct AgentChatView: View {
                                 }
                             }
                         }
+                        .onChange(of: typingAgent) {
+                            withAnimation {
+                                proxy.scrollTo("TYPING_INDICATOR", anchor: .bottom)
+                            }
+                        }
                     }
                 }
+            }
+            
+            if isProcessingConsensus {
+                ZStack {
+                    Color.black.opacity(0.85).ignoresSafeArea()
+                    VStack(spacing: 24) {
+                        ProgressView()
+                            .scaleEffect(1.5)
+                            .tint(AmbrosiaTheme.Cinematic.amber)
+                        Text("Drafting final order...")
+                            .font(.system(size: 18, weight: .semibold, design: .rounded))
+                            .foregroundColor(.white)
+                    }
+                }
+                .transition(.opacity)
             }
         }
         .task {
@@ -125,20 +161,23 @@ struct AgentChatView: View {
                 
                 if isHost {
                     if msg.isFinalConsensus {
-                        triggerConsensusFound()
+                        triggerConsensusFound(rawText: msg.text)
                     } else if !msg.agentName.contains("Host") {
                         // Host replies to Delegate messages
+                        typingAgent = "Host Moderator"
                         try? await Task.sleep(nanoseconds: 2_000_000_000)
+                        typingAgent = nil
                         await triggerHostLLMReply()
                     }
                 } else {
                     if msg.isFinalConsensus {
-                         triggerConsensusFound()
+                         triggerConsensusFound(rawText: msg.text)
                     } else if msg.agentName.contains("Host") {
                         // Delegate replies strictly to the Host's prompts
-                        // Add a natural varied delay so multiple delegates don't speak exactly at once
+                        typingAgent = "\(UIDevice.current.name)'s Agent"
                         let delay = UInt64(Double.random(in: 1.5...3.5) * 1_000_000_000)
                         try? await Task.sleep(nanoseconds: delay)
+                        typingAgent = nil
                         await triggerDelegateLLMReply(restaurantName: store.cachedParsedMenu?.metadata.restaurantName ?? "This Restaurant")
                     }
                 }
@@ -171,6 +210,9 @@ struct AgentChatView: View {
         
         // Host kickstarts the conversation with the first LLM prompt
         Task {
+            isProcessingConsensus = true
+            try? await Task.sleep(nanoseconds: 1_000_000_000)
+            isProcessingConsensus = false
             await triggerHostLLMReply()
         }
     }
@@ -187,7 +229,7 @@ struct AgentChatView: View {
                 try? store.chatManager.broadcast(payload: env)
             }
             if reply.isFinalConsensus {
-                triggerConsensusFound()
+                triggerConsensusFound(rawText: reply.text)
             }
         }
     }
@@ -213,11 +255,47 @@ struct AgentChatView: View {
         }
     }
     
-    private func triggerConsensusFound() {
+    private func triggerConsensusFound(rawText: String) {
         print("🎉 CONSENSUS REACHED. Shutting down chat and routing to Results!")
-        // Process the final dishes. This logic connects the Chat to the GroupResultView
-        // We will fake a RecommendationSet for now or parse the text to generate the final Output.
-        // store.navigationPath.append(.groupResult(...))
+        isProcessingConsensus = true
+        
+        Task {
+            do {
+                let parser = ConsensusParserAgent()
+                var combo = try await parser.parseConsensus(rawText: rawText, menuData: store.cachedParsedMenu)
+                
+                let visualizer = VisualizerAgent()
+                let dishNames = combo.dishes.map { $0.originalName }.joined(separator: ", ")
+                let imgURL = try? await visualizer.visualize(dishName: dishNames, culturalDescription: "A curated meal combination negotiated by experts")
+                combo.imageURL = imgURL
+                
+                try await withThrowingTaskGroup(of: (Int, URL?).self) { group in
+                    for (index, dish) in combo.dishes.enumerated() {
+                        group.addTask {
+                            let url = try? await visualizer.visualize(dishName: dish.originalName, culturalDescription: dish.description ?? "tasty")
+                            return (index, url)
+                        }
+                    }
+                    for try await (index, url) in group {
+                        combo.dishes[index].imageURL = url
+                    }
+                }
+                
+                let finalSet = GroupRecommendationSet(combos: [combo])
+                
+                await MainActor.run {
+                    withAnimation {
+                        isProcessingConsensus = false
+                        store.navigationPath.append(.groupResult(finalSet))
+                    }
+                }
+            } catch {
+                print("Failed to parse consensus string into structured data: \(error)")
+                await MainActor.run {
+                    withAnimation { isProcessingConsensus = false }
+                }
+            }
+        }
     }
 }
 
