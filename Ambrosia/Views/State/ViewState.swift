@@ -5,6 +5,7 @@ import Foundation
 enum AppMode: String, Codable, Equatable, Sendable {
     case individual
     case group
+    case agentChat
 }
 
 enum AppState: Equatable, Sendable {

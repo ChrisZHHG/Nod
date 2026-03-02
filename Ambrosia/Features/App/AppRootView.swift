@@ -32,12 +32,21 @@ struct AppRootView: View {
                         ScannerView(
                             images: store.capturedImages,
                             onCapture: { data in store.captureImage(data) },
-                            onAnalyze: { store.navigationPath.append(.wizard) },
+                            onAnalyze: {
+                                if store.mode == .agentChat {
+                                    store.navigationPath.append(.agentChatLobby(isHost: true))
+                                } else {
+                                    store.navigationPath.append(.wizard)
+                                }
+                            },
                             onCancel: { store.resetSession() }
                         )
                         .navigationBarBackButtonHidden(true)
                     case .wizard:
                         ProgressiveWizardView(store: store)
+                            .navigationBarBackButtonHidden(true)
+                    case .agentChatLobby(let isHost):
+                        AgentChatView(store: store, isHost: isHost)
                             .navigationBarBackButtonHidden(true)
                     case .soloResult(let recommendationSet):
                         MultiChoiceResultCarousel(
@@ -112,6 +121,7 @@ struct ModeSelectionContent: View {
 
     // Hover state for plate buttons
     @State private var hoveredMode: AppMode? = nil
+    @State private var isPressingAgentChat = false
     @State private var isPressingGroup = false
     @State private var isPressingIndividual = false
 
@@ -290,11 +300,22 @@ struct ModeSelectionContent: View {
                 .shadow(color: .black, radius: 6)
                 .padding(.bottom, 20)
 
-            HStack(spacing: 28) {
+            HStack(spacing: 20) {
+                placeSettingButton(
+                    mode: .agentChat,
+                    title: "Agent Chat",
+                    subtitle: "AI Consensus",
+                    isGroup: true,
+                    isPressing: $isPressingAgentChat
+                ) {
+                    store.setMode(.agentChat)
+                    store.startSession()
+                }
+
                 placeSettingButton(
                     mode: .group,
                     title: "Grand Feast",
-                    subtitle: "The whole table",
+                    subtitle: "Manual Veto",
                     isGroup: true,
                     isPressing: $isPressingGroup
                 ) {
@@ -313,7 +334,25 @@ struct ModeSelectionContent: View {
                     store.startSession()
                 }
             }
-            .padding(.horizontal, 32)
+            .padding(.horizontal, 16)
+            
+            // Delegate Join Button
+            Button(action: {
+                store.setMode(.agentChat)
+                store.navigationPath.append(.agentChatLobby(isHost: false))
+            }) {
+                HStack {
+                    Image(systemName: "wave.3.left")
+                    Text("Looking for a Host? Join Table")
+                        .font(.system(size: 13, weight: .medium, design: .rounded))
+                }
+                .foregroundColor(.white.opacity(0.8))
+                .padding(.vertical, 14)
+                .padding(.horizontal, 24)
+                .background(Color.white.opacity(0.12))
+                .clipShape(Capsule())
+            }
+            .padding(.top, 24)
         }
         .frame(maxWidth: .infinity)
     }
@@ -381,7 +420,7 @@ struct ModeSelectionContent: View {
                         AmbrosiaTheme.Cinematic.amber.opacity(isActive ? 1.0 : 0.30),
                         lineWidth: isActive ? 2.5 : 1
                     )
-                    .frame(width: 122, height: 122)
+                    .frame(width: 90, height: 90)
 
                 // Plate fill
                 Circle()
@@ -390,7 +429,7 @@ struct ModeSelectionContent: View {
                             ? AmbrosiaTheme.Cinematic.amber
                             : Color(hex: "F5F0E8")
                     )
-                    .frame(width: 106, height: 106)
+                    .frame(width: 78, height: 78)
                     .shadow(
                         color: isGroup
                             ? AmbrosiaTheme.Cinematic.amber.opacity(isActive ? 0.6 : 0.25)

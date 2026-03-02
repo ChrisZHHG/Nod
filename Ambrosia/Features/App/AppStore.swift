@@ -1,5 +1,6 @@
 import Foundation
 import SwiftUI
+import UIKit
 
 // MARK: - App Domain (State, Action, Effect)
 
@@ -21,6 +22,10 @@ final class AppStore {
     
     // Navigation (using enum path for type-safe navigation)
     var navigationPath: [AppDestination] = []
+    
+    // A2A Chat State
+    let chatManager = MultipeerChatManager(displayName: UIDevice.current.name)
+    var chatTranscript: [ChatMessage] = []
     
     // Dependencies
     private let dependencies: DependencyContainer
@@ -60,6 +65,9 @@ final class AppStore {
         self.navigationPath = []
         self.capturedImages = []
         self.cachedParsedMenu = nil
+        self.chatTranscript = []
+        self.chatManager.stopHosting()
+        self.chatManager.stopBrowsing()
         self.decodingTask?.cancel()
         self.decodingTask = nil
         log("🔄 Session Reset.")

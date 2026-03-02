@@ -4,6 +4,7 @@ import Foundation
 enum AppDestination: Hashable {
     case scanner
     case wizard
+    case agentChatLobby(isHost: Bool)
     case soloResult(SoloRecommendationSet)
     case groupResult(GroupRecommendationSet)
 }
