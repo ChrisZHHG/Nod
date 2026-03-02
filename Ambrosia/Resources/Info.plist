@@ -25,6 +25,13 @@
 	<string>Nod needs camera access to scan physical menus.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Nod needs access to photos to analyze menu screenshots.</string>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>Nod uses the local network to find and connect with nearby friends for AI group negotiations.</string>
+	<key>NSBonjourServices</key>
+	<array>
+		<string>_nod-a2a._tcp</string>
+		<string>_nod-a2a._udp</string>
+	</array>
 
     <key>OpenRouterAPIKey</key>
     <string>$(OPENROUTER_API_KEY)</string>
