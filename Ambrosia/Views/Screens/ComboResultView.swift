@@ -37,29 +37,30 @@ struct ComboResultView: View {
             AmbrosiaTheme.Cinematic.heroOverlay
                 .ignoresSafeArea()
             
-            ScrollView(.vertical, showsIndicators: false) {
-                VStack(spacing: 0) {
-                    
-                    // Push content down to expose the massive hero image
-                    Spacer(minLength: UIScreen.main.bounds.height * 0.35)
-                    
-                    // ── Combo Name & Quick Stats ──────────────────────────────────
-                    VStack(alignment: .leading, spacing: 0) {
-                        VStack(alignment: .leading, spacing: 6) {
-                            Text("FEAST FOR \(combo.dishes.count + combo.drinks.count)")
-                                .font(AmbrosiaTheme.Cinematic.sectionTitle)
-                                .tracking(2.5)
-                                .foregroundColor(AmbrosiaTheme.Cinematic.amber)
-                            
-                            Text(combo.optionType)
-                                .font(AmbrosiaTheme.Cinematic.displayHero)
-                                .foregroundColor(.white)
-                                .lineLimit(2)
-                                .minimumScaleFactor(0.65)
+            GeometryReader { geo in
+                ScrollView(.vertical, showsIndicators: false) {
+                    VStack(spacing: 0) {
+                        
+                        // Push content down to expose the massive hero image
+                        Spacer(minLength: geo.size.height * 0.35)
+                        
+                        // ── Combo Name & Quick Stats ──────────────────────────────────
+                        VStack(alignment: .leading, spacing: 0) {
+                            VStack(alignment: .leading, spacing: 6) {
+                                Text("FEAST FOR \(combo.dishes.count + combo.drinks.count)")
+                                    .font(AmbrosiaTheme.Cinematic.sectionTitle)
+                                    .tracking(2.5)
+                                    .foregroundColor(AmbrosiaTheme.Cinematic.amber)
+                                
+                                Text(combo.optionType)
+                                    .font(AmbrosiaTheme.Cinematic.displayHero)
+                                    .foregroundColor(.white)
+                                    .lineLimit(2)
+                                    .minimumScaleFactor(0.65)
+                            }
+                            .padding(.horizontal, 24)
+                            .padding(.bottom, 24)
                         }
-                        .padding(.horizontal, 24)
-                        .padding(.bottom, 24)
-                    }
                     
                     // ── Quick Stats strip ─────────────────────────────────────────
                     HStack(spacing: 0) {
@@ -139,6 +140,7 @@ struct ComboResultView: View {
                     Spacer(minLength: 60)
                 }
             }
+            } // GeometryReader
         }
         .preferredColorScheme(.dark)
     }

@@ -21,12 +21,16 @@
     <string>1.0</string>
     <key>CFBundleVersion</key>
     <string>1</string>
+
 	<key>NSCameraUsageDescription</key>
-	<string>Nod needs camera access to scan physical menus.</string>
+	<string>Nod uses the camera to photograph restaurant menus. Menu images are sent to an AI service (OpenRouter) to extract dish names, descriptions, and prices so the app can generate personalized food recommendations. Images are used only for this purpose and are not stored on our servers or shared with third parties beyond the AI processing service.</string>
+
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Nod needs access to photos to analyze menu screenshots.</string>
+	<string>Nod needs access to your photo library so you can select existing menu photos or screenshots for AI analysis. Selected images are processed by an AI service to identify dishes and generate recommendations. Images are not stored on our servers or shared with third parties beyond the AI processing service.</string>
+
 	<key>NSLocalNetworkUsageDescription</key>
-	<string>Nod uses the local network to find and connect with nearby friends for AI group negotiations.</string>
+	<string>Nod uses the local network to discover and connect with nearby friends' devices via Bonjour (peer-to-peer, no internet required). This enables the AI Group Negotiation feature, where each person's AI agent negotiates a shared meal order directly between devices. No personal data is transmitted outside of your local network during this process.</string>
+
 	<key>NSBonjourServices</key>
 	<array>
 		<string>_nod-a2a._tcp</string>
