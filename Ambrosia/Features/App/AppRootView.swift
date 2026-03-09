@@ -4,6 +4,7 @@ import SwiftUI
 
 struct AppRootView: View {
     @State private var store = AppStore()
+    @State private var showErrorAlert: Bool = false
 
     /// True whenever an agent pipeline is actively running
     private var isProcessing: Bool {
@@ -77,9 +78,10 @@ struct AppRootView: View {
             }
         }
         .animation(.easeInOut(duration: 0.35), value: isProcessing)
+        .onChange(of: errorMessage) { _, newValue in showErrorAlert = newValue != nil }
         // ── Error alert — surfaces any agent pipeline failure ──
-        .alert("Something went wrong", isPresented: .constant(errorMessage != nil)) {
-            Button("Try Again") { store.resetSession() }
+        .alert("Something went wrong", isPresented: $showErrorAlert) {
+            Button("Dismiss") { showErrorAlert = false }
         } message: {
             Text(errorMessage ?? "")
         }
@@ -437,12 +439,17 @@ struct ModeSelectionContent: View {
                         radius: isActive ? 28 : 12
                     )
 
-                // Mode icon
-                if isGroup {
-                    Image(systemName: "person.3.fill")
-                        .font(.system(size: 34, weight: .semibold))
+                // Mode icon — each mode gets a distinct symbol
+                switch mode {
+                case .agentChat:
+                    Image(systemName: "person.wave.2.fill")
+                        .font(.system(size: 30, weight: .semibold))
                         .foregroundColor(AmbrosiaTheme.Cinematic.deepBlack)
-                } else {
+                case .group:
+                    Image(systemName: "person.3.fill")
+                        .font(.system(size: 28, weight: .semibold))
+                        .foregroundColor(AmbrosiaTheme.Cinematic.deepBlack)
+                case .individual:
                     Image(systemName: "person.fill")
                         .font(.system(size: 34, weight: .medium))
                         .foregroundColor(AmbrosiaTheme.Cinematic.deepBlack.opacity(0.75))

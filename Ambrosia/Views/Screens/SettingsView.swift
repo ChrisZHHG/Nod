@@ -2,54 +2,75 @@ import SwiftUI
 
 struct SettingsView: View {
     @Environment(\.dismiss) var dismiss
+    @Environment(\.openURL) private var openURL
     @AppStorage("custom_gemini_api_key") private var customKey: String = ""
     @State private var isSecured: Bool = true
-    
+
     var body: some View {
-        NavigationStack {
-            Form {
-                Section {
-                    HStack {
-                        if isSecured {
-                            SecureField("Gemini API Key", text: $customKey)
-                        } else {
-                            TextField("Gemini API Key", text: $customKey)
+        ZStack {
+            AmbrosiaTheme.Cinematic.deepBlack.ignoresSafeArea()
+
+            ScrollView {
+                VStack(alignment: .leading, spacing: AmbrosiaTheme.Spacing.xl) {
+                    Color.clear.frame(height: 72)
+
+                    // MARK: API Configuration Section
+
+                    VStack(alignment: .leading, spacing: AmbrosiaTheme.Spacing.sm) {
+                        Text("API Configuration")
+                            .font(AmbrosiaTheme.Typography.caption)
+                            .foregroundColor(AmbrosiaTheme.Cinematic.smokeGray)
+                            .padding(.horizontal, AmbrosiaTheme.Spacing.sm)
+
+                        HStack(spacing: AmbrosiaTheme.Spacing.md) {
+                            Group {
+                                if isSecured {
+                                    SecureField("Gemini API Key", text: $customKey)
+                                } else {
+                                    TextField("Gemini API Key", text: $customKey)
+                                }
+                            }
+                            .font(AmbrosiaTheme.Typography.body)
+                            .foregroundColor(AmbrosiaTheme.Cinematic.pureWhite)
+                            .tint(AmbrosiaTheme.Cinematic.amber)
+
+                            Button {
+                                isSecured.toggle()
+                            } label: {
+                                Image(systemName: isSecured ? "eye.slash" : "eye")
+                                    .foregroundColor(AmbrosiaTheme.Cinematic.smokeGray)
+                                    .frame(width: 32, height: 32)
+                            }
                         }
-                        
-                        Button {
-                            isSecured.toggle()
-                        } label: {
-                            Image(systemName: isSecured ? "eye.slash" : "eye")
-                                .foregroundStyle(AmbrosiaTheme.Colors.textSecondary)
-                        }
+                        .padding(AmbrosiaTheme.Spacing.lg)
+                        .glassCard(cornerRadius: AmbrosiaTheme.Radius.lg)
+
+                        Text("Enter a custom API Key to override the built-in key. This allows key updates without rebuilding the app.")
+                            .font(AmbrosiaTheme.Typography.caption)
+                            .foregroundColor(AmbrosiaTheme.Cinematic.smokeGray)
+                            .padding(.horizontal, AmbrosiaTheme.Spacing.sm)
                     }
-                } header: {
-                    Text("API Configuration")
-                } footer: {
-                    Text("Enter a custom API Key here to override the built-in key. This allows you to update the key without rebuilding the app.")
-                        .font(AmbrosiaTheme.Typography.caption)
-                }
-                
-                Section {
-                    Button("Clear Custom Key", role: .destructive) {
+
+                    // MARK: Actions
+
+                    GlassButton(title: "Clear Custom Key", icon: "trash", variant: .secondary) {
                         customKey = ""
                     }
                     .disabled(customKey.isEmpty)
-                }
-                
-                Section {
-                    Link("Get Gemini API Key", destination: URL(string: "https://aistudio.google.com/app/apikey")!)
-                }
-            }
-            .navigationTitle("Settings")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Done") {
-                        dismiss()
+                    .opacity(customKey.isEmpty ? 0.4 : 1.0)
+
+                    GlassButton(title: "Get Gemini API Key", icon: "arrow.up.right.square", variant: .ghost) {
+                        openURL(URL(string: "https://aistudio.google.com/app/apikey")!)
                     }
                 }
+                .padding(.horizontal, AmbrosiaTheme.Spacing.xl)
+                .padding(.bottom, AmbrosiaTheme.Spacing.xxl)
             }
+            .scrollIndicators(.hidden)
         }
+        .floatingNavBar(
+            title: "Settings",
+            trailing: .init(icon: "xmark") { dismiss() }
+        )
     }
 }

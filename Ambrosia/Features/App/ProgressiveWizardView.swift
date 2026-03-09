@@ -1,12 +1,31 @@
 import SwiftUI
 
+// MARK: - Local StepperButton (duplicated from GroupSetupView — do not import)
+
+private struct StepperButton: View {
+    let icon: String
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            Image(systemName: icon)
+                .font(.system(size: 18, weight: .bold))
+                .foregroundStyle(AmbrosiaTheme.Cinematic.pureWhite)
+                .frame(width: 44, height: 44)
+                .background(AmbrosiaTheme.Cinematic.glassDark)
+                .clipShape(Circle())
+                .contentShape(Circle())
+        }
+    }
+}
+
 // MARK: - Progressive UI Wizard
+
 struct ProgressiveWizardView: View {
     @Bindable var store: AppStore
     @State private var currentStep: Int = 0
     @Namespace private var wizardNamespace
-    
-    // Quick Icon Definitions
+
     let vetoOptions = [
         ("Pork", "🐷"), ("Peanuts", "🥜"), ("Cilantro", "🌿"),
         ("Spicy", "🌶️"), ("Shellfish", "🦐"), ("Gluten", "🌾")
@@ -15,10 +34,10 @@ struct ProgressiveWizardView: View {
         ("Heavy & Meaty", "🥩"), ("Light & Fresh", "🥗"),
         ("Carb Comfort", "🍝"), ("Surprise Me", "✨")
     ]
-    
-    // Derived Binding arrays to simplify selection logic
+
     private var isGroup: Bool { store.mode == .group }
-    
+    private var isLastStep: Bool { currentStep == 2 }
+
     var body: some View {
         ZStack {
             // Background Layer: Cinematic Blurred Menu
@@ -32,17 +51,17 @@ struct ProgressiveWizardView: View {
             } else {
                 AmbrosiaTheme.Cinematic.heroOverlay.ignoresSafeArea()
             }
-            
+
             VStack {
                 // Header Progress
-                ProgressView(value: Double(currentStep + 1), total: isGroup ? 4.0 : 3.0)
+                ProgressView(value: Double(currentStep + 1), total: 3.0)
                     .progressViewStyle(.linear)
                     .tint(AmbrosiaTheme.Cinematic.amber)
                     .padding(.horizontal, 40)
                     .padding(.top, 20)
-                
+
                 Spacer()
-                
+
                 // Cards Carousel
                 TabView(selection: $currentStep) {
                     if isGroup {
@@ -51,10 +70,7 @@ struct ProgressiveWizardView: View {
                             onUpdate: { newCount in store.updateGroupProfile { $0.headcount = newCount } }
                         )
                         .tag(0)
-                        
-                        ForkModeCard()
-                            .tag(1)
-                            
+
                         VetoCard(
                             selections: store.groupProfile.vetoes,
                             options: vetoOptions,
@@ -65,8 +81,8 @@ struct ProgressiveWizardView: View {
                                 }
                             }
                         )
-                        .tag(2)
-                            
+                        .tag(1)
+
                         CravingCard(
                             selections: store.groupProfile.cravings,
                             options: cravingOptions,
@@ -77,9 +93,8 @@ struct ProgressiveWizardView: View {
                                 }
                             }
                         )
-                        .tag(3)
+                        .tag(2)
                     } else {
-                        // Solo Mode is shorter
                         VetoCard(
                             selections: store.individualProfile.vetoes,
                             options: vetoOptions,
@@ -91,7 +106,7 @@ struct ProgressiveWizardView: View {
                             }
                         )
                         .tag(0)
-                        
+
                         CravingCard(
                             selections: store.individualProfile.cravings,
                             options: cravingOptions,
@@ -103,7 +118,7 @@ struct ProgressiveWizardView: View {
                             }
                         )
                         .tag(1)
-                            
+
                         MoodCard(
                             mood: store.individualProfile.mood,
                             onUpdate: { newMood in store.updateIndividualProfile { $0.mood = newMood } }
@@ -113,40 +128,29 @@ struct ProgressiveWizardView: View {
                 }
                 .tabViewStyle(.page(indexDisplayMode: .never))
                 .animation(.spring(response: 0.5, dampingFraction: 0.8), value: currentStep)
-                
-                Spacer()
-                
-                // Navigation Buttons
-                HStack {
+
+                Spacer(minLength: 110)
+            }
+
+            // Floating Bottom Navigation
+            FloatingBottomBar {
+                HStack(spacing: AmbrosiaTheme.Spacing.md) {
                     if currentStep > 0 {
-                        Button("Back") {
+                        GlassButton(title: "Back", icon: "chevron.left", variant: .secondary) {
                             withAnimation { currentStep -= 1 }
                         }
-                        .foregroundColor(.white.opacity(0.7))
-                        .padding()
                     }
-                    
-                    Spacer()
-                    
-                    let isLastStep = isGroup ? (currentStep == 3) : (currentStep == 2)
-                    
-                    Button(isLastStep ? "Generate Recommendations" : "Next") {
-                        if isLastStep {
-                            Task {
-                                await store.generateRecommendation()
-                            }
-                        } else {
+
+                    if isLastStep {
+                        GlassButton(title: "Let the AI Decide", icon: "wand.and.stars", variant: .primary) {
+                            Task { await store.generateRecommendation() }
+                        }
+                    } else {
+                        GlassButton(title: "Next", icon: "arrow.right", variant: .primary) {
                             withAnimation { currentStep += 1 }
                         }
                     }
-                    .font(.headline)
-                    .padding(.horizontal, 24)
-                    .padding(.vertical, 14)
-                    .background(AmbrosiaTheme.Cinematic.amber)
-                    .foregroundColor(.black)
-                    .clipShape(Capsule())
                 }
-                .padding(30)
             }
         }
     }
@@ -157,53 +161,22 @@ struct ProgressiveWizardView: View {
 struct GroupSizeCard: View {
     let headcount: Int
     let onUpdate: (Int) -> Void
-    
+
     var body: some View {
         WizardCard(title: "How many people?") {
-            VStack(spacing: 30) {
+            VStack(spacing: AmbrosiaTheme.Spacing.xl) {
                 Text("\(headcount)")
-                    .font(.system(size: 64, weight: .bold, design: .rounded))
-                    .foregroundColor(.white)
-                
-                Slider(value: .init(
-                    get: { Double(headcount) },
-                    set: { onUpdate(Int($0)) }
-                ), in: 2...10, step: 1)
-                .accentColor(AmbrosiaTheme.Cinematic.amber)
-            }
-        }
-    }
-}
+                    .font(.system(size: 80, weight: .bold, design: .rounded))
+                    .foregroundColor(AmbrosiaTheme.Cinematic.pureWhite)
 
-struct ForkModeCard: View {
-    // To simplify: if 'Share', then we just rely on GroupProfile logic inside ChefAgent
-    var body: some View {
-        WizardCard(title: "Dining Style") {
-            VStack(spacing: 20) {
-                Button(action: {}) {
-                    HStack {
-                        Image(systemName: "tray.2.fill")
-                        Text("Share Everything")
+                HStack(spacing: AmbrosiaTheme.Spacing.xxl) {
+                    StepperButton(icon: "minus") {
+                        if headcount > 2 { onUpdate(headcount - 1) }
                     }
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(AmbrosiaTheme.Cinematic.amber.opacity(0.8))
-                    .foregroundColor(.black)
-                    .cornerRadius(12)
-                }
-                
-                Button(action: {}) {
-                    HStack {
-                        Image(systemName: "person.crop.square.fill")
-                        Text("Order Individually")
+                    StepperButton(icon: "plus") {
+                        if headcount < 12 { onUpdate(headcount + 1) }
                     }
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(.ultraThinMaterial)
-                    .foregroundColor(.white)
-                    .cornerRadius(12)
                 }
-                .disabled(true) // Currently backend defaults to shared group combos.
             }
         }
     }
@@ -213,26 +186,33 @@ struct VetoCard: View {
     let selections: [String]
     let options: [(String, String)]
     let onToggle: (String) -> Void
-    
+
     var body: some View {
         WizardCard(title: "Any absolute vetoes?") {
             ScrollView {
-                LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 15) {
+                LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: AmbrosiaTheme.Spacing.md) {
                     ForEach(options, id: \.0) { option in
                         let isSelected = selections.contains(option.0)
                         Button(action: {
+                            HapticFeedback.selection.trigger()
                             onToggle(option.0)
                         }) {
-                            VStack(spacing: 8) {
+                            VStack(spacing: AmbrosiaTheme.Spacing.sm) {
                                 Text(option.1).font(.system(size: 36))
-                                Text(option.0).font(AmbrosiaTheme.Typography.headline)
+                                Text(option.0)
+                                    .font(AmbrosiaTheme.Typography.caption)
+                                    .padding(.vertical, AmbrosiaTheme.Spacing.sm)
+                                    .padding(.horizontal, AmbrosiaTheme.Spacing.md)
                             }
                             .frame(maxWidth: .infinity)
-                            .padding(.vertical, 16)
-                            .background(isSelected ? AmbrosiaTheme.Cinematic.amber.opacity(0.8) : Color.clear)
+                            .padding(.vertical, AmbrosiaTheme.Spacing.md)
+                            .foregroundColor(isSelected ? AmbrosiaTheme.Cinematic.deepBlack : AmbrosiaTheme.Cinematic.pureWhite)
                             .background(.ultraThinMaterial)
-                            .cornerRadius(16)
-                            .foregroundColor(isSelected ? .black : .white)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: AmbrosiaTheme.Radius.lg, style: .continuous)
+                                    .fill(AmbrosiaTheme.Cinematic.amber.opacity(isSelected ? 0.85 : 0))
+                            )
+                            .clipShape(RoundedRectangle(cornerRadius: AmbrosiaTheme.Radius.lg, style: .continuous))
                         }
                     }
                 }
@@ -245,26 +225,33 @@ struct CravingCard: View {
     let selections: [String]
     let options: [(String, String)]
     let onToggle: (String) -> Void
-    
+
     var body: some View {
         WizardCard(title: "What are we craving?") {
             ScrollView {
-                LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 15) {
+                LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: AmbrosiaTheme.Spacing.md) {
                     ForEach(options, id: \.0) { option in
                         let isSelected = selections.contains(option.0)
                         Button(action: {
+                            HapticFeedback.selection.trigger()
                             onToggle(option.0)
                         }) {
-                            VStack(spacing: 8) {
+                            VStack(spacing: AmbrosiaTheme.Spacing.sm) {
                                 Text(option.1).font(.system(size: 36))
-                                Text(option.0).font(AmbrosiaTheme.Typography.headline)
+                                Text(option.0)
+                                    .font(AmbrosiaTheme.Typography.caption)
+                                    .padding(.vertical, AmbrosiaTheme.Spacing.sm)
+                                    .padding(.horizontal, AmbrosiaTheme.Spacing.md)
                             }
                             .frame(maxWidth: .infinity)
-                            .padding(.vertical, 16)
-                            .background(isSelected ? AmbrosiaTheme.Cinematic.amber.opacity(0.8) : Color.clear)
+                            .padding(.vertical, AmbrosiaTheme.Spacing.md)
+                            .foregroundColor(isSelected ? AmbrosiaTheme.Cinematic.deepBlack : AmbrosiaTheme.Cinematic.pureWhite)
                             .background(.ultraThinMaterial)
-                            .cornerRadius(16)
-                            .foregroundColor(isSelected ? .black : .white)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: AmbrosiaTheme.Radius.lg, style: .continuous)
+                                    .fill(AmbrosiaTheme.Cinematic.amber.opacity(isSelected ? 0.85 : 0))
+                            )
+                            .clipShape(RoundedRectangle(cornerRadius: AmbrosiaTheme.Radius.lg, style: .continuous))
                         }
                     }
                 }
@@ -276,63 +263,68 @@ struct CravingCard: View {
 struct MoodCard: View {
     let mood: String
     let onUpdate: (String) -> Void
-    
+
     let moods = ["Relaxed ✨", "Exhausted 😩", "Celebratory 🥂", "Adventurous 🧭"]
-    
+
     var body: some View {
         WizardCard(title: "What's the vibe tonight?") {
-            VStack(spacing: 15) {
+            VStack(spacing: AmbrosiaTheme.Spacing.md) {
                 ForEach(moods, id: \.self) { m in
                     let isSelected = mood == m
-                    Button(action: { onUpdate(m) }) {
+                    Button(action: {
+                        HapticFeedback.selection.trigger()
+                        onUpdate(m)
+                    }) {
                         Text(m)
                             .font(AmbrosiaTheme.Typography.headline)
                             .frame(maxWidth: .infinity)
-                            .padding(.vertical, 16)
-                            .background(isSelected ? AmbrosiaTheme.Cinematic.amber.opacity(0.8) : Color.clear)
+                            .padding(.vertical, AmbrosiaTheme.Spacing.lg)
+                            .foregroundColor(isSelected ? AmbrosiaTheme.Cinematic.deepBlack : AmbrosiaTheme.Cinematic.pureWhite)
                             .background(.ultraThinMaterial)
-                            .cornerRadius(16)
-                            .foregroundColor(isSelected ? .black : .white)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: AmbrosiaTheme.Radius.lg, style: .continuous)
+                                    .fill(AmbrosiaTheme.Cinematic.amber.opacity(isSelected ? 0.85 : 0))
+                            )
+                            .clipShape(RoundedRectangle(cornerRadius: AmbrosiaTheme.Radius.lg, style: .continuous))
                     }
                 }
                 TextField("Other...", text: .init(
                     get: { mood },
                     set: { onUpdate($0) }
                 ))
-                    .font(AmbrosiaTheme.Typography.headline)
-                    .padding(.vertical, 16)
-                    .padding(.horizontal)
-                    .background(.ultraThinMaterial)
-                    .cornerRadius(16)
-                    .foregroundColor(.white)
+                .font(AmbrosiaTheme.Typography.headline)
+                .padding(.vertical, AmbrosiaTheme.Spacing.lg)
+                .padding(.horizontal, AmbrosiaTheme.Spacing.lg)
+                .background(.ultraThinMaterial)
+                .clipShape(RoundedRectangle(cornerRadius: AmbrosiaTheme.Radius.lg, style: .continuous))
+                .foregroundColor(AmbrosiaTheme.Cinematic.pureWhite)
             }
         }
     }
 }
 
 // MARK: - Reusable Wizard Card
+
 struct WizardCard<Content: View>: View {
     let title: String
     let content: Content
-    
+
     init(title: String, @ViewBuilder content: () -> Content) {
         self.title = title
         self.content = content()
     }
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
             Text(title)
-                .font(.system(size: 28, weight: .bold, design: .rounded))
-                .foregroundColor(.white)
+                .font(AmbrosiaTheme.Typography.header)
+                .foregroundColor(AmbrosiaTheme.Cinematic.pureWhite)
                 .padding(.bottom, 10)
-            
+
             content
         }
         .padding(30)
-        .background(Color.black.opacity(0.2))
-        .background(.ultraThinMaterial)
-        .cornerRadius(32)
+        .glassCard(cornerRadius: AmbrosiaTheme.Radius.xxl)
         .shadow(color: .black.opacity(0.3), radius: 20, y: 10)
         .padding(.horizontal, 20)
     }

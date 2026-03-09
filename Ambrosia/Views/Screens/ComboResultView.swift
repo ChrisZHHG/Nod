@@ -128,21 +128,9 @@ struct ComboResultView: View {
                                         .stroke(AmbrosiaTheme.Cinematic.glassBorder, lineWidth: 1)
                                 )
                             } else {
-                                Button(action: { withAnimation(.spring()) { isRefining = true } }) {
-                                    HStack {
-                                        Spacer()
-                                        Text("Refine This Selection")
-                                            .font(AmbrosiaTheme.Cinematic.cta)
-                                            .foregroundColor(AmbrosiaTheme.Cinematic.deepBlack)
-                                        Spacer()
-                                    }
-                                    .padding(.vertical, 18)
-                                    .background(
-                                        RoundedRectangle(cornerRadius: 14, style: .continuous)
-                                            .fill(AmbrosiaTheme.Cinematic.amber)
-                                    )
+                                GlassButton(title: "Refine This Selection", icon: "slider.horizontal.3", variant: .primary) {
+                                    withAnimation(.spring()) { isRefining = true }
                                 }
-                                .buttonStyle(.plain)
                             }
                         }
                         .padding(24)
@@ -268,13 +256,13 @@ struct DishRow: View {
                             .scaledToFill()
                             .frame(height: 180)
                             .frame(maxWidth: .infinity)
-                            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                            .clipShape(RoundedRectangle(cornerRadius: AmbrosiaTheme.Radius.lg, style: .continuous))
                     } else if phase.error != nil {
                         // Error State, hidden
                         EmptyView()
                     } else {
                         // Loading State
-                        RoundedRectangle(cornerRadius: 16, style: .continuous)
+                        RoundedRectangle(cornerRadius: AmbrosiaTheme.Radius.lg, style: .continuous)
                             .fill(AmbrosiaTheme.Cinematic.glassDark)
                             .frame(height: 180)
                             .frame(maxWidth: .infinity)
