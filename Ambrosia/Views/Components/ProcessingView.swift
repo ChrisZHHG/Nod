@@ -11,6 +11,8 @@ struct ProcessingView: View {
     @State private var dotCount: Int = 0
     @State private var iconScale: Double = 0.85
     @State private var typewriterText: String = ""
+    @State private var animationTask: Task<Void, Never>? = nil
+    @State private var typewriterTask: Task<Void, Never>? = nil
 
     private var content: (icon: String, headline: String, subline: String) {
         switch store.appState {
@@ -84,6 +86,10 @@ struct ProcessingView: View {
         }
         .ignoresSafeArea()
         .onAppear { startAnimations() }
+        .onDisappear {
+            animationTask?.cancel()
+            typewriterTask?.cancel()
+        }
         .onChange(of: content.subline) { _, newSubline in
             startTypewriter(for: newSubline)
         }
@@ -99,23 +105,29 @@ struct ProcessingView: View {
         withAnimation(.easeInOut(duration: 1.4).repeatForever(autoreverses: true)) {
             iconScale = 1.0
         }
-        Timer.scheduledTimer(withTimeInterval: 0.55, repeats: true) { _ in
-            dotCount = (dotCount + 1) % 4
+        animationTask = Task {
+            while !Task.isCancelled {
+                try? await Task.sleep(for: .seconds(0.55))
+                if !Task.isCancelled {
+                    dotCount = (dotCount + 1) % 4
+                }
+            }
         }
         startTypewriter(for: content.subline)
     }
-    
+
     // Smooth fast typewriter effect
     private func startTypewriter(for text: String) {
+        typewriterTask?.cancel()
         typewriterText = ""
         let chars = Array(text)
-        var currentIndex = 0
-        Timer.scheduledTimer(withTimeInterval: 0.03, repeats: true) { timer in
-            if currentIndex < chars.count {
-                typewriterText.append(chars[currentIndex])
-                currentIndex += 1
-            } else {
-                timer.invalidate()
+        typewriterTask = Task {
+            for char in chars {
+                if Task.isCancelled { break }
+                try? await Task.sleep(for: .milliseconds(30))
+                if !Task.isCancelled {
+                    typewriterText.append(char)
+                }
             }
         }
     }
