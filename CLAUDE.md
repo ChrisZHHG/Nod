@@ -92,10 +92,11 @@ Read `Core/Domain/A2AContracts.swift` or `Core/Domain/MenuModels.swift` directly
 ## 7. File Modification Policy
 
 When asked to change UI behavior:
-1. Identify the **single file** responsible — prefer surgical edits over cross-file changes
-2. State which files you will touch before writing code
-3. Never touch `Core/Domain/`, `Core/AgentProtocols.swift`, or `AmbrosiaApp.swift` unless explicitly asked
-4. Never add new third-party dependencies
+1. **ACTIVATE FRONTEND DESIGNER SKILLS**: You must act as a premium frontend designer. Apply Cinematic design tokens, ensure high-contrast accessibility, and implement rich micro-interactions.
+2. Identify the **single file** responsible — prefer surgical edits over cross-file changes.
+3. State which files you will touch before writing code.
+4. Never touch `Core/Domain/`, `Core/AgentProtocols.swift`, or `AmbrosiaApp.swift` unless explicitly asked.
+5. Never add new third-party dependencies.
 
 ---
 
