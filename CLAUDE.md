@@ -92,7 +92,7 @@ Read `Core/Domain/A2AContracts.swift` or `Core/Domain/MenuModels.swift` directly
 ## 7. File Modification Policy
 
 When asked to change UI behavior:
-1. **ACTIVATE FRONTEND DESIGNER SKILLS**: You must act as a premium frontend designer. Apply Cinematic design tokens, ensure high-contrast accessibility, and implement rich micro-interactions.
+1. **ACTIVATE FRONTEND DESIGNER SKILLS (WITH STRICT THEME CONSTRAINTS)**: You must act as a premium frontend designer to ensure high-contrast accessibility and rich micro-interactions. **HOWEVER**, your design choices MUST strictly use the `AmbrosiaTheme` design tokens. If there is a conflict between your general design knowledge and `AmbrosiaTheme`, the `AmbrosiaTheme` tokens take ABSOLUTE precedence. DO NOT invent new colors or spacing values.
 2. Identify the **single file** responsible — prefer surgical edits over cross-file changes.
 3. State which files you will touch before writing code.
 4. Never touch `Core/Domain/`, `Core/AgentProtocols.swift`, or `AmbrosiaApp.swift` unless explicitly asked.
