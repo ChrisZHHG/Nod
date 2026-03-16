@@ -241,3 +241,14 @@ When asked to change UI behavior:
 2. State which files you will touch before writing code
 3. Never touch `Core/Domain/`, `Core/AgentProtocols.swift`, or `AmbrosiaApp.swift` unless explicitly asked
 4. Never add new third-party dependencies
+
+---
+
+## 8. Git & Version Control Policy
+
+**CRITICAL RULE**: Do NOT commit directly to the current working branch when developing new features or bug fixes.
+1. ALWAYS create a new branch for your work:
+   - For features: `git checkout -b feature/your-feature-name`
+   - For bug fixes: `git checkout -b fix/your-bug-name`
+2. Keep branches modular and strictly scoped. Do not mix unrelated bug fixes and features in the same branch.
+3. Use descriptive, conventional commit messages (e.g., `feat: ...`, `fix: ...`, `refactor: ...`).
