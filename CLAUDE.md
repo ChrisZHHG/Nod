@@ -80,13 +80,11 @@ Read `Core/Domain/A2AContracts.swift` or `Core/Domain/MenuModels.swift` directly
 
 ---
 
-## 6. Known Issues / Do Not Reintroduce
+## 6. Strict Anti-Patterns
 
-- **ForkModeCard is deleted**: The "Dining Style" step (Share/Order Individually) was a dead-end with empty actions. Never reintroduce it unless the backend supports individual-order mode.
-- **GroupSetupView is legacy**: `Views/Screens/GroupSetupView.swift` is superseded by `ProgressiveWizardView`. Do not add new flows there.
-- **Error alerts**: Never use `isPresented: .constant(...)`. Error state should be dismissible and should NOT call `resetSession()` as that clears all captured images.
-- **Magic numbers are banned**: Corner radii, spacing, font sizes MUST come from `AmbrosiaTheme` tokens.
-
+- **No Dead Code**: Never leave unused views or commented-out legacy code (e.g., deleted steps like ForkModeCard or GroupSetupView). Delete them entirely.
+- **No Blocking Alerts**: Never use `isPresented: .constant(...)` for error states. Errors must be gracefully dismissible and should NOT forcibly clear user session data unless requested.
+- **No Magic Numbers**: Corner radii, padding, and font sizes MUST come from `AmbrosiaTheme`. Hardcoded numbers (e.g., `.padding(16)`) are strictly forbidden.
 ---
 
 ## 7. File Modification Policy
