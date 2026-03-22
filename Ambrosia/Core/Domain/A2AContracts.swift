@@ -14,6 +14,10 @@ enum A2AMessageType: String, Codable, Sendable {
     case chatMessage
     /// The final, terminating trigger sent by the Host when the 3-dish consensus is locked.
     case consensusReached
+    /// Sent by the Host to a newly reconnected peer to restore the full chat transcript.
+    case chatHistorySync
+    /// Acknowledgement confirming a payload was received (used by B2 message queue).
+    case ack
 }
 
 /// The universal envelope for all Multipeer JSON transmissions.
@@ -61,4 +65,9 @@ struct SoulBroadcastPayload: Codable, Sendable {
     let serializedMenuData: Data
     /// The number of dishes the agents must agree upon.
     let requiredDishCount: Int
+}
+
+/// Sent by the Host to a reconnected peer to sync the full chat history.
+struct ChatHistorySyncPayload: Codable, Sendable {
+    let messages: [ChatMessage]
 }

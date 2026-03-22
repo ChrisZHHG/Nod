@@ -43,6 +43,11 @@ struct AgentChatView: View {
             leading: .init(icon: "chevron.left") { store.navigationPath.removeLast() },
             trailing: (!hasStartedChat && isHost) ? .init(icon: "play.fill") { startAIChat() } : nil
         )
+        .overlay(alignment: .top) {
+            if store.chatManager.isReconnecting {
+                reconnectingBanner
+            }
+        }
         .task {
             if isHost {
                 store.chatManager.startHosting()
@@ -51,6 +56,26 @@ struct AgentChatView: View {
             }
             await listenToNetwork()
         }
+    }
+
+    // MARK: - Reconnecting Banner
+
+    private var reconnectingBanner: some View {
+        HStack(spacing: NodTheme.Spacing.sm) {
+            ProgressView()
+                .tint(NodTheme.Cinematic.amber)
+                .scaleEffect(0.8)
+            Text("Connection lost — reconnecting...")
+                .font(NodTheme.Typography.caption)
+                .foregroundColor(NodTheme.Cinematic.pureWhite)
+        }
+        .padding(.horizontal, NodTheme.Spacing.lg)
+        .padding(.vertical, NodTheme.Spacing.sm)
+        .background(Color.black.opacity(0.75))
+        .clipShape(Capsule())
+        .padding(.top, NodTheme.Spacing.xl)
+        .transition(.move(edge: .top).combined(with: .opacity))
+        .animation(.spring(response: 0.4, dampingFraction: 0.8), value: store.chatManager.isReconnecting)
     }
 
     // MARK: - Pre-Chat Lobby
@@ -215,6 +240,8 @@ struct AgentChatView: View {
             case .chatMessage:
                 let msg = try JSONDecoder().decode(ChatMessage.self, from: payload.data)
                 store.chatTranscript.append(msg)
+                // Host tracks history so it can sync to reconnected peers.
+                if isHost { store.chatManager.chatHistory.append(msg) }
 
                 if isHost {
                     if msg.isFinalConsensus {
@@ -236,10 +263,23 @@ struct AgentChatView: View {
                         await triggerDelegateLLMReply(restaurantName: store.cachedParsedMenu?.metadata.restaurantName ?? "This Restaurant")
                     }
                 }
+
             case .soulBroadcast:
                 let soulData = try JSONDecoder().decode(SoulBroadcastPayload.self, from: payload.data)
                 hasStartedChat = true
                 store.cachedParsedMenu = try JSONDecoder().decode(MenuData.self, from: soulData.serializedMenuData)
+
+            case .chatHistorySync:
+                // Delegate receives this after reconnecting mid-session.
+                // Merges server-side history without duplicating messages already in transcript.
+                let syncData = try JSONDecoder().decode(ChatHistorySyncPayload.self, from: payload.data)
+                let existingIDs = Set(store.chatTranscript.map { $0.id })
+                let newMessages = syncData.messages.filter { !existingIDs.contains($0.id) }
+                if !newMessages.isEmpty {
+                    store.chatTranscript.append(contentsOf: newMessages.sorted { $0.timestamp < $1.timestamp })
+                }
+                hasStartedChat = true
+
             default: break
             }
         } catch {
