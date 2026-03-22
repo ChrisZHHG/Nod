@@ -9,6 +9,12 @@ struct AgentChatView: View {
     @State private var isProcessingConsensus = false
     @State private var isPulsing = false
 
+    // B4: Error boundaries
+    @State private var llmError: String? = nil
+    @State private var lastFailedAction: (() async -> Void)? = nil
+    @State private var isSessionIdle = false
+    @State private var idleTask: Task<Void, Never>? = nil
+
     var body: some View {
         ZStack {
             NodTheme.Cinematic.deepBlack.ignoresSafeArea()
@@ -50,6 +56,12 @@ struct AgentChatView: View {
                 }
                 if store.chatManager.hasUndeliveredMessage {
                     deliveryFailureBanner
+                }
+                if let err = llmError {
+                    llmErrorBanner(message: err)
+                }
+                if isSessionIdle {
+                    idlePromptBanner
                 }
             }
         }
@@ -104,6 +116,73 @@ struct AgentChatView: View {
         .clipShape(Capsule())
         .transition(.move(edge: .top).combined(with: .opacity))
         .animation(.spring(response: 0.4, dampingFraction: 0.8), value: store.chatManager.hasUndeliveredMessage)
+    }
+
+    // MARK: - B4 Error Boundary Banners
+
+    private func llmErrorBanner(message: String) -> some View {
+        HStack(spacing: NodTheme.Spacing.sm) {
+            Image(systemName: "bolt.slash.fill")
+                .font(.caption)
+                .foregroundColor(NodTheme.Cinematic.amber)
+            Text(message)
+                .font(NodTheme.Typography.caption)
+                .foregroundColor(NodTheme.Cinematic.pureWhite)
+                .lineLimit(2)
+            Spacer()
+            if let retry = lastFailedAction {
+                Button("Retry") {
+                    llmError = nil
+                    Task { await retry() }
+                }
+                .font(NodTheme.Typography.caption)
+                .foregroundColor(NodTheme.Cinematic.amber)
+            }
+            Button { llmError = nil } label: {
+                Image(systemName: "xmark")
+                    .font(.caption2)
+                    .foregroundColor(NodTheme.Cinematic.smokeGray)
+            }
+        }
+        .padding(.horizontal, NodTheme.Spacing.lg)
+        .padding(.vertical, NodTheme.Spacing.sm)
+        .background(Color(white: 0.12))
+        .clipShape(Capsule())
+        .transition(.move(edge: .top).combined(with: .opacity))
+        .animation(.spring(response: 0.4, dampingFraction: 0.8), value: llmError)
+    }
+
+    private var idlePromptBanner: some View {
+        HStack(spacing: NodTheme.Spacing.sm) {
+            Image(systemName: "clock.badge.questionmark")
+                .font(.caption)
+                .foregroundColor(NodTheme.Cinematic.smokeGray)
+            Text("Is everyone still there? The table has been quiet for a while.")
+                .font(NodTheme.Typography.caption)
+                .foregroundColor(NodTheme.Cinematic.smokeGray)
+                .lineLimit(2)
+            Spacer()
+            Button("Dismiss") { isSessionIdle = false }
+                .font(NodTheme.Typography.caption)
+                .foregroundColor(NodTheme.Cinematic.amber)
+        }
+        .padding(.horizontal, NodTheme.Spacing.lg)
+        .padding(.vertical, NodTheme.Spacing.sm)
+        .background(Color(white: 0.1))
+        .clipShape(Capsule())
+        .transition(.move(edge: .top).combined(with: .opacity))
+        .animation(.spring(response: 0.4, dampingFraction: 0.8), value: isSessionIdle)
+    }
+
+    /// Resets the 5-minute idle watchdog each time an LLM reply is sent or received.
+    private func resetIdleTimer() {
+        idleTask?.cancel()
+        isSessionIdle = false
+        idleTask = Task {
+            try? await Task.sleep(nanoseconds: 5 * 60 * 1_000_000_000)
+            guard !Task.isCancelled else { return }
+            await MainActor.run { isSessionIdle = true }
+        }
     }
 
     // MARK: - Pre-Chat Lobby
@@ -341,36 +420,57 @@ struct AgentChatView: View {
         let agent = ModeratorAgent()
         let rName = store.cachedParsedMenu?.metadata.restaurantName ?? "This Restaurant"
         let soul = AgentSoul.hostModeratorCommandments(restaurantName: rName, requiredDishes: 3)
-
-        if let reply = try? await agent.generateChatReply(transcript: store.chatTranscript, soulCommandments: soul, menuData: store.cachedParsedMenu) {
+        do {
+            let reply = try await agent.generateChatReply(
+                transcript: store.chatTranscript,
+                soulCommandments: soul,
+                menuData: store.cachedParsedMenu
+            )
             store.chatTranscript.append(reply)
+            if isHost { store.chatManager.chatHistory.append(reply) }
             if let bData = try? JSONEncoder().encode(reply) {
                 let env = A2APayload(type: .chatMessage, senderID: UUID(), data: bData)
                 try? store.chatManager.broadcast(payload: env)
             }
+            resetIdleTimer()
+            llmError = nil
             if reply.isFinalConsensus {
                 triggerConsensusFound(rawText: reply.text)
+            }
+        } catch {
+            await MainActor.run {
+                llmError = "Host AI failed to respond. \(error.localizedDescription)"
+                lastFailedAction = { await self.triggerHostLLMReply() }
             }
         }
     }
 
     private func triggerDelegateLLMReply(restaurantName: String) async {
         let agent = DelegateAgent(profile: store.individualProfile, delegateName: UIDevice.current.name)
-
         let vetoesStr = store.individualProfile.vetoes.isEmpty ? "None" : store.individualProfile.vetoes.joined(separator: ", ")
         let cravingsStr = store.individualProfile.cravings.isEmpty ? "Surprise me" : store.individualProfile.cravings.joined(separator: ", ")
-
         let soul = AgentSoul.delegateCommandments(
             delegateName: UIDevice.current.name,
             vetoes: vetoesStr,
             cravings: cravingsStr
         )
-
-        if let reply = try? await agent.generateChatReply(transcript: store.chatTranscript, soulCommandments: soul, menuData: store.cachedParsedMenu) {
+        do {
+            let reply = try await agent.generateChatReply(
+                transcript: store.chatTranscript,
+                soulCommandments: soul,
+                menuData: store.cachedParsedMenu
+            )
             store.chatTranscript.append(reply)
             if let bData = try? JSONEncoder().encode(reply) {
                 let env = A2APayload(type: .chatMessage, senderID: UUID(), data: bData)
                 try? store.chatManager.broadcast(payload: env)
+            }
+            resetIdleTimer()
+            llmError = nil
+        } catch {
+            await MainActor.run {
+                llmError = "Your Agent failed to respond. \(error.localizedDescription)"
+                lastFailedAction = { await self.triggerDelegateLLMReply(restaurantName: restaurantName) }
             }
         }
     }
