@@ -1,6 +1,6 @@
 import SwiftUI
 
-// MARK: - Ambrosia Design System (Modern Minimal / 2025)
+// MARK: - Nod Design System (Modern Minimal / 2025)
 
 struct NodTheme {
     
