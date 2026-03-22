@@ -34,7 +34,7 @@ final class ModeratorAgent: SoulAgentProtocol {
         
         prompt += "\n--- YOUR DIRECTIVE ---\n"
         prompt += "As the Host Moderator, analyze the chat history above. "
-        prompt += "If consensus on the required number of safe dishes is reached, declare [CONSENSUS REACHED] followed by the dishes. "
+        prompt += "If consensus on the required number of safe dishes is reached, output ONLY the JSON: {\"status\":\"consensus\",\"dishes\":[\"Dish1\",\"Dish2\",...]}. "
         prompt += "Otherwise, provide a strict 1-sentence prompt directing the Delegates to continue choosing.\n"
         prompt += "RESPOND WITH YOUR NEXT MESSAGE ONLY:"
         
@@ -45,7 +45,7 @@ final class ModeratorAgent: SoulAgentProtocol {
             responseSchema: nil // We want natural language chat, not JSON here.
         )
         
-        let consensusReached = replyText.contains("[CONSENSUS REACHED]")
+        let consensusReached = ConsensusDetector.isConsensusJSON(replyText)
         return ChatMessage(agentName: self.agentName, text: replyText, isFinalConsensus: consensusReached)
     }
 }
