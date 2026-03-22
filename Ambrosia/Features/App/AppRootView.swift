@@ -115,7 +115,8 @@ struct ModeSelectionContent: View {
     let store: AppStore
 
     // Per-word opacity (all start at 0.22, sequence breathes them up/down)
-    @State private var opacities: [Double] = [0.22, 0.22, 0.22, 0.22]
+    // Per-word base opacity (0.9 for maximum vibrancy, 1.0 when active)
+    @State private var opacities: [Double] = [0.9, 0.9, 0.9, 0.9]
 
     // Post-sequence reveals
     @State private var showButtons = false
@@ -253,7 +254,7 @@ struct ModeSelectionContent: View {
         }
         .shadow(color: .black.opacity(0.5), radius: 14, y: 7)
         .opacity(opacities[3])
-        .animation(.easeInOut(duration: 0.7), value: opacities[3])
+        .animation(.easeInOut(duration: 0.8), value: opacities[3])
     }
 
     // MARK: - Hero Background Layer
@@ -366,36 +367,45 @@ struct ModeSelectionContent: View {
         let hold:      UInt64 = 500_000_000   // 0.5s hold
         let breathOut: UInt64 = 300_000_000   // 0.3s fade out
         let gap:       UInt64 = 120_000_000   // 0.12s gap between words
+        try? await Task.sleep(nanoseconds: 400_000_000) // initial pause
+        var cycleCount = 0
         var isFirstCycle = true
 
-        try? await Task.sleep(nanoseconds: 400_000_000) // initial pause
-
         while !Task.isCancelled {
+            // After 1 cycle, keep NOD fully lit and stop the intro sequence
+            if cycleCount >= 1 {
+                withAnimation(.easeOut(duration: 1.0)) { opacities[3] = 1.0 }
+                return 
+            }
+
             // Snap, Simmer, Pick — breathe in, hold, breathe out
             for i in 0..<3 {
                 withAnimation(.easeInOut(duration: 0.55)) { opacities[i] = 1.0 }
                 try? await Task.sleep(nanoseconds: breathIn + hold)
-                withAnimation(.easeIn(duration: 0.3)) { opacities[i] = 0.22 }
+                withAnimation(.easeIn(duration: 0.3)) { opacities[i] = 0.9 } // Vibrant base
                 try? await Task.sleep(nanoseconds: breathOut + gap)
             }
 
-            // NOD — breathe in and hold 1.8s (destination word, noticeably longer)
+            // NOD — breathe in and hold 1.8s
             withAnimation(.easeOut(duration: 0.6)) { opacities[3] = 1.0 }
             try? await Task.sleep(nanoseconds: 1_800_000_000)
 
             if isFirstCycle {
                 isFirstCycle = false
                 // Kick off nodding O and reveal buttons on first cycle only
-                withAnimation(.easeInOut(duration: 0.8).repeatForever(autoreverses: true)) {
+                withAnimation(.easeInOut(duration: 0.9).repeatForever(autoreverses: true)) {
                     nodTilt = 15
                 }
                 try? await Task.sleep(nanoseconds: 400_000_000)
                 showButtons = true
             }
 
-            // Dim NOD before restarting loop
-            withAnimation(.easeIn(duration: 0.35)) { opacities[3] = 0.22 }
-            try? await Task.sleep(nanoseconds: 400_000_000) // gap before next cycle
+            // Dim NOD briefly before settling (or looping if cycleCount > 1)
+            cycleCount += 1
+            if cycleCount < 1 {
+                withAnimation(.easeIn(duration: 0.35)) { opacities[3] = 0.9 }
+                try? await Task.sleep(nanoseconds: 400_000_000)
+            }
         }
     }
 

@@ -136,8 +136,6 @@ struct KineticWireframe: View {
     
     var body: some View {
         GeometryReader { proxy in
-            let size = min(proxy.size.width, proxy.size.height)
-            
             TimelineView(.animation) { timeline in
                 let time = timeline.date.timeIntervalSinceReferenceDate
                 let slowTime = time * 0.2

@@ -88,7 +88,7 @@ final class ResearchAgent: ResearchAgentProtocol {
         }
         
         // 2. Extract sentiment or popular items from top 3 reviews
-        var popularMentions: [String] = []
+        let popularMentions: [String] = []
         if let reviews = firstPlace["reviews"] as? [[String: Any]] {
             for review in reviews.prefix(3) {
                 if let textDict = review["text"] as? [String: Any],

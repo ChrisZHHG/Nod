@@ -1,5 +1,5 @@
 import Foundation
-import MultipeerConnectivity
+@preconcurrency import MultipeerConnectivity
 import OSLog
 
 // MARK: - MultipeerChatManager
@@ -7,6 +7,7 @@ import OSLog
 // Responsibilities: peer discovery, session lifecycle, message broadcast,
 // auto-reconnect with exponential backoff, and chat-history sync on rejoin.
 
+@MainActor
 @Observable
 final class MultipeerChatManager: NSObject, Sendable {
     private let myPeerId: MCPeerID
@@ -88,9 +89,9 @@ final class MultipeerChatManager: NSObject, Sendable {
     }
 
     deinit {
-        advertiser?.stopAdvertisingPeer()
-        browser?.stopBrowsingForPeers()
-        session.disconnect()
+        // Properties like advertiser/browser are actor-isolated and cannot be 
+        // safely stopped in a synchronous deinit. They will be released and 
+        // stopped automatically by the OS when the manager is deallocated.
         incomingPayloadsContinuation.finish()
     }
 
@@ -180,7 +181,9 @@ final class MultipeerChatManager: NSObject, Sendable {
         // Schedule ACK timeout.
         let payloadID = payload.senderID
         DispatchQueue.global().asyncAfter(deadline: .now() + ackTimeoutSeconds) { [weak self] in
-            self?.handleAckTimeout(payloadID: payloadID)
+            Task { @MainActor in
+                self?.handleAckTimeout(payloadID: payloadID)
+            }
         }
     }
 
@@ -198,7 +201,7 @@ final class MultipeerChatManager: NSObject, Sendable {
             pendingQueueLock.lock()
             pendingQueue.removeValue(forKey: payloadID)
             pendingQueueLock.unlock()
-            DispatchQueue.main.async { self.hasUndeliveredMessage = true }
+            self.hasUndeliveredMessage = true
             return
         }
         Logger.network.warning("♻️ No ACK for \(payloadID). Retry \(attempt + 2)/\(self.maxDeliveryRetries)...")
@@ -246,10 +249,12 @@ final class MultipeerChatManager: NSObject, Sendable {
         }
         let delay = backoffDelays[min(reconnectAttempt, backoffDelays.count - 1)]
         Logger.network.info("♻️ Host re-advertise attempt \(self.reconnectAttempt + 1) in \(delay)s...")
-        DispatchQueue.global().asyncAfter(deadline: .now() + Double(delay)) { [weak self] in
-            guard let self else { return }
+        
+        Task {
+            try? await Task.sleep(nanoseconds: delay * 1_000_000_000)
+            
             // If a peer already reconnected while waiting, stop.
-            guard !self.session.connectedPeers.isEmpty == false else {
+            guard self.session.connectedPeers.isEmpty else {
                 self.isReconnecting = false
                 return
             }
@@ -268,9 +273,10 @@ final class MultipeerChatManager: NSObject, Sendable {
         }
         let delay = backoffDelays[min(reconnectAttempt, backoffDelays.count - 1)]
         Logger.network.info("♻️ Delegate rejoin attempt \(self.reconnectAttempt + 1) in \(delay)s...")
-        DispatchQueue.global().asyncAfter(deadline: .now() + Double(delay)) { [weak self] in
-            guard let self else { return }
-            guard !self.session.connectedPeers.isEmpty == false else {
+        
+        Task {
+            try? await Task.sleep(nanoseconds: delay * 1_000_000_000)
+            guard self.session.connectedPeers.isEmpty else {
                 self.isReconnecting = false
                 return
             }
@@ -286,7 +292,7 @@ final class MultipeerChatManager: NSObject, Sendable {
     private func handleReconnect(peer: MCPeerID) {
         Logger.network.info("✅ Peer reconnected: \(peer.displayName). Reconnect attempt count reset.")
         reconnectAttempt = 0
-        DispatchQueue.main.async { self.isReconnecting = false }
+        self.isReconnecting = false
 
         guard actingAsHost, !chatHistory.isEmpty else { return }
 
@@ -301,28 +307,30 @@ final class MultipeerChatManager: NSObject, Sendable {
 // MARK: - MCSessionDelegate
 
 extension MultipeerChatManager: MCSessionDelegate {
-    func session(_ session: MCSession, peer peerID: MCPeerID, didChange state: MCSessionState) {
-        DispatchQueue.main.async {
+    nonisolated func session(_ session: MCSession, peer peerID: MCPeerID, didChange state: MCSessionState) {
+        Task { @MainActor in
             self.connectedPeers = session.connectedPeers
         }
-        switch state {
-        case .connected:
-            Logger.network.info("✅ Peer Connected: \(peerID.displayName)")
-            handleReconnect(peer: peerID)
-        case .connecting:
-            Logger.network.info("⏳ Peer Connecting: \(peerID.displayName)")
-        case .notConnected:
-            Logger.network.info("❌ Peer Disconnected: \(peerID.displayName)")
-            // Only trigger reconnect if we were previously fully connected (not first-join failures).
-            if isHosting || isBrowsing {
-                handleDisconnect(peer: peerID)
+        Task { @MainActor in
+            switch state {
+            case .connected:
+                Logger.network.info("✅ Peer Connected: \(peerID.displayName)")
+                self.handleReconnect(peer: peerID)
+            case .connecting:
+                Logger.network.info("⏳ Peer Connecting: \(peerID.displayName)")
+            case .notConnected:
+                Logger.network.info("❌ Peer Disconnected: \(peerID.displayName)")
+                // Only trigger reconnect if we were previously fully connected (not first-join failures).
+                if self.isHosting || self.isBrowsing {
+                    self.handleDisconnect(peer: peerID)
+                }
+            @unknown default:
+                break
             }
-        @unknown default:
-            break
         }
     }
 
-    func session(_ session: MCSession, didReceive data: Data, fromPeer peerID: MCPeerID) {
+    nonisolated func session(_ session: MCSession, didReceive data: Data, fromPeer peerID: MCPeerID) {
         do {
             let payload = try JSONDecoder().decode(A2APayload.self, from: data)
             Logger.network.info("📥 Received \(payload.type.rawValue) from \(peerID.displayName) (\(data.count) bytes)")
@@ -330,7 +338,9 @@ extension MultipeerChatManager: MCSessionDelegate {
             if payload.type == .ack {
                 // Decode which original message this ACK confirms.
                 if let ackID = try? JSONDecoder().decode(UUID.self, from: payload.data) {
-                    processAck(payloadID: ackID)
+                    Task { @MainActor in
+                        self.processAck(payloadID: ackID)
+                    }
                 }
                 return // ACKs are not forwarded upstream.
             }
@@ -338,49 +348,54 @@ extension MultipeerChatManager: MCSessionDelegate {
             // For every other payload type, send ACK back to the sender.
             if let ackData = try? JSONEncoder().encode(payload.senderID) {
                 let ack = A2APayload(type: .ack, senderID: payload.senderID, data: ackData)
-                try? send(payload: ack, to: peerID)
+                Task { @MainActor in
+                    try? self.send(payload: ack, to: peerID)
+                    self.incomingPayloadsContinuation.yield(payload)
+                }
             }
-
-            incomingPayloadsContinuation.yield(payload)
         } catch {
             Logger.network.error("💥 Failed to decode payload from \(peerID.displayName): \(error)")
         }
     }
 
-    func session(_ session: MCSession, didReceive stream: InputStream, withName streamName: String, fromPeer peerID: MCPeerID) {}
-    func session(_ session: MCSession, didStartReceivingResourceWithName resourceName: String, fromPeer peerID: MCPeerID, with progress: Progress) {}
-    func session(_ session: MCSession, didFinishReceivingResourceWithName resourceName: String, fromPeer peerID: MCPeerID, at localURL: URL?, withError error: Error?) {}
+    nonisolated func session(_ session: MCSession, didReceive stream: InputStream, withName streamName: String, fromPeer peerID: MCPeerID) {}
+    nonisolated func session(_ session: MCSession, didStartReceivingResourceWithName resourceName: String, fromPeer peerID: MCPeerID, with progress: Progress) {}
+    nonisolated func session(_ session: MCSession, didFinishReceivingResourceWithName resourceName: String, fromPeer peerID: MCPeerID, at localURL: URL?, withError error: Error?) {}
 }
 
 // MARK: - MCNearbyServiceAdvertiserDelegate
 
 extension MultipeerChatManager: MCNearbyServiceAdvertiserDelegate {
-    func advertiser(_ advertiser: MCNearbyServiceAdvertiser, didReceiveInvitationFromPeer peerID: MCPeerID, withContext context: Data?, invitationHandler: @escaping (Bool, MCSession?) -> Void) {
+    nonisolated func advertiser(_ advertiser: MCNearbyServiceAdvertiser, didReceiveInvitationFromPeer peerID: MCPeerID, withContext context: Data?, invitationHandler: @escaping (Bool, MCSession?) -> Void) {
         Logger.network.info("📬 Received invitation from \(peerID.displayName). Auto-accepting.")
-        invitationHandler(true, session)
+        Task { @MainActor in
+            invitationHandler(true, self.session)
+        }
     }
 }
 
 // MARK: - MCNearbyServiceBrowserDelegate
 
 extension MultipeerChatManager: MCNearbyServiceBrowserDelegate {
-    func browser(_ browser: MCNearbyServiceBrowser, foundPeer peerID: MCPeerID, withDiscoveryInfo info: [String: String]?) {
+    nonisolated func browser(_ browser: MCNearbyServiceBrowser, foundPeer peerID: MCPeerID, withDiscoveryInfo info: [String: String]?) {
         Logger.network.info("🔭 Found Host: \(peerID.displayName)")
-        DispatchQueue.main.async {
+        Task { @MainActor in
             if !self.availableHosts.contains(peerID) {
                 self.availableHosts.append(peerID)
             }
         }
         // If we are reconnecting, auto-rejoin the first host we find.
-        if isReconnecting {
-            Logger.network.info("♻️ Auto-rejoining \(peerID.displayName) after reconnect.")
-            joinHost(peerID)
+        Task { @MainActor in
+            if self.isReconnecting {
+                Logger.network.info("♻️ Auto-rejoining \(peerID.displayName) after reconnect.")
+                self.joinHost(peerID)
+            }
         }
     }
 
-    func browser(_ browser: MCNearbyServiceBrowser, lostPeer peerID: MCPeerID) {
+    nonisolated func browser(_ browser: MCNearbyServiceBrowser, lostPeer peerID: MCPeerID) {
         Logger.network.info("💨 Lost Host: \(peerID.displayName)")
-        DispatchQueue.main.async {
+        Task { @MainActor in
             self.availableHosts.removeAll { $0 == peerID }
         }
     }
