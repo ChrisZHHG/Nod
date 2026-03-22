@@ -83,13 +83,15 @@ final class ChefAgent: ChefAgentProtocol, @unchecked Sendable {
         print(jsonString)
         print("[ChefAgent] ===== END RAW JSON =====")
         
-        guard let data = jsonString.data(using: .utf8) else { throw NSError(domain: "ChefAgent", code: 0, userInfo: nil) }
+        guard let data = jsonString.data(using: .utf8) else {
+            throw NodError.reasoningFailed(reason: "Chef AI returned an empty response.")
+        }
         
         do {
             return try JSONDecoder().decode(SoloRecommendationSet.self, from: data)
         } catch {
-            print("[ChefAgent] ❌ JSON Decode Error: \(error)")
-            throw error
+            print("[ChefAgent] [ERROR] JSON Decode Error: \(error)")
+            throw NodError.reasoningFailed(reason: "The Chef's response format was unexpected. Re-submitting usually fixes this.")
         }
     }
 
@@ -105,13 +107,15 @@ final class ChefAgent: ChefAgentProtocol, @unchecked Sendable {
             responseSchema: "application/json"
         )
         
-        guard let data = jsonString.data(using: .utf8) else { throw NSError(domain: "ChefAgent", code: 0, userInfo: nil) }
+        guard let data = jsonString.data(using: .utf8) else {
+            throw NodError.reasoningFailed(reason: "Chef AI returned an empty response for group combo.")
+        }
         
         do {
             return try JSONDecoder().decode(GroupRecommendationSet.self, from: data)
         } catch {
-            print("[ChefAgent] ❌ Group JSON Decode Error: \(error)")
-            throw error
+            print("[ChefAgent] [ERROR] Group JSON Decode Error: \(error)")
+            throw NodError.reasoningFailed(reason: "The Chef's group combo format was unexpected.")
         }
     }
 

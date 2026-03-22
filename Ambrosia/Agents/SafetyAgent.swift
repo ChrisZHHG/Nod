@@ -56,16 +56,12 @@ final class SafetyAgent: SafetyAgentProtocol, @unchecked Sendable {
         let result = try parseAuditResult(jsonString)
         
         if !result.isSafe {
-            throw NSError(domain: "NodSafe", code: 403, userInfo: [
-                NSLocalizedDescriptionKey: "Safety Alert: \(result.violationReason ?? "Unknown Safety Risk")"
-            ])
+            throw NodError.safetyAuditFailed(reason: result.violationReason ?? "Unknown Safety Risk")
         }
         
         print("[SafetyAgent] ✅ Individual Set Audit Passed.")
         return draft
     }
-    
-    // MARK: - Group Audit
     
     // MARK: - Group Audit
     
@@ -88,9 +84,7 @@ final class SafetyAgent: SafetyAgentProtocol, @unchecked Sendable {
         let result = try parseAuditResult(jsonString)
         
         if !result.isSafe {
-            throw NSError(domain: "NodSafe", code: 403, userInfo: [
-                NSLocalizedDescriptionKey: "Group Safety Alert: \(result.violationReason ?? "Unknown Safety Risk")"
-            ])
+            throw NodError.safetyAuditFailed(reason: result.violationReason ?? "Unknown Safety Risk")
         }
         
         print("[SafetyAgent] ✅ Group Combos Audit Passed.")
@@ -132,11 +126,16 @@ final class SafetyAgent: SafetyAgentProtocol, @unchecked Sendable {
     }
     
     private func parseAuditResult(_ jsonString: String) throws -> AuditResult {
-        guard let data = jsonString.data(using: .utf8),
-              let result = try? JSONDecoder().decode(AuditResult.self, from: data) else {
-            print("[SafetyAgent] ⚠️ Audit parsing failed. Proceeding with caution.")
-            return AuditResult(isSafe: true, violationReason: nil)
+        guard let data = jsonString.data(using: .utf8) else {
+            throw NodError.safetyAuditFailed(reason: "Safety auditor returned an empty response.")
         }
-        return result
+        
+        do {
+            return try JSONDecoder().decode(AuditResult.self, from: data)
+        } catch {
+            print("[SafetyAgent] [ERROR] Audit parsing failed: \(error)")
+            // If the auditor fails to return valid JSON, we MUST assume unsafe to be protective.
+            throw NodError.safetyAuditFailed(reason: "Safety AI response format was invalid. Please try again.")
+        }
     }
 }

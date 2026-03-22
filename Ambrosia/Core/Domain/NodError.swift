@@ -8,9 +8,9 @@ enum NodError: Error, Equatable, LocalizedError, Sendable {
     // Core Agent Errors
     case decodingFailed(reason: String)
     case researchFailed(reason: String)
+    case reasoningFailed(reason: String)
+    case safetyAuditFailed(reason: String)
     case recommendationFailed(reason: String)
-    
-    // Safety Agent Violations
     case safetyVetoTriggered(reason: String)
     
     // Network / API Errors
@@ -29,6 +29,10 @@ enum NodError: Error, Equatable, LocalizedError, Sendable {
             return "Failed to read the menu: \(reason)"
         case .researchFailed(let reason):
             return "Failed to research the restaurant: \(reason)"
+        case .reasoningFailed(let reason):
+            return "Chef Reasoning Error: \(reason)"
+        case .safetyAuditFailed(let reason):
+            return "Safety Audit Failed: \(reason)"
         case .recommendationFailed(let reason):
             return "Failed to generate recommendations: \(reason)"
         case .safetyVetoTriggered(let reason):

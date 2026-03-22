@@ -40,7 +40,11 @@ final class ResearchAgent: ResearchAgentProtocol {
         print("[ResearchAgent] 🔎 Searching Google Places for '\(name)'...")
         
         // 1. Text Search API (New) to find the Place ID and core details
-        let searchURL = URL(string: "https://places.googleapis.com/v1/places:searchText")!
+        guard let searchURL = URL(string: "https://places.googleapis.com/v1/places:searchText") else {
+            print("[ResearchAgent] [ERROR] Malformed search URL.")
+            return fallbackData()
+        }
+        
         var request = URLRequest(url: searchURL)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
