@@ -54,6 +54,21 @@ final class MultipeerChatManager: NSObject, Sendable {
     /// to any Delegate that reconnects mid-session.
     var chatHistory: [ChatMessage] = []
 
+    // MARK: - B2: Outgoing Message Queue
+
+    /// Tracks unacknowledged outbound payloads keyed by their envelope UUID.
+    /// Value: (original payload, retry attempt count)
+    private var pendingQueue: [UUID: (A2APayload, Int)] = [:]
+
+    /// Maximum delivery retries before giving up on a message.
+    private let maxDeliveryRetries = 3
+
+    /// Seconds to wait for an ACK before retrying.
+    private let ackTimeoutSeconds: Double = 3.0
+
+    /// Published flag: true when any message has exhausted all retries.
+    var hasUndeliveredMessage = false
+
     // MARK: - Init
 
     init(displayName: String) {
@@ -124,23 +139,69 @@ final class MultipeerChatManager: NSObject, Sendable {
 
     // MARK: - Broadcasting
 
+    /// Broadcasts a payload to all connected peers.
+    /// Enqueues the payload for ACK tracking; retries up to `maxDeliveryRetries` times
+    /// if no ACK is received within `ackTimeoutSeconds`.
     func broadcast(payload: A2APayload) throws {
         guard !session.connectedPeers.isEmpty else {
             Logger.network.warning("⚠️ Cannot broadcast: No connected peers.")
             return
         }
-        let data = try JSONEncoder().encode(payload)
-        if data.count > 100_000 {
-            Logger.network.warning("⚠️ Payload is unusually large: \(data.count) bytes.")
-        }
-        try session.send(data, toPeers: session.connectedPeers, with: .reliable)
-        Logger.network.info("📤 Broadcasted \(payload.type.rawValue) to \(self.session.connectedPeers.count) peers.")
+        try enqueueAndSend(payload: payload, toPeers: session.connectedPeers)
     }
 
     /// Sends a payload to a single specific peer (used for history sync on rejoin).
     private func send(payload: A2APayload, to peer: MCPeerID) throws {
         let data = try JSONEncoder().encode(payload)
         try session.send(data, toPeers: [peer], with: .reliable)
+    }
+
+    // MARK: - Internal Queue Helpers
+
+    private func enqueueAndSend(payload: A2APayload, toPeers peers: [MCPeerID], retryCount: Int = 0) throws {
+        let data = try JSONEncoder().encode(payload)
+        if data.count > 100_000 {
+            Logger.network.warning("⚠️ Payload unusually large: \(data.count) bytes.")
+        }
+        try session.send(data, toPeers: peers, with: .reliable)
+        Logger.network.info("📤 Sent \(payload.type.rawValue) (attempt \(retryCount + 1)) to \(peers.count) peers.")
+
+        // Skip ACK tracking for ack payloads themselves to prevent infinite loops.
+        guard payload.type != .ack else { return }
+
+        pendingQueue[payload.senderID] = (payload, retryCount)
+
+        // Schedule ACK timeout.
+        let payloadID = payload.senderID
+        DispatchQueue.global().asyncAfter(deadline: .now() + ackTimeoutSeconds) { [weak self] in
+            self?.handleAckTimeout(payloadID: payloadID)
+        }
+    }
+
+    private func handleAckTimeout(payloadID: UUID) {
+        guard let (payload, attempt) = pendingQueue[payloadID] else {
+            // Already acknowledged — nothing to do.
+            return
+        }
+        if attempt >= maxDeliveryRetries - 1 {
+            Logger.network.error("🚫 Message \(payloadID) undelivered after \(self.maxDeliveryRetries) attempts. Giving up.")
+            pendingQueue.removeValue(forKey: payloadID)
+            DispatchQueue.main.async { self.hasUndeliveredMessage = true }
+            return
+        }
+        Logger.network.warning("♻️ No ACK for \(payloadID). Retry \(attempt + 2)/\(self.maxDeliveryRetries)...")
+        guard !session.connectedPeers.isEmpty else {
+            pendingQueue.removeValue(forKey: payloadID)
+            return
+        }
+        try? enqueueAndSend(payload: payload, toPeers: session.connectedPeers, retryCount: attempt + 1)
+    }
+
+    /// Called when an ACK payload arrives. Removes the matching entry from the pending queue.
+    private func processAck(payloadID: UUID) {
+        if pendingQueue.removeValue(forKey: payloadID) != nil {
+            Logger.network.info("✅ ACK received for \(payloadID). Dequeued.")
+        }
     }
 
     // MARK: - Reconnect Logic
@@ -248,6 +309,21 @@ extension MultipeerChatManager: MCSessionDelegate {
         do {
             let payload = try JSONDecoder().decode(A2APayload.self, from: data)
             Logger.network.info("📥 Received \(payload.type.rawValue) from \(peerID.displayName) (\(data.count) bytes)")
+
+            if payload.type == .ack {
+                // Decode which original message this ACK confirms.
+                if let ackID = try? JSONDecoder().decode(UUID.self, from: payload.data) {
+                    processAck(payloadID: ackID)
+                }
+                return // ACKs are not forwarded upstream.
+            }
+
+            // For every other payload type, send ACK back to the sender.
+            if let ackData = try? JSONEncoder().encode(payload.senderID) {
+                let ack = A2APayload(type: .ack, senderID: payload.senderID, data: ackData)
+                try? send(payload: ack, to: peerID)
+            }
+
             incomingPayloadsContinuation.yield(payload)
         } catch {
             Logger.network.error("💥 Failed to decode payload from \(peerID.displayName): \(error)")

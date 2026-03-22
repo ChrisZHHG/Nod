@@ -44,8 +44,13 @@ struct AgentChatView: View {
             trailing: (!hasStartedChat && isHost) ? .init(icon: "play.fill") { startAIChat() } : nil
         )
         .overlay(alignment: .top) {
-            if store.chatManager.isReconnecting {
-                reconnectingBanner
+            VStack(spacing: NodTheme.Spacing.sm) {
+                if store.chatManager.isReconnecting {
+                    reconnectingBanner
+                }
+                if store.chatManager.hasUndeliveredMessage {
+                    deliveryFailureBanner
+                }
             }
         }
         .task {
@@ -76,6 +81,29 @@ struct AgentChatView: View {
         .padding(.top, NodTheme.Spacing.xl)
         .transition(.move(edge: .top).combined(with: .opacity))
         .animation(.spring(response: 0.4, dampingFraction: 0.8), value: store.chatManager.isReconnecting)
+    }
+
+    private var deliveryFailureBanner: some View {
+        HStack(spacing: NodTheme.Spacing.sm) {
+            Image(systemName: "exclamationmark.triangle.fill")
+                .font(.caption)
+                .foregroundColor(.red)
+            Text("A message failed to deliver.")
+                .font(NodTheme.Typography.caption)
+                .foregroundColor(NodTheme.Cinematic.pureWhite)
+            Spacer()
+            Button("Dismiss") {
+                store.chatManager.hasUndeliveredMessage = false
+            }
+            .font(NodTheme.Typography.caption)
+            .foregroundColor(NodTheme.Cinematic.amber)
+        }
+        .padding(.horizontal, NodTheme.Spacing.lg)
+        .padding(.vertical, NodTheme.Spacing.sm)
+        .background(Color.red.opacity(0.25))
+        .clipShape(Capsule())
+        .transition(.move(edge: .top).combined(with: .opacity))
+        .animation(.spring(response: 0.4, dampingFraction: 0.8), value: store.chatManager.hasUndeliveredMessage)
     }
 
     // MARK: - Pre-Chat Lobby
