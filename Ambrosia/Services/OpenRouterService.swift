@@ -24,7 +24,13 @@ actor OpenRouterService: GeminiServiceProtocol {
 
     private let apiKey: String?
     private let session: URLSession
-    private let baseURL = "https://openrouter.ai/api/v1/chat/completions"
+
+    /// Safe URL constructed once at init to avoid force-unwrap crashes at call sites.
+    private let endpointURL: URL
+
+    /// Retry policy for transient failures (429 rate-limit, 503 overload).
+    private let maxRetries = 3
+    private let retryableStatusCodes: Set<Int> = [429, 500, 502, 503, 504]
 
     init() {
         let key = Bundle.main.object(forInfoDictionaryKey: "OpenRouterAPIKey") as? String
@@ -35,28 +41,106 @@ actor OpenRouterService: GeminiServiceProtocol {
             self.apiKey = nil
         }
 
+        // Build URL safely once — guard here so a bad constant is caught at launch, not mid-request.
+        guard let url = URL(string: "https://openrouter.ai/api/v1/chat/completions") else {
+            fatalError("OpenRouterService: hardcoded endpoint URL is malformed — this is a code error.")
+        }
+        self.endpointURL = url
+
+        // 120s request timeout: multi-page menus with 3 images can be ~300 KB base64
+        // which takes longer than the default 60s on slow connections.
         let config = URLSessionConfiguration.default
-        config.timeoutIntervalForRequest = 60.0
+        config.timeoutIntervalForRequest = 120.0
+        config.timeoutIntervalForResource = 180.0
         self.session = URLSession(configuration: config)
     }
 
     // MARK: - GeminiServiceProtocol conformance
 
     /// Sends a text prompt + optional images to OpenRouter and returns the text response.
+    /// Automatically retries on 429 / 5xx with exponential backoff (1s, 2s, 4s).
     func generateContent(
         prompt: String,
         images: [Data] = [],
-        model: GeminiModel = .flash,         // mapped → OpenRouter model
+        model: GeminiModel = .flash,
         responseSchema: String? = nil
     ) async throws -> String {
         guard let apiKey else {
             throw NSError(domain: "OpenRouterService", code: 401,
-                          userInfo: [NSLocalizedDescriptionKey: "OpenRouter API key not configured."])
+                          userInfo: [NSLocalizedDescriptionKey: "OpenRouter API key not configured. Check Secrets.xcconfig."])
         }
 
         let orModel = mapModel(model)
+        let body = buildRequestBody(prompt: prompt, images: images, model: orModel, responseSchema: responseSchema)
+        let bodyData = try JSONSerialization.data(withJSONObject: body)
 
-        // Build message content — text first, then inline images
+        var lastError: Error = NSError(domain: "OpenRouterService", code: -1,
+                                       userInfo: [NSLocalizedDescriptionKey: "No attempt made."])
+
+        for attempt in 0..<maxRetries {
+            // Exponential backoff: 0s, 1s, 2s (skip sleep on first attempt)
+            if attempt > 0 {
+                let backoff = UInt64(pow(2.0, Double(attempt - 1)) * 1_000_000_000)
+                try? await Task.sleep(nanoseconds: backoff)
+            }
+
+            var request = URLRequest(url: endpointURL)
+            request.httpMethod = "POST"
+            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+            request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
+            request.setValue("https://github.com/ChrisZHHG/Nod", forHTTPHeaderField: "HTTP-Referer")
+            request.setValue("Nod-iOS", forHTTPHeaderField: "X-Title")
+            request.httpBody = bodyData
+
+            do {
+                let (data, response) = try await session.data(for: request)
+                guard let http = response as? HTTPURLResponse else {
+                    throw NSError(domain: "OpenRouterService", code: -1,
+                                  userInfo: [NSLocalizedDescriptionKey: "Non-HTTP response received."])
+                }
+
+                if http.statusCode == 200 {
+                    return try parseResponse(data)
+                }
+
+                let errorText = String(data: data, encoding: .utf8) ?? "No error body"
+                let error = NSError(domain: "OpenRouterService", code: http.statusCode,
+                                    userInfo: [NSLocalizedDescriptionKey: "HTTP \(http.statusCode): \(errorText)"])
+
+                if retryableStatusCodes.contains(http.statusCode) {
+                    print("[OpenRouterService] \(http.statusCode) — retrying (\(attempt + 1)/\(maxRetries))...")
+                    lastError = error
+                    continue
+                }
+                // Non-retryable (400, 401, 403, etc) — throw immediately.
+                throw error
+
+            } catch is CancellationError {
+                throw CancellationError()
+            } catch {
+                // Network-level errors (timeout, no connection) — retry.
+                lastError = error
+                print("[OpenRouterService] Network error — retrying (\(attempt + 1)/\(maxRetries)): \(error.localizedDescription)")
+            }
+        }
+
+        throw lastError
+    }
+
+    /// Fallback Image Generation using Pollinations.ai (Free, no API key required text-to-image).
+    func generateImage(prompt: String, model: String) async throws -> URL? {
+        print("[OpenRouterService] Generating image via Pollinations.ai...")
+        let augmentedPrompt = "\(prompt), highly detailed food photography, depth of field, natural lighting, bokeh, 8k resolution, photorealistic"
+        guard let encodedPrompt = augmentedPrompt.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) else {
+            return nil
+        }
+        let endpoint = "https://image.pollinations.ai/prompt/\(encodedPrompt)?width=800&height=800&nologo=true&model=flux"
+        return URL(string: endpoint)
+    }
+
+    // MARK: - Private helpers
+
+    private func buildRequestBody(prompt: String, images: [Data], model: String, responseSchema: String?) -> [String: Any] {
         var contentParts: [[String: Any]] = [["type": "text", "text": prompt]]
         for imageData in images {
             let b64 = imageData.base64EncodedString()
@@ -65,63 +149,21 @@ actor OpenRouterService: GeminiServiceProtocol {
                 "image_url": ["url": "data:image/jpeg;base64,\(b64)"]
             ])
         }
-
         var body: [String: Any] = [
-            "model": orModel,
+            "model": model,
             "messages": [["role": "user", "content": contentParts]],
-            // Push for slightly higher creativity in food descriptions
-            "temperature": 0.7 
+            "temperature": 0.7
         ]
-
-        // Ask for JSON output when schema is requested
         if responseSchema != nil {
             body["response_format"] = ["type": "json_object"]
         }
-
-        var request = URLRequest(url: URL(string: baseURL)!)
-        request.httpMethod = "POST"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
-        request.setValue("https://github.com/ChrisZHHG/Nod", forHTTPHeaderField: "HTTP-Referer")
-        request.setValue("Nod-iOS", forHTTPHeaderField: "X-Title")
-        request.httpBody = try JSONSerialization.data(withJSONObject: body)
-
-        let (data, response) = try await session.data(for: request)
-
-        guard let http = response as? HTTPURLResponse, http.statusCode == 200 else {
-            let errorText = String(data: data, encoding: .utf8) ?? "Unknown Error"
-            let code = (response as? HTTPURLResponse)?.statusCode ?? 500
-            throw NSError(domain: "OpenRouterService", code: code,
-                          userInfo: [NSLocalizedDescriptionKey: errorText])
-        }
-
-        return try parseResponse(data)
+        return body
     }
-
-    /// Fallback Image Generation using Pollinations.ai (Free, no API key required text-to-image)
-    /// Since OpenRouter doesn't natively support image generation (DALL-E etc).
-    func generateImage(prompt: String, model: String) async throws -> URL? {
-        print("[OpenRouterService] Generating image via Pollinations.ai...")
-        
-        // Force 'flux' model for significantly better photorealism compared to default turbo models.
-        // Also append strict style guidelines to the raw prompt to prevent cartoonish/abstract renders.
-        let augmentedPrompt = "\(prompt), highly detailed food photography, depth of field, natural lighting, bokeh, 8k resolution, photorealistic"
-        
-        // Encode the prompt for a URL path
-        guard let encodedPrompt = augmentedPrompt.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) else {
-            return nil
-        }
-        
-        let endpoint = "https://image.pollinations.ai/prompt/\(encodedPrompt)?width=800&height=800&nologo=true&model=flux"
-        return URL(string: endpoint)
-    }
-
-    // MARK: - Private helpers
 
     private func mapModel(_ model: GeminiModel) -> String {
         switch model {
         case .flash: return OpenRouterModel.geminiFlash.rawValue
-        case .pro:   return OpenRouterModel.claudeSonnet.rawValue  // Map 'pro' requests to Claude 3.5 Sonnet for top-tier reasoning
+        case .pro:   return OpenRouterModel.claudeSonnet.rawValue
         }
     }
 
@@ -134,7 +176,7 @@ actor OpenRouterService: GeminiServiceProtocol {
         else {
             let raw = String(data: data, encoding: .utf8) ?? ""
             throw NSError(domain: "OpenRouterService", code: 0,
-                          userInfo: [NSLocalizedDescriptionKey: "Unexpected response: \(raw)"])
+                          userInfo: [NSLocalizedDescriptionKey: "Unexpected API response format. Raw: \(raw.prefix(200))"])
         }
 
         // Strip markdown code fences if the model wraps JSON in ```json ... ```

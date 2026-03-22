@@ -38,12 +38,20 @@ struct CameraScannerView: UIViewControllerRepresentable {
 
         Task {
             defer { context.coordinator.isCaptureInFlight = false }
-            // Add a tiny delay to ensure AVFoundation is settled to avoid -17281 errors
+            // Small delay to let AVFoundation settle and avoid -17281 (camera not ready) errors.
             try? await Task.sleep(nanoseconds: 300_000_000)
-            if let image = try? await uiViewController.capturePhoto() {
+            do {
+                let image = try await uiViewController.capturePhoto()
                 await MainActor.run {
                     UIImpactFeedbackGenerator(style: .heavy).impactOccurred()
                     context.coordinator.parent.scannedImage = image.jpegData(compressionQuality: 0.8)
+                }
+            } catch {
+                // capturePhoto threw (e.g. -17281 camera busy) — give error feedback and reset.
+                print("[CameraScannerView] capturePhoto error: \(error.localizedDescription)")
+                await MainActor.run {
+                    UINotificationFeedbackGenerator().notificationOccurred(.error)
+                    context.coordinator.parent.scannedImage = nil
                 }
             }
         }

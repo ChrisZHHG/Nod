@@ -82,12 +82,28 @@ final class AppStore {
         
         // CONCURRENCY TRICK: Start the heavy OCR immediately, 
         // hiding the latency behind the upcoming Progressive UI Wizard.
+        // If this background task fails, surface a recoverable error immediately
+        // instead of silently hanging when the user hits 'Analyze'.
+        let imagesSnapshot = capturedImages
         self.decodingTask = Task {
-            log("👀 Decoder Agent: Background Scanning Menu...")
-            let data = try await dependencies.decoder.decode(images: capturedImages)
-            self.cachedParsedMenu = data
-            log("👀 Decoder Agent: Background Scan Complete.")
-            return data
+            do {
+                log("👀 Decoder Agent: Background Scanning Menu...")
+                let data = try await dependencies.decoder.decode(images: imagesSnapshot)
+                await MainActor.run {
+                    self.cachedParsedMenu = data
+                    self.log("👀 Decoder Agent: Background Scan Complete.")
+                }
+                return data
+            } catch {
+                await MainActor.run {
+                    // Only surface the error if no result was cached from a previous capture.
+                    if self.cachedParsedMenu == nil {
+                        self.log("❌ Decoder Agent: Background Scan Failed — \(error.localizedDescription)")
+                        self.appState = .error(.decodingFailed(reason: error.localizedDescription))
+                    }
+                }
+                throw error
+            }
         }
     }
     

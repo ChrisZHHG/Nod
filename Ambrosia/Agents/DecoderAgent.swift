@@ -54,34 +54,36 @@ final class DecoderAgent: DecoderAgentProtocol, @unchecked Sendable {
 
     
     func decode(images: [Data]) async throws -> MenuData {
-        // "Silky" UX: We tell the Manager we are starting text recognition
         print("[DecoderAgent] Sending \(images.count) images to Gemini Flash...")
-        
-        // Call API
+
         let jsonString = try await service.generateContent(
             prompt: systemPrompt,
             images: images,
             model: .flash,
-            responseSchema: "application/json" // Force strict JSON
+            responseSchema: "application/json"
         )
-        
-        // DEBUG: Print raw response to diagnose parsing issues
+
         print("[DecoderAgent] ===== RAW JSON RESPONSE =====")
         print(jsonString)
         print("[DecoderAgent] ===== END RAW JSON =====")
-        
-        // Decode JSON to Struct
-        guard let data = jsonString.data(using: .utf8) else {
-            throw NSError(domain: "Decoder", code: 0, userInfo: [NSLocalizedDescriptionKey: "Empty Response"])
+
+        // Sanity check: if the model returned a plain English refusal (no JSON braces),
+        // throw a clean user-facing error instead of a confusing Swift decode error.
+        guard jsonString.contains("{") else {
+            print("[DecoderAgent] [ERROR] Non-JSON response: \(jsonString.prefix(200))")
+            throw NodError.decodingFailed(reason: "Could not read the menu. Try a clearer photo with the full menu visible.")
         }
-        
-        let decoder = JSONDecoder()
-        
+
+        guard let data = jsonString.data(using: .utf8) else {
+            throw NodError.decodingFailed(reason: "Menu AI returned an empty response. Please try again.")
+        }
+
         do {
-            return try decoder.decode(MenuData.self, from: data)
+            return try JSONDecoder().decode(MenuData.self, from: data)
         } catch {
-            print("[DecoderAgent] ❌ JSON Decode Error: \(error)")
-            throw error
+            print("[DecoderAgent] [ERROR] JSON Decode Error: \(error)")
+            // Provide actionable guidance rather than a raw Swift type error.
+            throw NodError.decodingFailed(reason: "The AI response format was unexpected. Retaking the photo usually fixes this.")
         }
     }
 }
