@@ -45,9 +45,9 @@ struct MultiChoiceResultCarousel: View {
                     }) {
                         Image(systemName: "arrow.right")
                             .font(.system(size: 18, weight: .bold))
-                            .foregroundColor(AmbrosiaTheme.Cinematic.deepBlack)
+                            .foregroundColor(NodTheme.Cinematic.deepBlack)
                             .padding()
-                            .background(AmbrosiaTheme.Cinematic.amber)
+                            .background(NodTheme.Cinematic.amber)
                             .clipShape(Circle())
                     }
                 }

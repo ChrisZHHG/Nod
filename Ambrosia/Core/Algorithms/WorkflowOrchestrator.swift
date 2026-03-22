@@ -6,7 +6,7 @@ enum EngineOutput: Sendable {
 }
 
 /// Orchestrates the entire multi-agent recommendation pipeline.
-/// Completely decoupled from UI state and typed securely against AmbrosiaError.
+/// Completely decoupled from UI state and typed securely against NodError.
 actor WorkflowOrchestrator {
     private let dependencies: DependencyContainer
     
@@ -22,7 +22,7 @@ actor WorkflowOrchestrator {
         cachedMenu: MenuData?,
         pendingDecodingTask: Task<MenuData, Error>?,
         onProgress: @Sendable @escaping (Double, String) -> Void
-    ) async -> Result<EngineOutput, AmbrosiaError> {
+    ) async -> Result<EngineOutput, NodError> {
         
         guard !images.isEmpty else {
             return .failure(.noImagesCaptured)
@@ -73,7 +73,7 @@ actor WorkflowOrchestrator {
                 return .success(.group(result, menuData))
             }
             
-        } catch let ambrosiaError as AmbrosiaError {
+        } catch let ambrosiaError as NodError {
             return .failure(ambrosiaError)
         } catch {
             return .failure(.unknown(error.localizedDescription))

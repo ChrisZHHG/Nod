@@ -17,21 +17,21 @@ struct GlassButton: View {
             HapticFeedback.light.trigger()
             action()
         }) {
-            HStack(spacing: AmbrosiaTheme.Spacing.sm) {
+            HStack(spacing: NodTheme.Spacing.sm) {
                 if let icon = icon {
                     Image(systemName: icon)
                         .font(.system(size: 18, weight: .semibold))
                         .symbolRenderingMode(.hierarchical)
                 }
                 Text(title)
-                    .font(AmbrosiaTheme.Typography.button)
+                    .font(NodTheme.Typography.button)
             }
-            .padding(.vertical, AmbrosiaTheme.Spacing.lg)
-            .padding(.horizontal, AmbrosiaTheme.Spacing.xl)
+            .padding(.vertical, NodTheme.Spacing.lg)
+            .padding(.horizontal, NodTheme.Spacing.xl)
             .frame(maxWidth: .infinity)
             .foregroundColor(foregroundColor)
             .background(backgroundView)
-            .clipShape(RoundedRectangle(cornerRadius: AmbrosiaTheme.Radius.xl, style: .continuous))
+            .clipShape(RoundedRectangle(cornerRadius: NodTheme.Radius.xl, style: .continuous))
             .overlay(overlayView)
             .contentShape(Rectangle()) // Ensures entire button area catches taps
             .shadow(
@@ -48,7 +48,7 @@ struct GlassButton: View {
     private var backgroundView: some View {
         switch variant {
         case .primary:
-            AmbrosiaTheme.Colors.accent
+            NodTheme.Colors.accent
         case .secondary:
             Color.white
         case .ghost:
@@ -62,8 +62,8 @@ struct GlassButton: View {
         case .primary:
             EmptyView()
         case .secondary:
-            RoundedRectangle(cornerRadius: AmbrosiaTheme.Radius.xl, style: .continuous)
-                .stroke(AmbrosiaTheme.Colors.glassBorder, lineWidth: 1)
+            RoundedRectangle(cornerRadius: NodTheme.Radius.xl, style: .continuous)
+                .stroke(NodTheme.Colors.glassBorder, lineWidth: 1)
         case .ghost:
             EmptyView()
         }
@@ -72,20 +72,20 @@ struct GlassButton: View {
     private var foregroundColor: Color {
         switch variant {
         case .primary:
-            return AmbrosiaTheme.Colors.textOnAccent
+            return NodTheme.Colors.textOnAccent
         case .secondary:
-            return AmbrosiaTheme.Colors.textPrimary
+            return NodTheme.Colors.textPrimary
         case .ghost:
-            return AmbrosiaTheme.Colors.accent
+            return NodTheme.Colors.accent
         }
     }
     
     private var shadowColor: Color {
         switch variant {
         case .primary:
-            return AmbrosiaTheme.Colors.accent.opacity(0.3)
+            return NodTheme.Colors.accent.opacity(0.3)
         case .secondary:
-            return AmbrosiaTheme.Colors.glassShadow
+            return NodTheme.Colors.glassShadow
         case .ghost:
             return .clear
         }

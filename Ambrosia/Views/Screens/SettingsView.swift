@@ -8,21 +8,21 @@ struct SettingsView: View {
 
     var body: some View {
         ZStack {
-            AmbrosiaTheme.Cinematic.deepBlack.ignoresSafeArea()
+            NodTheme.Cinematic.deepBlack.ignoresSafeArea()
 
             ScrollView {
-                VStack(alignment: .leading, spacing: AmbrosiaTheme.Spacing.xl) {
+                VStack(alignment: .leading, spacing: NodTheme.Spacing.xl) {
                     Color.clear.frame(height: 72)
 
                     // MARK: API Configuration Section
 
-                    VStack(alignment: .leading, spacing: AmbrosiaTheme.Spacing.sm) {
+                    VStack(alignment: .leading, spacing: NodTheme.Spacing.sm) {
                         Text("API Configuration")
-                            .font(AmbrosiaTheme.Typography.caption)
-                            .foregroundColor(AmbrosiaTheme.Cinematic.smokeGray)
-                            .padding(.horizontal, AmbrosiaTheme.Spacing.sm)
+                            .font(NodTheme.Typography.caption)
+                            .foregroundColor(NodTheme.Cinematic.smokeGray)
+                            .padding(.horizontal, NodTheme.Spacing.sm)
 
-                        HStack(spacing: AmbrosiaTheme.Spacing.md) {
+                        HStack(spacing: NodTheme.Spacing.md) {
                             Group {
                                 if isSecured {
                                     SecureField("Gemini API Key", text: $customKey)
@@ -30,25 +30,25 @@ struct SettingsView: View {
                                     TextField("Gemini API Key", text: $customKey)
                                 }
                             }
-                            .font(AmbrosiaTheme.Typography.body)
-                            .foregroundColor(AmbrosiaTheme.Cinematic.pureWhite)
-                            .tint(AmbrosiaTheme.Cinematic.amber)
+                            .font(NodTheme.Typography.body)
+                            .foregroundColor(NodTheme.Cinematic.pureWhite)
+                            .tint(NodTheme.Cinematic.amber)
 
                             Button {
                                 isSecured.toggle()
                             } label: {
                                 Image(systemName: isSecured ? "eye.slash" : "eye")
-                                    .foregroundColor(AmbrosiaTheme.Cinematic.smokeGray)
+                                    .foregroundColor(NodTheme.Cinematic.smokeGray)
                                     .frame(width: 32, height: 32)
                             }
                         }
-                        .padding(AmbrosiaTheme.Spacing.lg)
-                        .glassCard(cornerRadius: AmbrosiaTheme.Radius.lg)
+                        .padding(NodTheme.Spacing.lg)
+                        .glassCard(cornerRadius: NodTheme.Radius.lg)
 
                         Text("Enter a custom API Key to override the built-in key. This allows key updates without rebuilding the app.")
-                            .font(AmbrosiaTheme.Typography.caption)
-                            .foregroundColor(AmbrosiaTheme.Cinematic.smokeGray)
-                            .padding(.horizontal, AmbrosiaTheme.Spacing.sm)
+                            .font(NodTheme.Typography.caption)
+                            .foregroundColor(NodTheme.Cinematic.smokeGray)
+                            .padding(.horizontal, NodTheme.Spacing.sm)
                     }
 
                     // MARK: Actions
@@ -63,8 +63,8 @@ struct SettingsView: View {
                         openURL(URL(string: "https://aistudio.google.com/app/apikey")!)
                     }
                 }
-                .padding(.horizontal, AmbrosiaTheme.Spacing.xl)
-                .padding(.bottom, AmbrosiaTheme.Spacing.xxl)
+                .padding(.horizontal, NodTheme.Spacing.xl)
+                .padding(.bottom, NodTheme.Spacing.xxl)
             }
             .scrollIndicators(.hidden)
         }

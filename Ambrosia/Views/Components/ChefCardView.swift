@@ -17,7 +17,7 @@ struct ChefCardView: View {
                             .clipped()
                     } else {
                         // Dark placeholder when no image ("premium" matte)
-                        AmbrosiaTheme.Cinematic.richBrown
+                        NodTheme.Cinematic.richBrown
                             .frame(width: geo.size.width, height: geo.size.height)
                             .overlay(
                                 Image(systemName: "fork.knife")
@@ -30,7 +30,7 @@ struct ChefCardView: View {
             .ignoresSafeArea()
             
             // ── Cinematic Gradient ────────────────────────────────────────────
-            AmbrosiaTheme.Cinematic.heroOverlay
+            NodTheme.Cinematic.heroOverlay
                 .ignoresSafeArea()
             
             // ── Main Content Scroll ───────────────────────────────────────────
@@ -78,22 +78,22 @@ struct ChefCardView: View {
                         // Diet label & category tag row
                         HStack(spacing: 10) {
                             Text("CHEF'S CHOICE")
-                                .font(AmbrosiaTheme.Cinematic.sectionTitle)
+                                .font(NodTheme.Cinematic.sectionTitle)
                                 .tracking(2.5)
-                                .foregroundColor(AmbrosiaTheme.Cinematic.amber)
+                                .foregroundColor(NodTheme.Cinematic.amber)
                             
                             Spacer()
                             
                             if let price = recommendation.recommendedItem.price {
                                 Text(String(format: "$%.2f", price))
-                                    .font(AmbrosiaTheme.Cinematic.sectionTitle)
-                                    .foregroundColor(AmbrosiaTheme.Cinematic.smokeGray)
+                                    .font(NodTheme.Cinematic.sectionTitle)
+                                    .foregroundColor(NodTheme.Cinematic.smokeGray)
                             }
                         }
                         
                         // Dish name (massive)
                         Text(recommendation.translation.localizedName)
-                            .font(AmbrosiaTheme.Cinematic.displayHero)
+                            .font(NodTheme.Cinematic.displayHero)
                             .foregroundColor(.white)
                             .lineLimit(2)
                             .minimumScaleFactor(0.6)
@@ -101,17 +101,17 @@ struct ChefCardView: View {
                         // Original name (italic small)
                         Text(recommendation.recommendedItem.originalName)
                             .font(.system(size: 14, weight: .light, design: .default).italic())
-                            .foregroundColor(AmbrosiaTheme.Cinematic.smokeGray)
+                            .foregroundColor(NodTheme.Cinematic.smokeGray)
                         
                         // Separator
                         Rectangle()
                             .frame(height: 1)
-                            .foregroundColor(AmbrosiaTheme.Cinematic.glassBorder)
+                            .foregroundColor(NodTheme.Cinematic.glassBorder)
                         
                         // Cultural context body
                         Text(recommendation.translation.culturalContext)
-                            .font(AmbrosiaTheme.Cinematic.body)
-                            .foregroundColor(AmbrosiaTheme.Cinematic.smokeGray)
+                            .font(NodTheme.Cinematic.body)
+                            .foregroundColor(NodTheme.Cinematic.smokeGray)
                             .lineSpacing(7)
                         
                         // Warnings
@@ -120,7 +120,7 @@ struct ChefCardView: View {
                                 HStack(spacing: 8) {
                                     ForEach(recommendation.translation.warnings, id: \.self) { warn in
                                         Text(warn)
-                                            .font(AmbrosiaTheme.Cinematic.caption)
+                                            .font(NodTheme.Cinematic.caption)
                                             .foregroundColor(Color(hex: "FF6B6B"))
                                             .padding(.vertical, 6)
                                             .padding(.horizontal, 12)
@@ -138,14 +138,14 @@ struct ChefCardView: View {
                                 HStack {
                                     Spacer()
                                     Text("Scan Another Menu")
-                                        .font(AmbrosiaTheme.Cinematic.cta)
-                                        .foregroundColor(AmbrosiaTheme.Cinematic.deepBlack)
+                                        .font(NodTheme.Cinematic.cta)
+                                        .foregroundColor(NodTheme.Cinematic.deepBlack)
                                     Spacer()
                                 }
                                 .padding(.vertical, 18)
                                 .background(
                                     RoundedRectangle(cornerRadius: 14, style: .continuous)
-                                        .fill(AmbrosiaTheme.Cinematic.amber)
+                                        .fill(NodTheme.Cinematic.amber)
                                 )
                             }
                             .buttonStyle(.plain)
@@ -156,7 +156,7 @@ struct ChefCardView: View {
                     .background(
                         ZStack {
                             Rectangle().fill(.ultraThinMaterial).environment(\.colorScheme, .dark)
-                            AmbrosiaTheme.Cinematic.glassDark
+                            NodTheme.Cinematic.glassDark
                         }
                         .clipShape(
                             RoundedRectangle(cornerRadius: 28, style: .continuous)
@@ -164,7 +164,7 @@ struct ChefCardView: View {
                     )
                     .overlay(
                         RoundedRectangle(cornerRadius: 28, style: .continuous)
-                            .stroke(AmbrosiaTheme.Cinematic.glassBorder, lineWidth: 1)
+                            .stroke(NodTheme.Cinematic.glassBorder, lineWidth: 1)
                     )
                     .padding(.horizontal, 16)
                     .padding(.bottom, 40)

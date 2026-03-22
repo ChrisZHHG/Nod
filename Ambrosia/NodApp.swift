@@ -1,7 +1,7 @@
 import SwiftUI
 
 @main
-struct AmbrosiaApp: App {
+struct NodApp: App {
     
     var body: some Scene {
         WindowGroup {

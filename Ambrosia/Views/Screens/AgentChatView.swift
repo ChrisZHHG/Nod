@@ -11,7 +11,7 @@ struct AgentChatView: View {
 
     var body: some View {
         ZStack {
-            AmbrosiaTheme.Cinematic.deepBlack.ignoresSafeArea()
+            NodTheme.Cinematic.deepBlack.ignoresSafeArea()
 
             VStack(spacing: 0) {
                 Color.clear.frame(height: 80)
@@ -29,7 +29,7 @@ struct AgentChatView: View {
                     VStack(spacing: 24) {
                         ProgressView()
                             .scaleEffect(1.5)
-                            .tint(AmbrosiaTheme.Cinematic.amber)
+                            .tint(NodTheme.Cinematic.amber)
                         Text("Drafting final order...")
                             .font(.system(size: 18, weight: .semibold, design: .rounded))
                             .foregroundColor(.white)
@@ -57,89 +57,89 @@ struct AgentChatView: View {
 
     private var lobbyView: some View {
         ScrollView {
-            VStack(spacing: AmbrosiaTheme.Spacing.xl) {
+            VStack(spacing: NodTheme.Spacing.xl) {
                 if isHost {
                     hostLobbyContent
                 } else {
                     delegateLobbyContent
                 }
             }
-            .padding(.horizontal, AmbrosiaTheme.Spacing.xl)
-            .padding(.vertical, AmbrosiaTheme.Spacing.lg)
+            .padding(.horizontal, NodTheme.Spacing.xl)
+            .padding(.vertical, NodTheme.Spacing.lg)
         }
     }
 
     private var hostLobbyContent: some View {
-        VStack(spacing: AmbrosiaTheme.Spacing.xl) {
+        VStack(spacing: NodTheme.Spacing.xl) {
             // Amber pulsing advertising indicator
-            HStack(spacing: AmbrosiaTheme.Spacing.sm) {
+            HStack(spacing: NodTheme.Spacing.sm) {
                 Circle()
-                    .fill(AmbrosiaTheme.Cinematic.amber)
+                    .fill(NodTheme.Cinematic.amber)
                     .frame(width: 10, height: 10)
                     .scaleEffect(isPulsing ? 1.4 : 0.8)
                     .animation(.easeInOut(duration: 0.8).repeatForever(autoreverses: true), value: isPulsing)
                 Text("Advertising to nearby friends...")
-                    .font(AmbrosiaTheme.Typography.body)
-                    .foregroundColor(AmbrosiaTheme.Cinematic.smokeGray)
+                    .font(NodTheme.Typography.body)
+                    .foregroundColor(NodTheme.Cinematic.smokeGray)
                 Spacer()
             }
-            .padding(AmbrosiaTheme.Spacing.lg)
-            .glassCard(cornerRadius: AmbrosiaTheme.Radius.xl)
+            .padding(NodTheme.Spacing.lg)
+            .glassCard(cornerRadius: NodTheme.Radius.xl)
             .onAppear { isPulsing = true }
 
             // Connected delegate count
             HStack {
                 Text("Connected Delegates")
-                    .font(AmbrosiaTheme.Typography.headline)
-                    .foregroundColor(AmbrosiaTheme.Cinematic.pureWhite)
+                    .font(NodTheme.Typography.headline)
+                    .foregroundColor(NodTheme.Cinematic.pureWhite)
                 Spacer()
                 Text("\(store.chatManager.connectedPeers.count)")
-                    .font(AmbrosiaTheme.Typography.headline)
-                    .foregroundColor(AmbrosiaTheme.Cinematic.amber)
+                    .font(NodTheme.Typography.headline)
+                    .foregroundColor(NodTheme.Cinematic.amber)
             }
-            .padding(AmbrosiaTheme.Spacing.lg)
-            .glassCard(cornerRadius: AmbrosiaTheme.Radius.lg)
+            .padding(NodTheme.Spacing.lg)
+            .glassCard(cornerRadius: NodTheme.Radius.lg)
 
             // Peer chips
             ForEach(store.chatManager.connectedPeers, id: \.self) { peer in
-                HStack(spacing: AmbrosiaTheme.Spacing.md) {
+                HStack(spacing: NodTheme.Spacing.md) {
                     Image(systemName: "person.fill")
-                        .foregroundColor(AmbrosiaTheme.Cinematic.amber)
+                        .foregroundColor(NodTheme.Cinematic.amber)
                     Text(peer.displayName)
-                        .font(AmbrosiaTheme.Typography.body)
-                        .foregroundColor(AmbrosiaTheme.Cinematic.pureWhite)
+                        .font(NodTheme.Typography.body)
+                        .foregroundColor(NodTheme.Cinematic.pureWhite)
                     Spacer()
                     Image(systemName: "checkmark.circle.fill")
-                        .foregroundColor(AmbrosiaTheme.Cinematic.amber)
+                        .foregroundColor(NodTheme.Cinematic.amber)
                 }
-                .padding(AmbrosiaTheme.Spacing.md)
-                .glassCard(cornerRadius: AmbrosiaTheme.Radius.lg)
+                .padding(NodTheme.Spacing.md)
+                .glassCard(cornerRadius: NodTheme.Radius.lg)
             }
         }
     }
 
     private var delegateLobbyContent: some View {
-        VStack(spacing: AmbrosiaTheme.Spacing.xl) {
+        VStack(spacing: NodTheme.Spacing.xl) {
             // Smoky pulsing waiting indicator
-            HStack(spacing: AmbrosiaTheme.Spacing.sm) {
+            HStack(spacing: NodTheme.Spacing.sm) {
                 Circle()
-                    .fill(AmbrosiaTheme.Cinematic.smokeGray)
+                    .fill(NodTheme.Cinematic.smokeGray)
                     .frame(width: 10, height: 10)
                     .scaleEffect(isPulsing ? 1.4 : 0.8)
                     .animation(.easeInOut(duration: 0.8).repeatForever(autoreverses: true), value: isPulsing)
                 Text("Waiting for Host to start...")
-                    .font(AmbrosiaTheme.Typography.body)
-                    .foregroundColor(AmbrosiaTheme.Cinematic.smokeGray)
+                    .font(NodTheme.Typography.body)
+                    .foregroundColor(NodTheme.Cinematic.smokeGray)
                 Spacer()
             }
-            .padding(AmbrosiaTheme.Spacing.lg)
-            .glassCard(cornerRadius: AmbrosiaTheme.Radius.xl)
+            .padding(NodTheme.Spacing.lg)
+            .glassCard(cornerRadius: NodTheme.Radius.xl)
             .onAppear { isPulsing = true }
 
             if !store.chatManager.availableHosts.isEmpty {
                 Text("Select Host to Join:")
-                    .font(AmbrosiaTheme.Typography.headline)
-                    .foregroundColor(AmbrosiaTheme.Cinematic.pureWhite)
+                    .font(NodTheme.Typography.headline)
+                    .foregroundColor(NodTheme.Cinematic.pureWhite)
                     .frame(maxWidth: .infinity, alignment: .leading)
 
                 ForEach(store.chatManager.availableHosts, id: \.self) { host in
@@ -156,7 +156,7 @@ struct AgentChatView: View {
     private var chatView: some View {
         ScrollViewReader { proxy in
             ScrollView {
-                VStack(spacing: AmbrosiaTheme.Spacing.lg) {
+                VStack(spacing: NodTheme.Spacing.lg) {
                     ForEach(store.chatTranscript) { msg in
                         ChatBubble(message: msg, isMe: msg.agentName.contains("Host"))
                             .id(msg.id)
@@ -165,25 +165,25 @@ struct AgentChatView: View {
                     if let typing = typingAgent {
                         HStack {
                             if typing.contains("Host") { Spacer() }
-                            HStack(spacing: AmbrosiaTheme.Spacing.sm) {
+                            HStack(spacing: NodTheme.Spacing.sm) {
                                 ProgressView()
-                                    .tint(AmbrosiaTheme.Cinematic.amber)
+                                    .tint(NodTheme.Cinematic.amber)
                                     .scaleEffect(0.75)
                                 Text("\(typing) is typing...")
-                                    .font(AmbrosiaTheme.Typography.caption)
+                                    .font(NodTheme.Typography.caption)
                                     .italic()
-                                    .foregroundColor(AmbrosiaTheme.Cinematic.smokeGray)
+                                    .foregroundColor(NodTheme.Cinematic.smokeGray)
                             }
-                            .padding(.horizontal, AmbrosiaTheme.Spacing.lg)
-                            .padding(.vertical, AmbrosiaTheme.Spacing.sm)
-                            .glassCard(cornerRadius: AmbrosiaTheme.Radius.xl)
+                            .padding(.horizontal, NodTheme.Spacing.lg)
+                            .padding(.vertical, NodTheme.Spacing.sm)
+                            .glassCard(cornerRadius: NodTheme.Radius.xl)
                             .transition(.opacity)
                             if !typing.contains("Host") { Spacer() }
                         }
                         .id("TYPING_INDICATOR")
                     }
                 }
-                .padding(AmbrosiaTheme.Spacing.lg)
+                .padding(NodTheme.Spacing.lg)
             }
             .onChange(of: store.chatTranscript.count) {
                 if let last = store.chatTranscript.last {
@@ -361,13 +361,13 @@ struct ChatBubble: View {
 
             VStack(alignment: isMe ? .trailing : .leading, spacing: 4) {
                 Text(message.agentName)
-                    .font(AmbrosiaTheme.Typography.caption)
-                    .foregroundColor(AmbrosiaTheme.Cinematic.smokeGray)
+                    .font(NodTheme.Typography.caption)
+                    .foregroundColor(NodTheme.Cinematic.smokeGray)
                     .padding(.horizontal, 4)
 
                 Text(message.text)
                     .padding(12)
-                    .background(isMe ? AmbrosiaTheme.Cinematic.amber : Color(white: 0.2))
+                    .background(isMe ? NodTheme.Cinematic.amber : Color(white: 0.2))
                     .foregroundColor(isMe ? .black : .white)
                     .cornerRadius(isMe ? 18 : 14, corners: isMe ? [.topLeft, .topRight, .bottomLeft] : [.topLeft, .topRight, .bottomRight])
             }

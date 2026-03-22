@@ -161,7 +161,7 @@ struct KineticWireframe: View {
                         
                         context.stroke(
                             transformedPath,
-                            with: .color(AmbrosiaTheme.Awwwards.inkBlack.opacity(0.15)),
+                            with: .color(NodTheme.Awwwards.inkBlack.opacity(0.15)),
                             lineWidth: 0.5
                         )
                     }

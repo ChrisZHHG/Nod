@@ -32,7 +32,7 @@ struct FloatingNavBar: View {
             
             VStack(spacing: 0) {
                 // Nav Bar Content
-                HStack(spacing: AmbrosiaTheme.Spacing.md) {
+                HStack(spacing: NodTheme.Spacing.md) {
                     // Leading Button
                     if let leading = leadingAction {
                         NavBarButton(icon: leading.icon, action: leading.action)
@@ -45,8 +45,8 @@ struct FloatingNavBar: View {
                     // Title
                     if let title = title {
                         Text(title)
-                            .font(AmbrosiaTheme.Typography.headline)
-                            .foregroundStyle(AmbrosiaTheme.Colors.textPrimary)
+                            .font(NodTheme.Typography.headline)
+                            .foregroundStyle(NodTheme.Colors.textPrimary)
                     }
                     
                     Spacer()
@@ -58,8 +58,8 @@ struct FloatingNavBar: View {
                         Spacer().frame(width: 44)
                     }
                 }
-                .padding(.horizontal, AmbrosiaTheme.Spacing.lg)
-                .padding(.vertical, AmbrosiaTheme.Spacing.md)
+                .padding(.horizontal, NodTheme.Spacing.lg)
+                .padding(.vertical, NodTheme.Spacing.md)
                 .padding(.top, hasDynamicIsland ? 8 : 0) // Extra padding for Dynamic Island
                 
                 Spacer()
@@ -82,13 +82,13 @@ struct NavBarButton: View {
         }) {
             Image(systemName: icon)
                 .font(.system(size: 18, weight: .semibold))
-                .foregroundStyle(AmbrosiaTheme.Colors.textPrimary)
+                .foregroundStyle(NodTheme.Colors.textPrimary)
                 .frame(width: 44, height: 44)
                 .background(.ultraThinMaterial)
                 .clipShape(Circle())
                 .overlay(
                     Circle()
-                        .stroke(AmbrosiaTheme.Colors.glassBorder, lineWidth: 0.5)
+                        .stroke(NodTheme.Colors.glassBorder, lineWidth: 0.5)
                 )
         }
         .buttonStyle(ScaleButtonStyle())
@@ -107,17 +107,17 @@ struct FloatingBottomBar<Content: View>: View {
                 Spacer()
                 
                 content()
-                    .padding(.horizontal, AmbrosiaTheme.Spacing.lg)
-                    .padding(.vertical, AmbrosiaTheme.Spacing.lg)
-                    .padding(.bottom, geometry.safeAreaInsets.bottom > 0 ? 0 : AmbrosiaTheme.Spacing.lg)
+                    .padding(.horizontal, NodTheme.Spacing.lg)
+                    .padding(.vertical, NodTheme.Spacing.lg)
+                    .padding(.bottom, geometry.safeAreaInsets.bottom > 0 ? 0 : NodTheme.Spacing.lg)
                     .background(
-                        RoundedRectangle(cornerRadius: AmbrosiaTheme.Radius.xxl, style: .continuous)
+                        RoundedRectangle(cornerRadius: NodTheme.Radius.xxl, style: .continuous)
                             .fill(.ultraThinMaterial)
                             .overlay(
-                                RoundedRectangle(cornerRadius: AmbrosiaTheme.Radius.xxl, style: .continuous)
-                                    .stroke(AmbrosiaTheme.Colors.glassBorder, lineWidth: 0.5)
+                                RoundedRectangle(cornerRadius: NodTheme.Radius.xxl, style: .continuous)
+                                    .stroke(NodTheme.Colors.glassBorder, lineWidth: 0.5)
                             )
-                            .shadow(color: AmbrosiaTheme.Shadows.cardShadowColor, radius: 20, x: 0, y: -5)
+                            .shadow(color: NodTheme.Shadows.cardShadowColor, radius: 20, x: 0, y: -5)
                     )
             }
             .ignoresSafeArea(edges: .bottom)
@@ -184,8 +184,8 @@ struct FloatingBackButton: View {
         VStack {
             HStack {
                 NavBarButton(icon: "chevron.left", action: action)
-                    .padding(.leading, AmbrosiaTheme.Spacing.lg)
-                    .padding(.top, safeAreaInsets.top + AmbrosiaTheme.Spacing.sm)
+                    .padding(.leading, NodTheme.Spacing.lg)
+                    .padding(.top, safeAreaInsets.top + NodTheme.Spacing.sm)
                 
                 Spacer()
             }

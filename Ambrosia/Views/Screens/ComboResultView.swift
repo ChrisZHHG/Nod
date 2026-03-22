@@ -10,7 +10,7 @@ struct ComboResultView: View {
     
     var body: some View {
         ZStack(alignment: .top) {
-            AmbrosiaTheme.Cinematic.deepBlack.ignoresSafeArea()
+            NodTheme.Cinematic.deepBlack.ignoresSafeArea()
             
             // ── Full-Bleed Hero Image Background ────────────────────────────────
             GeometryReader { geo in
@@ -21,7 +21,7 @@ struct ComboResultView: View {
                             .frame(width: geo.size.width, height: geo.size.height)
                             .clipped()
                     } else {
-                        AmbrosiaTheme.Cinematic.richBrown
+                        NodTheme.Cinematic.richBrown
                             .frame(width: geo.size.width, height: geo.size.height)
                             .overlay(
                                 Image(systemName: "fork.knife")
@@ -34,7 +34,7 @@ struct ComboResultView: View {
             .ignoresSafeArea()
             
             // ── Cinematic Gradient ──────────────────────────────────────────────
-            AmbrosiaTheme.Cinematic.heroOverlay
+            NodTheme.Cinematic.heroOverlay
                 .ignoresSafeArea()
             
             GeometryReader { geo in
@@ -48,12 +48,12 @@ struct ComboResultView: View {
                         VStack(alignment: .leading, spacing: 0) {
                             VStack(alignment: .leading, spacing: 6) {
                                 Text("FEAST FOR \(combo.dishes.count + combo.drinks.count)")
-                                    .font(AmbrosiaTheme.Cinematic.sectionTitle)
+                                    .font(NodTheme.Cinematic.sectionTitle)
                                     .tracking(2.5)
-                                    .foregroundColor(AmbrosiaTheme.Cinematic.amber)
+                                    .foregroundColor(NodTheme.Cinematic.amber)
                                 
                                 Text(combo.optionType)
-                                    .font(AmbrosiaTheme.Cinematic.displayHero)
+                                    .font(NodTheme.Cinematic.displayHero)
                                     .foregroundColor(.white)
                                     .lineLimit(2)
                                     .minimumScaleFactor(0.65)
@@ -65,22 +65,22 @@ struct ComboResultView: View {
                     // ── Quick Stats strip ─────────────────────────────────────────
                     HStack(spacing: 0) {
                         statPill(icon: "dollarsign.circle", value: String(format: "$%.0f", combo.totalPrice), label: "Total")
-                        Divider().frame(height: 30).background(AmbrosiaTheme.Cinematic.glassBorder)
+                        Divider().frame(height: 30).background(NodTheme.Cinematic.glassBorder)
                         statPill(icon: "fork.knife", value: "\(combo.dishes.count)", label: "Dishes")
-                        Divider().frame(height: 30).background(AmbrosiaTheme.Cinematic.glassBorder)
+                        Divider().frame(height: 30).background(NodTheme.Cinematic.glassBorder)
                         statPill(icon: "wineglass", value: "\(combo.drinks.count)", label: "Drinks")
                     }
                     .padding(.vertical, 18)
-                    .background(AmbrosiaTheme.Cinematic.glassDark)
+                    .background(NodTheme.Cinematic.glassDark)
                     .overlay(
                         Rectangle()
-                            .stroke(AmbrosiaTheme.Cinematic.glassBorder, lineWidth: 1)
+                            .stroke(NodTheme.Cinematic.glassBorder, lineWidth: 1)
                     )
                     
                     // ── Reasoning ────────────────────────────────────────────────
                     Text(combo.reasoning)
-                        .font(AmbrosiaTheme.Cinematic.body)
-                        .foregroundColor(AmbrosiaTheme.Cinematic.smokeGray)
+                        .font(NodTheme.Cinematic.body)
+                        .foregroundColor(NodTheme.Cinematic.smokeGray)
                         .lineSpacing(7)
                         .padding(24)
                     
@@ -104,10 +104,10 @@ struct ComboResultView: View {
                             if isRefining {
                                 HStack(spacing: 0) {
                                     TextField("e.g. More seafood, something fried...", text: $refinementText)
-                                        .font(AmbrosiaTheme.Cinematic.body)
+                                        .font(NodTheme.Cinematic.body)
                                         .foregroundColor(.white)
                                         .padding(14)
-                                        .background(AmbrosiaTheme.Cinematic.glassDark)
+                                        .background(NodTheme.Cinematic.glassDark)
                                     
                                     Button(action: {
                                         onRefine(refinementText)
@@ -115,18 +115,18 @@ struct ComboResultView: View {
                                         isRefining = false
                                     }) {
                                         Text("GO")
-                                            .font(AmbrosiaTheme.Cinematic.cta)
-                                            .foregroundColor(AmbrosiaTheme.Cinematic.deepBlack)
+                                            .font(NodTheme.Cinematic.cta)
+                                            .foregroundColor(NodTheme.Cinematic.deepBlack)
                                             .padding(.horizontal, 24)
                                             .frame(maxHeight: .infinity)
-                                            .background(AmbrosiaTheme.Cinematic.amber)
+                                            .background(NodTheme.Cinematic.amber)
                                     }
                                 }
                                 .frame(height: 52)
                                 .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
                                 .overlay(
                                     RoundedRectangle(cornerRadius: 14, style: .continuous)
-                                        .stroke(AmbrosiaTheme.Cinematic.glassBorder, lineWidth: 1)
+                                        .stroke(NodTheme.Cinematic.glassBorder, lineWidth: 1)
                                 )
                             } else {
                                 GlassButton(title: "Refine This Selection", icon: "slider.horizontal.3", variant: .primary) {
@@ -148,9 +148,9 @@ struct ComboResultView: View {
     private func sectionHeader(_ title: String) -> some View {
         HStack {
             Text(title)
-                .font(AmbrosiaTheme.Cinematic.sectionTitle)
+                .font(NodTheme.Cinematic.sectionTitle)
                 .tracking(2.5)
-                .foregroundColor(AmbrosiaTheme.Cinematic.amber)
+                .foregroundColor(NodTheme.Cinematic.amber)
             Spacer()
         }
         .padding(.horizontal, 24)
@@ -163,14 +163,14 @@ struct ComboResultView: View {
             HStack(spacing: 4) {
                 Image(systemName: icon)
                     .font(.system(size: 12, weight: .regular))
-                    .foregroundColor(AmbrosiaTheme.Cinematic.amber)
+                    .foregroundColor(NodTheme.Cinematic.amber)
                 Text(value)
-                    .font(AmbrosiaTheme.Cinematic.itemTitle)
+                    .font(NodTheme.Cinematic.itemTitle)
                     .foregroundColor(.white)
             }
             Text(label)
-                .font(AmbrosiaTheme.Cinematic.caption)
-                .foregroundColor(AmbrosiaTheme.Cinematic.smokeGray)
+                .font(NodTheme.Cinematic.caption)
+                .foregroundColor(NodTheme.Cinematic.smokeGray)
         }
         .frame(maxWidth: .infinity)
     }
@@ -182,13 +182,13 @@ struct InfoChip: View {
     var body: some View {
         HStack(spacing: 6) {
             Image(systemName: icon)
-                .foregroundColor(AmbrosiaTheme.Cinematic.amber)
+                .foregroundColor(NodTheme.Cinematic.amber)
             Text(text)
-                .font(AmbrosiaTheme.Cinematic.sectionTitle)
+                .font(NodTheme.Cinematic.sectionTitle)
         }
         .padding(.vertical, 8)
         .padding(.horizontal, 16)
-        .background(AmbrosiaTheme.Cinematic.glassDark)
+        .background(NodTheme.Cinematic.glassDark)
         .clipShape(Capsule())
         .foregroundStyle(.white)
     }
@@ -201,14 +201,14 @@ struct DishRow: View {
             HStack(alignment: .top, spacing: 16) {
                 VStack(alignment: .leading, spacing: 6) {
                     Text(dish.originalName)
-                        .font(AmbrosiaTheme.Cinematic.itemTitle)
+                        .font(NodTheme.Cinematic.itemTitle)
                         .foregroundColor(.white)
                         .lineLimit(2)
                         
                     if let desc = dish.description, !desc.isEmpty {
                         Text(desc)
-                            .font(AmbrosiaTheme.Cinematic.caption)
-                            .foregroundColor(AmbrosiaTheme.Cinematic.smokeGray)
+                            .font(NodTheme.Cinematic.caption)
+                            .foregroundColor(NodTheme.Cinematic.smokeGray)
                             .lineLimit(2)
                     }
                     
@@ -243,8 +243,8 @@ struct DishRow: View {
                 Spacer()
                 if let price = dish.price {
                     Text(String(format: "$%.2f", price))
-                        .font(AmbrosiaTheme.Cinematic.body)
-                        .foregroundColor(AmbrosiaTheme.Cinematic.smokeGray)
+                        .font(NodTheme.Cinematic.body)
+                        .foregroundColor(NodTheme.Cinematic.smokeGray)
                         .padding(.top, 4)
                 }
             }
@@ -258,17 +258,17 @@ struct DishRow: View {
                             .scaledToFill()
                             .frame(height: 180)
                             .frame(maxWidth: .infinity)
-                            .clipShape(RoundedRectangle(cornerRadius: AmbrosiaTheme.Radius.lg, style: .continuous))
+                            .clipShape(RoundedRectangle(cornerRadius: NodTheme.Radius.lg, style: .continuous))
                     } else if phase.error != nil {
                         // Error State, hidden
                         EmptyView()
                     } else {
                         // Loading State
-                        RoundedRectangle(cornerRadius: AmbrosiaTheme.Radius.lg, style: .continuous)
-                            .fill(AmbrosiaTheme.Cinematic.glassDark)
+                        RoundedRectangle(cornerRadius: NodTheme.Radius.lg, style: .continuous)
+                            .fill(NodTheme.Cinematic.glassDark)
                             .frame(height: 180)
                             .frame(maxWidth: .infinity)
-                            .overlay(ProgressView().tint(AmbrosiaTheme.Cinematic.amber))
+                            .overlay(ProgressView().tint(NodTheme.Cinematic.amber))
                     }
                 }
             }
@@ -277,12 +277,12 @@ struct DishRow: View {
         .padding(.vertical, 18)
         .background(
             Rectangle()
-                .fill(AmbrosiaTheme.Cinematic.glassDark.opacity(0.4))
+                .fill(NodTheme.Cinematic.glassDark.opacity(0.4))
         )
         .overlay(
             Rectangle()
                 .frame(height: 1)
-                .foregroundColor(AmbrosiaTheme.Cinematic.glassBorder),
+                .foregroundColor(NodTheme.Cinematic.glassBorder),
             alignment: .bottom
         )
     }
@@ -294,16 +294,16 @@ struct DrinkRow: View {
         HStack(alignment: .top, spacing: 16) {
             Image(systemName: drink.type == "Alcoholic" ? "wineglass.fill" : "cup.and.saucer.fill")
                 .font(.system(size: 16))
-                .foregroundColor(AmbrosiaTheme.Cinematic.amber)
+                .foregroundColor(NodTheme.Cinematic.amber)
                 .padding(.top, 3)
             
             VStack(alignment: .leading, spacing: 4) {
                 Text(drink.name)
-                    .font(AmbrosiaTheme.Cinematic.itemTitle)
+                    .font(NodTheme.Cinematic.itemTitle)
                     .foregroundColor(.white)
                 Text(drink.pairingReason)
-                    .font(AmbrosiaTheme.Cinematic.body)
-                    .foregroundColor(AmbrosiaTheme.Cinematic.smokeGray)
+                    .font(NodTheme.Cinematic.body)
+                    .foregroundColor(NodTheme.Cinematic.smokeGray)
                     .lineLimit(3)
                     .lineSpacing(4)
             }
@@ -313,12 +313,12 @@ struct DrinkRow: View {
         .padding(.vertical, 18)
         .background(
             Rectangle()
-                .fill(AmbrosiaTheme.Cinematic.glassDark.opacity(0.4))
+                .fill(NodTheme.Cinematic.glassDark.opacity(0.4))
         )
         .overlay(
             Rectangle()
                 .frame(height: 1)
-                .foregroundColor(AmbrosiaTheme.Cinematic.glassBorder),
+                .foregroundColor(NodTheme.Cinematic.glassBorder),
             alignment: .bottom
         )
     }

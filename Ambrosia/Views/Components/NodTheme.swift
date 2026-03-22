@@ -2,7 +2,7 @@ import SwiftUI
 
 // MARK: - Ambrosia Design System (Modern Minimal / 2025)
 
-struct AmbrosiaTheme {
+struct NodTheme {
     
     // MARK: - Spacing Tokens
     struct Spacing {
@@ -270,7 +270,7 @@ extension View {
 // MARK: - Glass Card Modifier
 
 struct GlassCardModifier: ViewModifier {
-    var cornerRadius: CGFloat = AmbrosiaTheme.Radius.xxl
+    var cornerRadius: CGFloat = NodTheme.Radius.xxl
     var addShadow: Bool = true
     
     func body(content: Content) -> some View {
@@ -302,12 +302,12 @@ struct GlassCardModifier: ViewModifier {
 }
 
 extension View {
-    func glassCard(cornerRadius: CGFloat = AmbrosiaTheme.Radius.xxl, shadow: Bool = true) -> some View {
+    func glassCard(cornerRadius: CGFloat = NodTheme.Radius.xxl, shadow: Bool = true) -> some View {
         modifier(GlassCardModifier(cornerRadius: cornerRadius, addShadow: shadow))
     }
     
     // Legacy support
-    func ambrosiaGlass(cornerRadius: CGFloat = AmbrosiaTheme.Radius.xl, shadow: CGFloat = 12) -> some View {
+    func ambrosiaGlass(cornerRadius: CGFloat = NodTheme.Radius.xl, shadow: CGFloat = 12) -> some View {
         modifier(GlassCardModifier(cornerRadius: cornerRadius, addShadow: shadow > 0))
     }
 }

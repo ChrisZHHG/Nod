@@ -50,7 +50,7 @@ final class ConsensusParserAgent: @unchecked Sendable {
         )
         
         guard let data = jsonString.data(using: .utf8) else {
-            throw AmbrosiaError.recommendationFailed(reason: "Consensus Parser returned empty data.")
+            throw NodError.recommendationFailed(reason: "Consensus Parser returned empty data.")
         }
         
         let decoder = JSONDecoder()
@@ -59,7 +59,7 @@ final class ConsensusParserAgent: @unchecked Sendable {
             return combo
         } catch {
             print("[ConsensusParserAgent] JSON Decode Error: \(error)")
-            throw AmbrosiaError.recommendationFailed(reason: "Failed to decode Consensus JSON: \(error.localizedDescription)")
+            throw NodError.recommendationFailed(reason: "Failed to decode Consensus JSON: \(error.localizedDescription)")
         }
     }
 }

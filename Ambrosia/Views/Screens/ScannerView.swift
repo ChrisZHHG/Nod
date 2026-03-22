@@ -38,13 +38,13 @@ struct ScannerView: View {
                     }
                     Spacer()
                 }
-                .padding(.horizontal, AmbrosiaTheme.Spacing.xl)
-                .padding(.top, AmbrosiaTheme.Spacing.lg)
+                .padding(.horizontal, NodTheme.Spacing.xl)
+                .padding(.top, NodTheme.Spacing.lg)
                 
                 Spacer()
                 
                 // Bottom Bar Controls
-                VStack(spacing: AmbrosiaTheme.Spacing.lg) {
+                VStack(spacing: NodTheme.Spacing.lg) {
                     // Feedback Text
                     if !images.isEmpty {
                         Text("\(images.count) \(images.count == 1 ? "Photo" : "Photos") captured")
@@ -60,7 +60,7 @@ struct ScannerView: View {
                             )
                     }
 
-                    HStack(spacing: AmbrosiaTheme.Spacing.xl) {
+                    HStack(spacing: NodTheme.Spacing.xl) {
                         Spacer()
 
                         // Capture Button — glass ring with white fill
@@ -90,16 +90,16 @@ struct ScannerView: View {
                                 Image(systemName: "arrow.right")
                                     .font(.system(size: 16, weight: .bold))
                             }
-                            .foregroundColor(AmbrosiaTheme.Cinematic.deepBlack)
+                            .foregroundColor(NodTheme.Cinematic.deepBlack)
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 16)
                             .background(
                                 RoundedRectangle(cornerRadius: 14, style: .continuous)
-                                    .fill(AmbrosiaTheme.Cinematic.amber)
+                                    .fill(NodTheme.Cinematic.amber)
                             )
                         }
                         .buttonStyle(.plain)
-                        .padding(.horizontal, AmbrosiaTheme.Spacing.xxl)
+                        .padding(.horizontal, NodTheme.Spacing.xxl)
                     }
                 }
                 .padding(.vertical, 20)

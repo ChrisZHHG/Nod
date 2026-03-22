@@ -10,9 +10,9 @@ private struct StepperButton: View {
         Button(action: action) {
             Image(systemName: icon)
                 .font(.system(size: 18, weight: .bold))
-                .foregroundStyle(AmbrosiaTheme.Cinematic.pureWhite)
+                .foregroundStyle(NodTheme.Cinematic.pureWhite)
                 .frame(width: 44, height: 44)
-                .background(AmbrosiaTheme.Cinematic.glassDark)
+                .background(NodTheme.Cinematic.glassDark)
                 .clipShape(Circle())
                 .contentShape(Circle())
         }
@@ -49,14 +49,14 @@ struct ProgressiveWizardView: View {
                     .blur(radius: 40)
                     .overlay(Color.black.opacity(0.4))
             } else {
-                AmbrosiaTheme.Cinematic.heroOverlay.ignoresSafeArea()
+                NodTheme.Cinematic.heroOverlay.ignoresSafeArea()
             }
 
             VStack {
                 // Header Progress
                 ProgressView(value: Double(currentStep + 1), total: 3.0)
                     .progressViewStyle(.linear)
-                    .tint(AmbrosiaTheme.Cinematic.amber)
+                    .tint(NodTheme.Cinematic.amber)
                     .padding(.horizontal, 40)
                     .padding(.top, 20)
 
@@ -134,7 +134,7 @@ struct ProgressiveWizardView: View {
 
             // Floating Bottom Navigation
             FloatingBottomBar {
-                HStack(spacing: AmbrosiaTheme.Spacing.md) {
+                HStack(spacing: NodTheme.Spacing.md) {
                     if currentStep > 0 {
                         GlassButton(title: "Back", icon: "chevron.left", variant: .secondary) {
                             withAnimation { currentStep -= 1 }
@@ -164,12 +164,12 @@ struct GroupSizeCard: View {
 
     var body: some View {
         WizardCard(title: "How many people?") {
-            VStack(spacing: AmbrosiaTheme.Spacing.xl) {
+            VStack(spacing: NodTheme.Spacing.xl) {
                 Text("\(headcount)")
                     .font(.system(size: 80, weight: .bold, design: .rounded))
-                    .foregroundColor(AmbrosiaTheme.Cinematic.pureWhite)
+                    .foregroundColor(NodTheme.Cinematic.pureWhite)
 
-                HStack(spacing: AmbrosiaTheme.Spacing.xxl) {
+                HStack(spacing: NodTheme.Spacing.xxl) {
                     StepperButton(icon: "minus") {
                         if headcount > 2 { onUpdate(headcount - 1) }
                     }
@@ -190,29 +190,29 @@ struct VetoCard: View {
     var body: some View {
         WizardCard(title: "Any absolute vetoes?") {
             ScrollView {
-                LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: AmbrosiaTheme.Spacing.md) {
+                LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: NodTheme.Spacing.md) {
                     ForEach(options, id: \.0) { option in
                         let isSelected = selections.contains(option.0)
                         Button(action: {
                             HapticFeedback.selection.trigger()
                             onToggle(option.0)
                         }) {
-                            VStack(spacing: AmbrosiaTheme.Spacing.sm) {
+                            VStack(spacing: NodTheme.Spacing.sm) {
                                 Text(option.1).font(.system(size: 36))
                                 Text(option.0)
-                                    .font(AmbrosiaTheme.Typography.caption)
-                                    .padding(.vertical, AmbrosiaTheme.Spacing.sm)
-                                    .padding(.horizontal, AmbrosiaTheme.Spacing.md)
+                                    .font(NodTheme.Typography.caption)
+                                    .padding(.vertical, NodTheme.Spacing.sm)
+                                    .padding(.horizontal, NodTheme.Spacing.md)
                             }
                             .frame(maxWidth: .infinity)
-                            .padding(.vertical, AmbrosiaTheme.Spacing.md)
-                            .foregroundColor(isSelected ? AmbrosiaTheme.Cinematic.deepBlack : AmbrosiaTheme.Cinematic.pureWhite)
+                            .padding(.vertical, NodTheme.Spacing.md)
+                            .foregroundColor(isSelected ? NodTheme.Cinematic.deepBlack : NodTheme.Cinematic.pureWhite)
                             .background(.ultraThinMaterial)
                             .overlay(
-                                RoundedRectangle(cornerRadius: AmbrosiaTheme.Radius.lg, style: .continuous)
-                                    .fill(AmbrosiaTheme.Cinematic.amber.opacity(isSelected ? 0.85 : 0))
+                                RoundedRectangle(cornerRadius: NodTheme.Radius.lg, style: .continuous)
+                                    .fill(NodTheme.Cinematic.amber.opacity(isSelected ? 0.85 : 0))
                             )
-                            .clipShape(RoundedRectangle(cornerRadius: AmbrosiaTheme.Radius.lg, style: .continuous))
+                            .clipShape(RoundedRectangle(cornerRadius: NodTheme.Radius.lg, style: .continuous))
                         }
                     }
                 }
@@ -229,29 +229,29 @@ struct CravingCard: View {
     var body: some View {
         WizardCard(title: "What are we craving?") {
             ScrollView {
-                LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: AmbrosiaTheme.Spacing.md) {
+                LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: NodTheme.Spacing.md) {
                     ForEach(options, id: \.0) { option in
                         let isSelected = selections.contains(option.0)
                         Button(action: {
                             HapticFeedback.selection.trigger()
                             onToggle(option.0)
                         }) {
-                            VStack(spacing: AmbrosiaTheme.Spacing.sm) {
+                            VStack(spacing: NodTheme.Spacing.sm) {
                                 Text(option.1).font(.system(size: 36))
                                 Text(option.0)
-                                    .font(AmbrosiaTheme.Typography.caption)
-                                    .padding(.vertical, AmbrosiaTheme.Spacing.sm)
-                                    .padding(.horizontal, AmbrosiaTheme.Spacing.md)
+                                    .font(NodTheme.Typography.caption)
+                                    .padding(.vertical, NodTheme.Spacing.sm)
+                                    .padding(.horizontal, NodTheme.Spacing.md)
                             }
                             .frame(maxWidth: .infinity)
-                            .padding(.vertical, AmbrosiaTheme.Spacing.md)
-                            .foregroundColor(isSelected ? AmbrosiaTheme.Cinematic.deepBlack : AmbrosiaTheme.Cinematic.pureWhite)
+                            .padding(.vertical, NodTheme.Spacing.md)
+                            .foregroundColor(isSelected ? NodTheme.Cinematic.deepBlack : NodTheme.Cinematic.pureWhite)
                             .background(.ultraThinMaterial)
                             .overlay(
-                                RoundedRectangle(cornerRadius: AmbrosiaTheme.Radius.lg, style: .continuous)
-                                    .fill(AmbrosiaTheme.Cinematic.amber.opacity(isSelected ? 0.85 : 0))
+                                RoundedRectangle(cornerRadius: NodTheme.Radius.lg, style: .continuous)
+                                    .fill(NodTheme.Cinematic.amber.opacity(isSelected ? 0.85 : 0))
                             )
-                            .clipShape(RoundedRectangle(cornerRadius: AmbrosiaTheme.Radius.lg, style: .continuous))
+                            .clipShape(RoundedRectangle(cornerRadius: NodTheme.Radius.lg, style: .continuous))
                         }
                     }
                 }
@@ -268,7 +268,7 @@ struct MoodCard: View {
 
     var body: some View {
         WizardCard(title: "What's the vibe tonight?") {
-            VStack(spacing: AmbrosiaTheme.Spacing.md) {
+            VStack(spacing: NodTheme.Spacing.md) {
                 ForEach(moods, id: \.self) { m in
                     let isSelected = mood == m
                     Button(action: {
@@ -276,28 +276,28 @@ struct MoodCard: View {
                         onUpdate(m)
                     }) {
                         Text(m)
-                            .font(AmbrosiaTheme.Typography.headline)
+                            .font(NodTheme.Typography.headline)
                             .frame(maxWidth: .infinity)
-                            .padding(.vertical, AmbrosiaTheme.Spacing.lg)
-                            .foregroundColor(isSelected ? AmbrosiaTheme.Cinematic.deepBlack : AmbrosiaTheme.Cinematic.pureWhite)
+                            .padding(.vertical, NodTheme.Spacing.lg)
+                            .foregroundColor(isSelected ? NodTheme.Cinematic.deepBlack : NodTheme.Cinematic.pureWhite)
                             .background(.ultraThinMaterial)
                             .overlay(
-                                RoundedRectangle(cornerRadius: AmbrosiaTheme.Radius.lg, style: .continuous)
-                                    .fill(AmbrosiaTheme.Cinematic.amber.opacity(isSelected ? 0.85 : 0))
+                                RoundedRectangle(cornerRadius: NodTheme.Radius.lg, style: .continuous)
+                                    .fill(NodTheme.Cinematic.amber.opacity(isSelected ? 0.85 : 0))
                             )
-                            .clipShape(RoundedRectangle(cornerRadius: AmbrosiaTheme.Radius.lg, style: .continuous))
+                            .clipShape(RoundedRectangle(cornerRadius: NodTheme.Radius.lg, style: .continuous))
                     }
                 }
                 TextField("Other...", text: .init(
                     get: { mood },
                     set: { onUpdate($0) }
                 ))
-                .font(AmbrosiaTheme.Typography.headline)
-                .padding(.vertical, AmbrosiaTheme.Spacing.lg)
-                .padding(.horizontal, AmbrosiaTheme.Spacing.lg)
+                .font(NodTheme.Typography.headline)
+                .padding(.vertical, NodTheme.Spacing.lg)
+                .padding(.horizontal, NodTheme.Spacing.lg)
                 .background(.ultraThinMaterial)
-                .clipShape(RoundedRectangle(cornerRadius: AmbrosiaTheme.Radius.lg, style: .continuous))
-                .foregroundColor(AmbrosiaTheme.Cinematic.pureWhite)
+                .clipShape(RoundedRectangle(cornerRadius: NodTheme.Radius.lg, style: .continuous))
+                .foregroundColor(NodTheme.Cinematic.pureWhite)
             }
         }
     }
@@ -317,14 +317,14 @@ struct WizardCard<Content: View>: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
             Text(title)
-                .font(AmbrosiaTheme.Typography.header)
-                .foregroundColor(AmbrosiaTheme.Cinematic.pureWhite)
+                .font(NodTheme.Typography.header)
+                .foregroundColor(NodTheme.Cinematic.pureWhite)
                 .padding(.bottom, 10)
 
             content
         }
         .padding(30)
-        .glassCard(cornerRadius: AmbrosiaTheme.Radius.xxl)
+        .glassCard(cornerRadius: NodTheme.Radius.xxl)
         .shadow(color: .black.opacity(0.3), radius: 20, y: 10)
         .padding(.horizontal, 20)
     }

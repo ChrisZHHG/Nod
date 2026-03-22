@@ -135,7 +135,7 @@ struct ModeSelectionContent: View {
             heroLayer
 
             // Gradient overlay — lighter at top so glass text reads
-            AmbrosiaTheme.Cinematic.heroOverlay.ignoresSafeArea()
+            NodTheme.Cinematic.heroOverlay.ignoresSafeArea()
 
             // Top-left title stack + bottom buttons
             VStack(alignment: .leading, spacing: 0) {
@@ -226,7 +226,7 @@ struct ModeSelectionContent: View {
                 Text("O")
                     .font(.cinematicHero(size: 88))
                     .fontWeight(.black)
-                    .foregroundColor(AmbrosiaTheme.Cinematic.amber)
+                    .foregroundColor(NodTheme.Cinematic.amber)
                     .rotation3DEffect(
                         .degrees(nodTilt),
                         axis: (x: 1, y: 0, z: 0),
@@ -278,7 +278,7 @@ struct ModeSelectionContent: View {
                             startPoint: .topTrailing, endPoint: .bottomLeading
                         )
                         Circle()
-                            .fill(AmbrosiaTheme.Cinematic.amber.opacity(0.07))
+                            .fill(NodTheme.Cinematic.amber.opacity(0.07))
                             .frame(width: geo.size.width * 1.4)
                             .offset(y: -geo.size.height * 0.3)
                             .blur(radius: 80)
@@ -419,7 +419,7 @@ struct ModeSelectionContent: View {
                 // Outer ring, highlight on active
                 Circle()
                     .stroke(
-                        AmbrosiaTheme.Cinematic.amber.opacity(isActive ? 1.0 : 0.30),
+                        NodTheme.Cinematic.amber.opacity(isActive ? 1.0 : 0.30),
                         lineWidth: isActive ? 2.5 : 1
                     )
                     .frame(width: 90, height: 90)
@@ -428,13 +428,13 @@ struct ModeSelectionContent: View {
                 Circle()
                     .fill(
                         isGroup
-                            ? AmbrosiaTheme.Cinematic.amber
+                            ? NodTheme.Cinematic.amber
                             : Color(hex: "F5F0E8")
                     )
                     .frame(width: 78, height: 78)
                     .shadow(
                         color: isGroup
-                            ? AmbrosiaTheme.Cinematic.amber.opacity(isActive ? 0.6 : 0.25)
+                            ? NodTheme.Cinematic.amber.opacity(isActive ? 0.6 : 0.25)
                             : Color(hex: "F5F0E8").opacity(isActive ? 0.45 : 0.15),
                         radius: isActive ? 28 : 12
                     )
@@ -444,15 +444,15 @@ struct ModeSelectionContent: View {
                 case .agentChat:
                     Image(systemName: "person.wave.2.fill")
                         .font(.system(size: 30, weight: .semibold))
-                        .foregroundColor(AmbrosiaTheme.Cinematic.deepBlack)
+                        .foregroundColor(NodTheme.Cinematic.deepBlack)
                 case .group:
                     Image(systemName: "person.3.fill")
                         .font(.system(size: 28, weight: .semibold))
-                        .foregroundColor(AmbrosiaTheme.Cinematic.deepBlack)
+                        .foregroundColor(NodTheme.Cinematic.deepBlack)
                 case .individual:
                     Image(systemName: "person.fill")
                         .font(.system(size: 34, weight: .medium))
-                        .foregroundColor(AmbrosiaTheme.Cinematic.deepBlack.opacity(0.75))
+                        .foregroundColor(NodTheme.Cinematic.deepBlack.opacity(0.75))
                 }
             }
             .scaleEffect(isActive ? 1.10 : (isOtherActive ? 0.92 : 1.0))

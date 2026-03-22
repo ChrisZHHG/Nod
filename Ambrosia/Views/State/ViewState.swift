@@ -14,5 +14,5 @@ enum AppState: Equatable, Sendable {
     case decoding(progress: Double)
     case reasoning(stage: String)
     case verifying
-    case error(AmbrosiaError)
+    case error(NodError)
 }

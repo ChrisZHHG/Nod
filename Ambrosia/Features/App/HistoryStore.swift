@@ -155,18 +155,18 @@ struct HistoryView: View {
     }
     
     private var emptyStateView: some View {
-        VStack(spacing: AmbrosiaTheme.Spacing.lg) {
+        VStack(spacing: NodTheme.Spacing.lg) {
             Image(systemName: "clock.arrow.circlepath")
                 .font(.system(size: 64))
-                .foregroundStyle(AmbrosiaTheme.Colors.textTertiary)
+                .foregroundStyle(NodTheme.Colors.textTertiary)
             
             Text("No History Yet")
-                .font(AmbrosiaTheme.Typography.title)
-                .foregroundStyle(AmbrosiaTheme.Colors.textSecondary)
+                .font(NodTheme.Typography.title)
+                .foregroundStyle(NodTheme.Colors.textSecondary)
             
             Text("Your past recommendations will appear here")
-                .font(AmbrosiaTheme.Typography.body)
-                .foregroundStyle(AmbrosiaTheme.Colors.textTertiary)
+                .font(NodTheme.Typography.body)
+                .foregroundStyle(NodTheme.Colors.textTertiary)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
@@ -197,25 +197,25 @@ struct HistoryRowView: View {
     let entry: HistoryEntry
     
     var body: some View {
-        HStack(spacing: AmbrosiaTheme.Spacing.md) {
+        HStack(spacing: NodTheme.Spacing.md) {
             // Mode Icon
             Image(systemName: entry.mode == .individual ? "person.fill" : "person.3.fill")
                 .font(.system(size: 20))
-                .foregroundStyle(AmbrosiaTheme.Gradients.coralSunset)
+                .foregroundStyle(NodTheme.Gradients.coralSunset)
                 .frame(width: 40, height: 40)
-                .background(AmbrosiaTheme.SemanticColors.surface)
+                .background(NodTheme.SemanticColors.surface)
                 .clipShape(Circle())
             
             // Content
             VStack(alignment: .leading, spacing: 4) {
                 Text(dishName)
-                    .font(AmbrosiaTheme.Typography.headline)
-                    .foregroundStyle(AmbrosiaTheme.Colors.textPrimary)
+                    .font(NodTheme.Typography.headline)
+                    .foregroundStyle(NodTheme.Colors.textPrimary)
                     .lineLimit(1)
                 
                 Text(formattedDate)
-                    .font(AmbrosiaTheme.Typography.caption)
-                    .foregroundStyle(AmbrosiaTheme.Colors.textTertiary)
+                    .font(NodTheme.Typography.caption)
+                    .foregroundStyle(NodTheme.Colors.textTertiary)
             }
             
             Spacer()
@@ -223,8 +223,8 @@ struct HistoryRowView: View {
             // Restaurant
             if let restaurant = entry.restaurantName {
                 Text(restaurant)
-                    .font(AmbrosiaTheme.Typography.caption)
-                    .foregroundStyle(AmbrosiaTheme.Colors.textSecondary)
+                    .font(NodTheme.Typography.caption)
+                    .foregroundStyle(NodTheme.Colors.textSecondary)
                     .lineLimit(1)
             }
         }

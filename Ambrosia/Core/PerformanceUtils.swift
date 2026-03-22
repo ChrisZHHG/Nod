@@ -32,11 +32,11 @@ struct SkeletonTile: View {
     @State private var shimmerOffset: CGFloat = -100
 
     var body: some View {
-        RoundedRectangle(cornerRadius: AmbrosiaTheme.Radius.lg, style: .continuous)
-            .fill(AmbrosiaTheme.Colors.surfaceSecondary)
+        RoundedRectangle(cornerRadius: NodTheme.Radius.lg, style: .continuous)
+            .fill(NodTheme.Colors.surfaceSecondary)
             .overlay(
                 GeometryReader { geo in
-                    RoundedRectangle(cornerRadius: AmbrosiaTheme.Radius.lg, style: .continuous)
+                    RoundedRectangle(cornerRadius: NodTheme.Radius.lg, style: .continuous)
                         .fill(
                             LinearGradient(
                                 colors: [.clear, Color.white.opacity(0.08), .clear],
@@ -53,7 +53,7 @@ struct SkeletonTile: View {
                 }
                 .clipped()
             )
-            .clipShape(RoundedRectangle(cornerRadius: AmbrosiaTheme.Radius.lg, style: .continuous))
+            .clipShape(RoundedRectangle(cornerRadius: NodTheme.Radius.lg, style: .continuous))
     }
 }
 
@@ -107,7 +107,7 @@ struct CachedAsyncImage: View {
                 // Fallback for failed loads
                 Image(systemName: "photo")
                     .font(.largeTitle)
-                    .foregroundStyle(AmbrosiaTheme.Colors.textTertiary)
+                    .foregroundStyle(NodTheme.Colors.textTertiary)
             }
         }
         .task(id: url) {
@@ -159,8 +159,8 @@ enum LaunchPerformance {
     
     static func preloadCriticalAssets() {
         // Preload theme colors (they're already computed, this just ensures they're cached)
-        _ = AmbrosiaTheme.Colors.coralStart
-        _ = AmbrosiaTheme.Gradients.coralSunset
+        _ = NodTheme.Colors.coralStart
+        _ = NodTheme.Gradients.coralSunset
         
         // Warm up SF Symbols cache
         _ = Image(systemName: "fork.knife.circle.fill")
@@ -180,7 +180,7 @@ extension View {
 
 // MARK: - App Launch Integration
 
-extension AmbrosiaApp {
+extension NodApp {
     static func performLaunchOptimizations() {
         LaunchPerformance.measureLaunchTime()
         LaunchPerformance.preloadCriticalAssets()

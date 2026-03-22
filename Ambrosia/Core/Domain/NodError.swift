@@ -1,7 +1,7 @@
 import Foundation
 
 /// Core strict-type errors for the entire Ambrosia system
-enum AmbrosiaError: Error, Equatable, LocalizedError, Sendable {
+enum NodError: Error, Equatable, LocalizedError, Sendable {
     // Pipeline Errors
     case noImagesCaptured
     

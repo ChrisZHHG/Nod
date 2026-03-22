@@ -10,7 +10,7 @@ struct BentoGrid<Content: View>: View {
     
     init(
         columns: Int = 2,
-        spacing: CGFloat = AmbrosiaTheme.Bento.spacing,
+        spacing: CGFloat = NodTheme.Bento.spacing,
         @ViewBuilder content: @escaping () -> Content
     ) {
         self.columns = columns
@@ -47,10 +47,10 @@ enum BentoTileSize {
     
     var minHeight: CGFloat {
         switch self {
-        case .small: return AmbrosiaTheme.Bento.tileMinHeight
-        case .medium: return AmbrosiaTheme.Bento.tileMinHeight
-        case .tall: return AmbrosiaTheme.Bento.tileLargeHeight * 1.5
-        case .large: return AmbrosiaTheme.Bento.tileLargeHeight
+        case .small: return NodTheme.Bento.tileMinHeight
+        case .medium: return NodTheme.Bento.tileMinHeight
+        case .tall: return NodTheme.Bento.tileLargeHeight * 1.5
+        case .large: return NodTheme.Bento.tileLargeHeight
         }
     }
 }
@@ -58,7 +58,7 @@ enum BentoTileSize {
 // MARK: - Bento Tile
 
 /// A single tile in the Bento Grid
-struct AmbrosiaBentoTile<Content: View>: View {
+struct NodBentoTile<Content: View>: View {
     let size: BentoTileSize
     let action: (() -> Void)?
     @ViewBuilder let content: () -> Content
@@ -84,7 +84,7 @@ struct AmbrosiaBentoTile<Content: View>: View {
                 }) {
                     tileContent
                 }
-                .buttonStyle(AmbrosiaBentoTileButtonStyle())
+                .buttonStyle(NodBentoTileButtonStyle())
             } else {
                 tileContent
             }
@@ -100,12 +100,12 @@ struct AmbrosiaBentoTile<Content: View>: View {
 
 // MARK: - Bento Tile Button Style
 
-struct AmbrosiaBentoTileButtonStyle: ButtonStyle {
+struct NodBentoTileButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .scaleEffect(configuration.isPressed ? 0.96 : 1.0)
             .opacity(configuration.isPressed ? 0.9 : 1.0)
-            .animation(AmbrosiaTheme.Animation.microInteraction, value: configuration.isPressed)
+            .animation(NodTheme.Animation.microInteraction, value: configuration.isPressed)
     }
 }
 
@@ -123,8 +123,8 @@ struct BentoHeroTile: View {
     @State private var animateIcon = false
     
     var body: some View {
-        AmbrosiaBentoTile(size: size, action: action) {
-            VStack(alignment: .leading, spacing: AmbrosiaTheme.Spacing.md) {
+        NodBentoTile(size: size, action: action) {
+            VStack(alignment: .leading, spacing: NodTheme.Spacing.md) {
                 // High contrast, clean icon with no pastel blobs
                 ZStack {
                     Circle()
@@ -140,18 +140,18 @@ struct BentoHeroTile: View {
                 
                 Spacer()
                 
-                VStack(alignment: .leading, spacing: AmbrosiaTheme.Spacing.xs) {
+                VStack(alignment: .leading, spacing: NodTheme.Spacing.xs) {
                     Text(title)
-                        .font(AmbrosiaTheme.Typography.headline)
-                        .foregroundStyle(AmbrosiaTheme.Colors.textPrimary)
+                        .font(NodTheme.Typography.headline)
+                        .foregroundStyle(NodTheme.Colors.textPrimary)
                     
                     Text(subtitle)
-                        .font(AmbrosiaTheme.Typography.caption)
-                        .foregroundStyle(AmbrosiaTheme.Colors.textSecondary)
+                        .font(NodTheme.Typography.caption)
+                        .foregroundStyle(NodTheme.Colors.textSecondary)
                         .lineLimit(2)
                 }
             }
-            .padding(AmbrosiaTheme.Spacing.xl)
+            .padding(NodTheme.Spacing.xl)
             .frame(maxWidth: .infinity, alignment: .leading)
         }
         .onAppear {
@@ -168,8 +168,8 @@ struct BentoStatTile: View {
     let color: Color
     
     var body: some View {
-        AmbrosiaBentoTile(size: .small) {
-            VStack(alignment: .leading, spacing: AmbrosiaTheme.Spacing.sm) {
+        NodBentoTile(size: .small) {
+            VStack(alignment: .leading, spacing: NodTheme.Spacing.sm) {
                 Image(systemName: icon)
                     .font(.system(size: 20, weight: .medium))
                     .foregroundStyle(color)
@@ -177,14 +177,14 @@ struct BentoStatTile: View {
                 Spacer()
                 
                 Text(value)
-                    .font(AmbrosiaTheme.Typography.bentoNumber)
-                    .foregroundStyle(AmbrosiaTheme.Colors.textPrimary)
+                    .font(NodTheme.Typography.bentoNumber)
+                    .foregroundStyle(NodTheme.Colors.textPrimary)
                 
                 Text(label)
-                    .font(AmbrosiaTheme.Typography.caption)
-                    .foregroundStyle(AmbrosiaTheme.Colors.textSecondary)
+                    .font(NodTheme.Typography.caption)
+                    .foregroundStyle(NodTheme.Colors.textSecondary)
             }
-            .padding(AmbrosiaTheme.Spacing.xl)
+            .padding(NodTheme.Spacing.xl)
             .frame(maxWidth: .infinity, alignment: .leading)
         }
     }
@@ -197,27 +197,27 @@ struct BentoInfoTile: View {
     let gradient: LinearGradient
     
     var body: some View {
-        AmbrosiaBentoTile(size: .medium) {
-            HStack(spacing: AmbrosiaTheme.Spacing.lg) {
+        NodBentoTile(size: .medium) {
+            HStack(spacing: NodTheme.Spacing.lg) {
                 // Gradient Accent Bar
                 RoundedRectangle(cornerRadius: 4)
                     .fill(gradient)
                     .frame(width: 4)
                 
-                VStack(alignment: .leading, spacing: AmbrosiaTheme.Spacing.xs) {
+                VStack(alignment: .leading, spacing: NodTheme.Spacing.xs) {
                     Text(title)
-                        .font(AmbrosiaTheme.Typography.headline)
-                        .foregroundStyle(AmbrosiaTheme.Colors.textPrimary)
+                        .font(NodTheme.Typography.headline)
+                        .foregroundStyle(NodTheme.Colors.textPrimary)
                     
                     Text(description)
-                        .font(AmbrosiaTheme.Typography.subheadline)
-                        .foregroundStyle(AmbrosiaTheme.Colors.textSecondary)
+                        .font(NodTheme.Typography.subheadline)
+                        .foregroundStyle(NodTheme.Colors.textSecondary)
                         .lineLimit(2)
                 }
                 
                 Spacer()
             }
-            .padding(AmbrosiaTheme.Spacing.xl)
+            .padding(NodTheme.Spacing.xl)
         }
     }
 }
