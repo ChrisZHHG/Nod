@@ -56,7 +56,7 @@ final class SafetyAgent: SafetyAgentProtocol, @unchecked Sendable {
         let result = try parseAuditResult(jsonString)
         
         if !result.isSafe {
-            throw NSError(domain: "AmbrosiaSafe", code: 403, userInfo: [
+            throw NSError(domain: "NodSafe", code: 403, userInfo: [
                 NSLocalizedDescriptionKey: "Safety Alert: \(result.violationReason ?? "Unknown Safety Risk")"
             ])
         }
@@ -88,7 +88,7 @@ final class SafetyAgent: SafetyAgentProtocol, @unchecked Sendable {
         let result = try parseAuditResult(jsonString)
         
         if !result.isSafe {
-            throw NSError(domain: "AmbrosiaSafe", code: 403, userInfo: [
+            throw NSError(domain: "NodSafe", code: 403, userInfo: [
                 NSLocalizedDescriptionKey: "Group Safety Alert: \(result.violationReason ?? "Unknown Safety Risk")"
             ])
         }

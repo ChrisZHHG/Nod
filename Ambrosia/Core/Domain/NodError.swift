@@ -1,6 +1,6 @@
 import Foundation
 
-/// Core strict-type errors for the entire Ambrosia system
+/// Core strict-type errors for the Nod app
 enum NodError: Error, Equatable, LocalizedError, Sendable {
     // Pipeline Errors
     case noImagesCaptured

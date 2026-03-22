@@ -82,8 +82,8 @@ actor OpenRouterService: GeminiServiceProtocol {
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
-        request.setValue("https://github.com/ChrisZHHG/Ambrosia", forHTTPHeaderField: "HTTP-Referer")
-        request.setValue("Ambrosia-iOS", forHTTPHeaderField: "X-Title")
+        request.setValue("https://github.com/ChrisZHHG/Nod", forHTTPHeaderField: "HTTP-Referer")
+        request.setValue("Nod-iOS", forHTTPHeaderField: "X-Title")
         request.httpBody = try JSONSerialization.data(withJSONObject: body)
 
         let (data, response) = try await session.data(for: request)

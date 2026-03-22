@@ -60,6 +60,10 @@ final class MultipeerChatManager: NSObject, Sendable {
     /// Value: (original payload, retry attempt count)
     private var pendingQueue: [UUID: (A2APayload, Int)] = [:]
 
+    /// Serializes all pendingQueue reads/writes to prevent data races
+    /// (accessed from DispatchQueue.global callbacks AND the MCSession delegate thread).
+    private let pendingQueueLock = NSLock()
+
     /// Maximum delivery retries before giving up on a message.
     private let maxDeliveryRetries = 3
 
@@ -169,7 +173,9 @@ final class MultipeerChatManager: NSObject, Sendable {
         // Skip ACK tracking for ack payloads themselves to prevent infinite loops.
         guard payload.type != .ack else { return }
 
+        pendingQueueLock.lock()
         pendingQueue[payload.senderID] = (payload, retryCount)
+        pendingQueueLock.unlock()
 
         // Schedule ACK timeout.
         let payloadID = payload.senderID
@@ -179,19 +185,27 @@ final class MultipeerChatManager: NSObject, Sendable {
     }
 
     private func handleAckTimeout(payloadID: UUID) {
-        guard let (payload, attempt) = pendingQueue[payloadID] else {
+        pendingQueueLock.lock()
+        let entry = pendingQueue[payloadID]
+        pendingQueueLock.unlock()
+
+        guard let (payload, attempt) = entry else {
             // Already acknowledged — nothing to do.
             return
         }
         if attempt >= maxDeliveryRetries - 1 {
             Logger.network.error("🚫 Message \(payloadID) undelivered after \(self.maxDeliveryRetries) attempts. Giving up.")
+            pendingQueueLock.lock()
             pendingQueue.removeValue(forKey: payloadID)
+            pendingQueueLock.unlock()
             DispatchQueue.main.async { self.hasUndeliveredMessage = true }
             return
         }
         Logger.network.warning("♻️ No ACK for \(payloadID). Retry \(attempt + 2)/\(self.maxDeliveryRetries)...")
         guard !session.connectedPeers.isEmpty else {
+            pendingQueueLock.lock()
             pendingQueue.removeValue(forKey: payloadID)
+            pendingQueueLock.unlock()
             return
         }
         try? enqueueAndSend(payload: payload, toPeers: session.connectedPeers, retryCount: attempt + 1)
@@ -199,7 +213,10 @@ final class MultipeerChatManager: NSObject, Sendable {
 
     /// Called when an ACK payload arrives. Removes the matching entry from the pending queue.
     private func processAck(payloadID: UUID) {
-        if pendingQueue.removeValue(forKey: payloadID) != nil {
+        pendingQueueLock.lock()
+        let removed = pendingQueue.removeValue(forKey: payloadID)
+        pendingQueueLock.unlock()
+        if removed != nil {
             Logger.network.info("✅ ACK received for \(payloadID). Dequeued.")
         }
     }
