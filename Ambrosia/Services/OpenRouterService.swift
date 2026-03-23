@@ -127,10 +127,52 @@ actor OpenRouterService: GeminiServiceProtocol {
         throw lastError
     }
 
-    /// Fallback Image Generation using Pollinations.ai (Free, no API key required text-to-image).
-    func generateImage(prompt: String, model: String) async throws -> URL? {
-        print("[OpenRouterService] Generating image via Pollinations.ai...")
+    /// Image Generation using OpenRouter (google/imagen-3.0-generate-001).
+    /// Falls back to Pollinations.ai if OpenRouter fails or no key is present.
+    func generateImage(prompt: String, model: String = "google/imagen-3.0-generate-001") async throws -> URL? {
+        print("[OpenRouterService] Generating image via \(model)...")
+        
         let augmentedPrompt = "\(prompt), highly detailed food photography, depth of field, natural lighting, bokeh, 8k resolution, photorealistic"
+        
+        // Try OpenRouter first if we have a key
+        if let apiKey = self.apiKey {
+            do {
+                let body: [String: Any] = [
+                    "model": model,
+                    "messages": [
+                        ["role": "user", "content": augmentedPrompt]
+                    ]
+                ]
+                let bodyData = try JSONSerialization.data(withJSONObject: body)
+                
+                var request = URLRequest(url: endpointURL)
+                request.httpMethod = "POST"
+                request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+                request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
+                request.setValue("https://github.com/ChrisZHHG/Nod", forHTTPHeaderField: "HTTP-Referer")
+                request.setValue("Nod-iOS", forHTTPHeaderField: "X-Title")
+                request.timeoutInterval = 60.0
+                request.httpBody = bodyData
+                
+                let (data, response) = try await session.data(for: request)
+                if let http = response as? HTTPURLResponse, http.statusCode == 200 {
+                    let content = try parseResponse(data)
+                    // OpenRouter image models typically return markdown `![image](https://...)` or just the URL.
+                    // Extract the first http/https URL we find.
+                    if let urlString = extractURL(from: content), let url = URL(string: urlString) {
+                        return url
+                    }
+                } else {
+                    let errorText = String(data: data, encoding: .utf8) ?? "Unknown Error"
+                    print("[OpenRouterService] Image generation failed: \(errorText)")
+                }
+            } catch {
+                print("[OpenRouterService] Error fetching from OpenRouter: \(error)")
+            }
+        }
+        
+        // FALLBACK: Pollinations.ai
+        print("[OpenRouterService] Falling back to Pollinations.ai...")
         guard let encodedPrompt = augmentedPrompt.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) else {
             return nil
         }
@@ -185,5 +227,21 @@ actor OpenRouterService: GeminiServiceProtocol {
         else if clean.hasPrefix("```")  { clean = String(clean.dropFirst(3)) }
         if clean.hasSuffix("```")       { clean = String(clean.dropLast(3)) }
         return clean.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+    
+    /// Helper to extract the first http/https URL from a string (e.g. from markdown `![image](https://...)`)
+    private func extractURL(from text: String) -> String? {
+        let pattern = "(?i)https?://(?:www\\.)?\\S+(?:/|\\b)"
+        guard let regex = try? NSRegularExpression(pattern: pattern, options: []) else { return nil }
+        let nsString = text as NSString
+        let results = regex.matches(in: text, options: [], range: NSRange(location: 0, length: nsString.length))
+        if let firstMatch = results.first {
+            var urlString = nsString.substring(with: firstMatch.range)
+            // Clean trailing markdown fragments if regex caught them
+            if urlString.hasSuffix(")") { urlString.removeLast() }
+            if urlString.hasSuffix("]") { urlString.removeLast() }
+            return urlString
+        }
+        return nil
     }
 }

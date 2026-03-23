@@ -18,18 +18,8 @@ final class VisualizerAgent: VisualizerAgentProtocol, @unchecked Sendable {
     func visualize(dishName: String, culturalDescription: String) async throws -> URL? {
         print("[VisualizerAgent] 🎨 Painting realistic food image for: \(dishName)...")
         
-        // We use Pollinations.ai with a highly specific prompt to avoid hallucinations
-        // like drawing a literal cat for a dish named "Naughty Cat".
-        let visualPrompt = "Delicious high quality food photography of \(dishName), \(culturalDescription). Appetizing, professional culinary lighting, 8k resolution, photorealistic."
-        let cleanPrompt = visualPrompt.replacingOccurrences(of: "\n", with: " ")
-        
-        guard let encodedPrompt = cleanPrompt.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) else {
-            return nil
-        }
-        
-        // nologo=true removes the watermark, enhance=true makes the image strictly follow the prompt better
-        let endpoint = "https://image.pollinations.ai/prompt/\(encodedPrompt)?width=800&height=800&nologo=true&enhance=true"
-        
-        return URL(string: endpoint)
+        let visualPrompt = "Delicious high quality food photography of \(dishName), \(culturalDescription)"
+        // Let the service handle the API call and fallback logic
+        return try await service.generateImage(prompt: visualPrompt, model: modelID)
     }
 }

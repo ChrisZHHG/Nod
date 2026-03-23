@@ -28,7 +28,6 @@ struct FloatingNavBar: View {
     var body: some View {
         GeometryReader { geometry in
             let topSafeArea = geometry.safeAreaInsets.top
-            let hasDynamicIsland = topSafeArea > 50 // Dynamic Island devices have ~59pt top safe area
             
             VStack(spacing: 0) {
                 // Nav Bar Content

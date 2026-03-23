@@ -4,7 +4,7 @@ import Foundation
 // Conforms to Principles 4 & 5. 
 // Isolated Agents that consume `ChatMessage` protocols and output `ChatMessage` protocols.
 
-final class ModeratorAgent: SoulAgentProtocol {
+final class ModeratorAgent: SoulAgentProtocol, @unchecked Sendable {
     private let service: GeminiServiceProtocol
     private let agentName = "Host Moderator"
     var currentRound: Int = 1
