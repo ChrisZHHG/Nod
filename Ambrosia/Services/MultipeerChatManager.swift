@@ -9,7 +9,7 @@ import OSLog
 
 @MainActor
 @Observable
-final class MultipeerChatManager: NSObject, Sendable {
+final class MultipeerChatManager: NSObject, @unchecked Sendable {
     private let myPeerId: MCPeerID
     private let serviceType = "nod-a2a"
     private let session: MCSession

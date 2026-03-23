@@ -121,6 +121,18 @@ final class ChefAgent: ChefAgentProtocol, @unchecked Sendable {
 
     private func buildGroupPrompt(group: GroupProfile, menu: MenuData, research: RestaurantResearchData?) -> String {
         let cuisine = menu.metadata.cuisineStyle ?? "Unknown"
+        
+        // Only include drinks if the menu actually has a drink/beverage section
+        let drinkKeywords = ["drink", "beverage", "cocktail", "wine", "beer", "alcohol", "spirits", "juice", "soda", "bar"]
+        let drinkSections = menu.sections.filter { section in
+            drinkKeywords.contains(where: { section.name.lowercased().contains($0) })
+        }
+        let hasDrinksMenu = !drinkSections.isEmpty
+        
+        let drinksInstruction = hasDrinksMenu
+            ? "DRINKS: Recommend 1-2 drinks from the drinks/beverage sections only. Do NOT invent drinks not on the menu."
+            : "DRINKS: The menu does not have a drinks section. Set `drinks` to an empty array `[]`. Do NOT invent or hallucinate drinks."
+        
         return """
         You are 'Bely', a master event planner and Sommelier specializing in \(cuisine) dining.
         
@@ -148,8 +160,8 @@ final class ChefAgent: ChefAgentProtocol, @unchecked Sendable {
         2. EXCLUDE ANY DISH that contains ANY of the Vetoes/Allergies (\(group.vetoes.isEmpty ? "None" : group.vetoes.joined(separator: ", "))). This is a fatal safety violation if missed.
         3. QUANTITY: The combos MUST contain enough distinct dishes to satisfy exactly \(group.headcount) people. (e.g. 4 people = ~5-7 dishes).
         4. Your `reasoning` must highly explicitly mention how the combo matches the group's `Mood` or `Cravings`.
+        5. \(drinksInstruction)
         
-        Return ONLY valid JSON with this EXACT structure:
         Return ONLY valid JSON with this EXACT structure:
         {
           "combos": [
@@ -159,9 +171,7 @@ final class ChefAgent: ChefAgentProtocol, @unchecked Sendable {
                 {"originalName": "Dish 1", "description": "...", "price": 10.99, "ingredients": ["Tofu", "Chili"]},
                 {"originalName": "Dish 2", "description": "...", "price": 15.99, "ingredients": ["Beef", "Broccoli"]}
               ],
-              "drinks": [
-                {"name": "Drink Name", "type": "Alcoholic", "description": "...", "pairingReason": "..."}
-              ],
+              "drinks": [],
               "totalPrice": 120.50,
               "reasoning": "Why this combo works for their vibe."
             }
