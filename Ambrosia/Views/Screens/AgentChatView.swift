@@ -8,6 +8,8 @@ struct AgentChatView: View {
     @State private var typingAgent: String? = nil
     @State private var isProcessingConsensus = false
     @State private var isPulsing = false
+    @State private var chatRound: Int = 0
+    @State private var userNickname: String = UIDevice.current.name
 
     // B4: Error boundaries
     @State private var llmError: String? = nil
@@ -47,7 +49,7 @@ struct AgentChatView: View {
         .floatingNavBar(
             title: isHost ? "Host Lobby" : "Table Lobby",
             leading: .init(icon: "chevron.left") { store.navigationPath.removeLast() },
-            trailing: (!hasStartedChat && isHost) ? .init(icon: "play.fill") { startAIChat() } : nil
+            trailing: (!hasStartedChat && isHost) ? .init(icon: "play.fill") { startAIChat() } : (hasStartedChat && store.chatTranscript.count >= 4) ? .init(icon: "stop.fill") { forceEndChat() } : nil
         )
         .overlay(alignment: .top) {
             VStack(spacing: NodTheme.Spacing.sm) {
@@ -218,6 +220,23 @@ struct AgentChatView: View {
             .padding(NodTheme.Spacing.lg)
             .glassCard(cornerRadius: NodTheme.Radius.xl)
             .onAppear { isPulsing = true }
+            
+            // Nickname input
+            VStack(alignment: .leading, spacing: 8) {
+                Text("YOUR DISPLAY NAME")
+                    .font(.system(size: 11, weight: .bold, design: .rounded))
+                    .tracking(2)
+                    .foregroundColor(NodTheme.Cinematic.amber)
+                TextField("Enter your name", text: $userNickname)
+                    .font(NodTheme.Typography.body)
+                    .foregroundColor(.white)
+                    .padding(14)
+                    .background(.ultraThinMaterial)
+                    .environment(\.colorScheme, .dark)
+                    .cornerRadius(12)
+            }
+            .padding(NodTheme.Spacing.lg)
+            .glassCard(cornerRadius: NodTheme.Radius.xl)
 
             // Connected delegate count
             HStack {
@@ -363,7 +382,8 @@ struct AgentChatView: View {
                     if msg.isFinalConsensus {
                         triggerConsensusFound(rawText: msg.text)
                     } else if msg.agentName.contains("Host") {
-                        typingAgent = "\(UIDevice.current.name)'s Agent"
+                        let displayName = userNickname.isEmpty ? UIDevice.current.name : userNickname
+                        typingAgent = "\(displayName)'s Agent"
                         let delay = UInt64(Double.random(in: 1.5...3.5) * 1_000_000_000)
                         try? await Task.sleep(nanoseconds: delay)
                         typingAgent = nil
@@ -417,9 +437,16 @@ struct AgentChatView: View {
     }
 
     private func triggerHostLLMReply() async {
+        chatRound += 1
         let agent = ModeratorAgent()
+        agent.currentRound = chatRound
         let rName = store.cachedParsedMenu?.metadata.restaurantName ?? "This Restaurant"
-        let soul = AgentSoul.hostModeratorCommandments(restaurantName: rName, requiredDishes: 3)
+        let soul = AgentSoul.hostModeratorCommandments(
+            restaurantName: rName,
+            requiredDishes: 3,
+            currentRound: chatRound,
+            maxRounds: 6
+        )
         do {
             let reply = try await agent.generateChatReply(
                 transcript: store.chatTranscript,
@@ -446,11 +473,12 @@ struct AgentChatView: View {
     }
 
     private func triggerDelegateLLMReply(restaurantName: String) async {
-        let agent = DelegateAgent(profile: store.individualProfile, delegateName: UIDevice.current.name)
+        let displayName = userNickname.isEmpty ? UIDevice.current.name : userNickname
+        let agent = DelegateAgent(profile: store.individualProfile, delegateName: displayName)
         let vetoesStr = store.individualProfile.vetoes.isEmpty ? "None" : store.individualProfile.vetoes.joined(separator: ", ")
         let cravingsStr = store.individualProfile.cravings.isEmpty ? "Surprise me" : store.individualProfile.cravings.joined(separator: ", ")
         let soul = AgentSoul.delegateCommandments(
-            delegateName: UIDevice.current.name,
+            delegateName: displayName,
             vetoes: vetoesStr,
             cravings: cravingsStr
         )
@@ -472,6 +500,18 @@ struct AgentChatView: View {
                 llmError = "Your Agent failed to respond. \(error.localizedDescription)"
                 lastFailedAction = { await self.triggerDelegateLLMReply(restaurantName: restaurantName) }
             }
+        }
+    }
+    
+    @MainActor
+    private func forceEndChat() {
+        // Force the moderator to declare consensus on the next turn
+        chatRound = 6
+        Task {
+            typingAgent = "Host Moderator"
+            try? await Task.sleep(nanoseconds: 1_000_000_000)
+            typingAgent = nil
+            await triggerHostLLMReply()
         }
     }
 

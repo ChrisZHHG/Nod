@@ -60,7 +60,7 @@ struct FloatingNavBar: View {
                 }
                 .padding(.horizontal, NodTheme.Spacing.lg)
                 .padding(.vertical, NodTheme.Spacing.md)
-                .padding(.top, hasDynamicIsland ? 8 : 0) // Extra padding for Dynamic Island
+                .padding(.top, max(topSafeArea, 44)) // Respect actual safe area (Dynamic Island ~59pt)
                 
                 Spacer()
             }

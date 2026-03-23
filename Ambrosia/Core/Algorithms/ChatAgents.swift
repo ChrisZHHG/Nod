@@ -7,6 +7,7 @@ import Foundation
 final class ModeratorAgent: SoulAgentProtocol {
     private let service: GeminiServiceProtocol
     private let agentName = "Host Moderator"
+    var currentRound: Int = 1
     
     init(service: GeminiServiceProtocol = OpenRouterService()) {
         self.service = service
@@ -33,16 +34,19 @@ final class ModeratorAgent: SoulAgentProtocol {
         }
         
         prompt += "\n--- YOUR DIRECTIVE ---\n"
-        prompt += "As the Host Moderator, analyze the chat history above. "
-        prompt += "If consensus on the required number of safe dishes is reached, output ONLY the JSON: {\"status\":\"consensus\",\"dishes\":[\"Dish1\",\"Dish2\",...]}. "
-        prompt += "Otherwise, provide a strict 1-sentence prompt directing the Delegates to continue choosing.\n"
+        if currentRound >= 6 {
+            prompt += "THIS IS THE FINAL ROUND. Output ONLY the consensus JSON with the best dishes from the conversation. DO NOT write anything else.\n"
+        } else {
+            prompt += "As the Host Moderator, analyze the chat history above. "
+            prompt += "If consensus on the required number of safe dishes is reached (delegates said ACCEPT or FINAL), output ONLY the JSON: {\"status\":\"consensus\",\"dishes\":[\"Dish1\",\"Dish2\",...]}. "
+            prompt += "Otherwise, summarize which dishes are accepted so far and ask delegates to finalize the remaining.\n"
+        }
         prompt += "RESPOND WITH YOUR NEXT MESSAGE ONLY:"
         
-        // Execute the call using the most intelligent model available (.pro mapping)
         let replyText = try await service.generateContent(
             prompt: prompt,
             model: .pro,
-            responseSchema: nil // We want natural language chat, not JSON here.
+            responseSchema: nil
         )
         
         let consensusReached = ConsensusDetector.isConsensusJSON(replyText)
