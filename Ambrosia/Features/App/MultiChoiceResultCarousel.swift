@@ -63,19 +63,35 @@ struct MultiChoiceResultCarousel: View {
             .ignoresSafeArea(edges: .bottom)
         }
         .overlay(alignment: .topLeading) {
-            Button(action: {
-                store.navigationPath.removeLast()
-            }) {
-                Image(systemName: "chevron.left")
-                    .font(.system(size: 18, weight: .semibold))
-                    .foregroundStyle(.white)
-                    .frame(width: 44, height: 44)
-                    .background(.ultraThinMaterial)
-                    .clipShape(Circle())
-                    .overlay(Circle().stroke(Color.white.opacity(0.3), lineWidth: 0.5))
+            HStack(spacing: 10) {
+                // ← Back one step
+                Button(action: {
+                    store.navigationPath.removeLast()
+                }) {
+                    Image(systemName: "chevron.left")
+                        .font(.system(size: 18, weight: .semibold))
+                        .foregroundStyle(.white)
+                        .frame(width: 44, height: 44)
+                        .background(.ultraThinMaterial)
+                        .clipShape(Circle())
+                        .overlay(Circle().stroke(Color.white.opacity(0.3), lineWidth: 0.5))
+                }
+                
+                // ⌂ Jump straight to home
+                Button(action: {
+                    store.navigationPath.removeAll()
+                }) {
+                    Image(systemName: "house.fill")
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundStyle(.white)
+                        .frame(width: 44, height: 44)
+                        .background(.ultraThinMaterial)
+                        .clipShape(Circle())
+                        .overlay(Circle().stroke(Color.white.opacity(0.3), lineWidth: 0.5))
+                }
             }
             .padding(.leading, 20)
-            .padding(.top, 56) // Safe area estimation
+            .padding(.top, 56)
         }
         .preferredColorScheme(.dark)
     }

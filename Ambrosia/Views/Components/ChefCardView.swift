@@ -33,6 +33,47 @@ struct ChefCardView: View {
             NodTheme.Cinematic.heroOverlay
                 .ignoresSafeArea()
             
+            // ── Instagram-Style Ingredient Tags (float over image) ───────────
+            if let ingredients = recommendation.recommendedItem.ingredients,
+               !ingredients.isEmpty {
+                VStack {
+                    // Position tags at ~40% down the screen (mid-image area)
+                    Spacer().frame(height: UIScreen.main.bounds.height * 0.30)
+                    
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 8) {
+                            // Show max 5 most distinctive ingredients
+                            ForEach(Array(ingredients.prefix(5)), id: \.self) { ingredient in
+                                HStack(spacing: 4) {
+                                    Image(systemName: "tag.fill")
+                                        .font(.system(size: 8))
+                                        .foregroundColor(.white.opacity(0.9))
+                                    Text(ingredient.uppercased())
+                                        .font(.system(size: 10, weight: .bold, design: .rounded))
+                                        .tracking(1)
+                                        .foregroundColor(.white)
+                                }
+                                .padding(.vertical, 6)
+                                .padding(.horizontal, 10)
+                                .background(.ultraThinMaterial)
+                                .environment(\.colorScheme, .dark)
+                                .clipShape(Capsule())
+                                .overlay(
+                                    Capsule().stroke(Color.white.opacity(0.4), lineWidth: 0.5)
+                                )
+                                .shadow(color: .black.opacity(0.5), radius: 6, y: 3)
+                            }
+                        }
+                        .padding(.horizontal, 20)
+                    }
+                    
+                    Spacer()
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .ignoresSafeArea()
+                .allowsHitTesting(false) // Tags don't intercept scroll/tap gestures
+            }
+            
             // ── Main Content Scroll ───────────────────────────────────────────
             ScrollView(.vertical, showsIndicators: false) {
                 VStack(alignment: .leading, spacing: 0) {
@@ -40,79 +81,57 @@ struct ChefCardView: View {
                     // Push content down to expose the massive image
                     Spacer(minLength: UIScreen.main.bounds.height * 0.40)
                     
-                    // ── Instagram-Style Floating Ingredient Tags ────────────
-                    if let ingredients = recommendation.recommendedItem.ingredients, !ingredients.isEmpty {
-                        ScrollView(.horizontal, showsIndicators: false) {
-                            HStack(spacing: 8) {
-                                ForEach(ingredients, id: \.self) { ingredient in
-                                    HStack(spacing: 4) {
-                                        Image(systemName: "tag.fill")
-                                            .font(.system(size: 8))
-                                            .foregroundColor(.white.opacity(0.9))
-                                        Text(ingredient.uppercased())
-                                            .font(.system(size: 10, weight: .bold, design: .rounded))
-                                            .tracking(1)
-                                            .foregroundColor(.white)
-                                    }
-                                    .padding(.vertical, 6)
-                                    .padding(.horizontal, 10)
-                                    // Ultra thin elegant glass effect (ins style)
-                                    .background(.ultraThinMaterial)
-                                    .environment(\.colorScheme, .dark)
-                                    .clipShape(Capsule())
-                                    .overlay(
-                                        Capsule().stroke(Color.white.opacity(0.3), lineWidth: 0.5)
-                                    )
-                                    // Subtle drop shadow to pop against bright food
-                                    .shadow(color: .black.opacity(0.3), radius: 4, y: 2)
-                                }
-                            }
-                            .padding(.horizontal, 16)
-                            .padding(.bottom, 16)
-                        }
-                    }
-                    
                     // ── Info Panel (dark glass) ─────────────────────────────
-                    VStack(alignment: .leading, spacing: 20) {
+                    VStack(alignment: .leading, spacing: 16) {
                         
-                        // Diet label & category tag row
-                        HStack(spacing: 10) {
-                            Text("CHEF'S CHOICE")
-                                .font(NodTheme.Cinematic.sectionTitle)
-                                .tracking(2.5)
-                                .foregroundColor(NodTheme.Cinematic.amber)
+                        // ── MOOD LABEL (Hero Title) ─────────────────────────
+                        // e.g. "Grand Feast", "Light & Fresh", "Hidden Gem"
+                        Text(recommendation.optionType.uppercased())
+                            .font(.system(size: 13, weight: .bold, design: .rounded))
+                            .tracking(3)
+                            .foregroundColor(NodTheme.Cinematic.amber)
+                        
+                        // ── DISH NAME + PRICE ───────────────────────────────
+                        HStack(alignment: .firstTextBaseline, spacing: 8) {
+                            Text(recommendation.recommendedItem.originalName)
+                                .font(NodTheme.Cinematic.displayHero)
+                                .foregroundColor(.white)
+                                .lineLimit(2)
+                                .minimumScaleFactor(0.6)
                             
                             Spacer()
                             
                             if let price = recommendation.recommendedItem.price {
                                 Text(String(format: "$%.2f", price))
-                                    .font(NodTheme.Cinematic.sectionTitle)
-                                    .foregroundColor(NodTheme.Cinematic.smokeGray)
+                                    .font(.system(size: 18, weight: .semibold, design: .rounded))
+                                    .foregroundColor(NodTheme.Cinematic.amber)
+                                    .padding(.horizontal, 10)
+                                    .padding(.vertical, 5)
+                                    .background(NodTheme.Cinematic.amber.opacity(0.12))
+                                    .clipShape(Capsule())
                             }
                         }
                         
-                        // Dish name (massive)
-                        Text(recommendation.translation.localizedName)
-                            .font(NodTheme.Cinematic.displayHero)
-                            .foregroundColor(.white)
-                            .lineLimit(2)
-                            .minimumScaleFactor(0.6)
-                        
-                        // Original name (italic small)
-                        Text(recommendation.recommendedItem.originalName)
-                            .font(.system(size: 14, weight: .light, design: .default).italic())
-                            .foregroundColor(NodTheme.Cinematic.smokeGray)
+                        // ── TRANSLATED NAME (only for foreign menus) ────────
+                        let localizedName = recommendation.translation.localizedName
+                        let originalName = recommendation.recommendedItem.originalName
+                        if !localizedName.isEmpty && localizedName.lowercased() != originalName.lowercased() {
+                            Text("Also known as: \(localizedName)")
+                                .font(.system(size: 13, weight: .light, design: .default).italic())
+                                .foregroundColor(NodTheme.Cinematic.smokeGray)
+                        }
                         
                         // Separator
                         Rectangle()
                             .frame(height: 1)
                             .foregroundColor(NodTheme.Cinematic.glassBorder)
                         
-                        // Cultural context body
+                        // ── CULTURAL CONTEXT ────────────────────────────────
                         Text(recommendation.translation.culturalContext)
                             .font(NodTheme.Cinematic.body)
                             .foregroundColor(NodTheme.Cinematic.smokeGray)
                             .lineSpacing(7)
+
                         
                         // Warnings
                         if !recommendation.translation.warnings.isEmpty {

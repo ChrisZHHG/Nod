@@ -29,30 +29,27 @@ final class ChefAgent: ChefAgentProtocol, @unchecked Sendable {
         - Popular Dishes/Specialties (Prioritize these if they match cravings and avoid vetoes): \(research?.popularDishes.isEmpty == false ? research!.popularDishes.joined(separator: ", ") : "Not available")
         
         TASK:
-        The customer requested personalized options. You must provide EXACTLY THREE distinct choices from the provided MENU DATA:
-        1. "The Safe Crowd-Pleaser" (Classic, popular, universally loved)
-        2. "The Local Secret" (Authentic, signature, or regional specialty)
-        3. "The Adventurous Pick" (Surprising, unique, or perfectly matches their specific craving)
+        The customer requested personalized options. You must provide EXACTLY THREE distinct choices from the provided MENU DATA.
         
         CRITICAL INSTRUCTIONS: 
         1. You MUST ONLY select dishes that exist in the provided MENU DATA. DO NOT invent or hallucinate dishes.
         2. Your `reasoning` must be highly persuasive and explicitly mention how the dish matches the user's `Mood` or `Cravings`.
+        3. For `optionType`, create a SHORT (2-4 words), EVOCATIVE, MOOD-DRIVEN label that captures the personality of that recommendation — based on the user's mood and the dish character. Examples: "Grand Feast", "Light & Fresh", "Hidden Gem", "Crowd Pleaser", "Bold Adventure", "Soul Food", "Chef's Secret". Make it feel like a recommendation personality, not a category name.
         
-        Return ONLY valid JSON with this EXACT structure:
         Return ONLY valid JSON with this EXACT structure:
         {
           "options": [
             {
-              "optionType": "The Safe Crowd-Pleaser",
+              "optionType": "Grand Feast",
               "recommendedItem": {
-                "originalName": "Dish Name",
+                "originalName": "Dish Name from Menu",
                 "description": "Brief description",
                 "price": 12.99,
                 "ingredients": ["Tomato", "Basil", "Mozzarella"]
               },
               "translation": {
-                "localizedName": "English Name",
-                "culturalContext": "Cultural explanation",
+                "localizedName": "English Name if dish is in foreign language, otherwise same as originalName",
+                "culturalContext": "1-2 sentence cultural explanation and why it fits this user's vibe",
                 "warnings": []
               },
               "reasoning": "Why this fits their mood and cravings.",
@@ -62,7 +59,7 @@ final class ChefAgent: ChefAgentProtocol, @unchecked Sendable {
             }
           ]
         }
-        (Ensure you output 3 items in the `options` array).
+        (Ensure you output 3 items in the `options` array with 3 distinct `optionType` mood labels).
         """
     }
 

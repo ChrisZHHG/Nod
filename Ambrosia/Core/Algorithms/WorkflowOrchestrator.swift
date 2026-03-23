@@ -106,12 +106,19 @@ actor WorkflowOrchestrator {
             return results
         }
         
-        // Rebuild immutable array
+        // Rebuild immutable array, preserving all fields including ingredients
         let updatedOptions = draftSet.options.enumerated().map { (index, oldOption) in
-            MenuRecommendation(
+            let updatedItem = RecommendedItem(
+                originalName: oldOption.recommendedItem.originalName,
+                description: oldOption.recommendedItem.description,
+                price: oldOption.recommendedItem.price,
+                ingredients: oldOption.recommendedItem.ingredients, // ← was previously dropped
+                imageURL: oldOption.recommendedItem.imageURL
+            )
+            return MenuRecommendation(
                 id: oldOption.id,
                 optionType: oldOption.optionType,
-                recommendedItem: oldOption.recommendedItem,
+                recommendedItem: updatedItem,
                 translation: oldOption.translation,
                 reasoning: oldOption.reasoning,
                 pairings: oldOption.pairings,
