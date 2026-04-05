@@ -20,7 +20,9 @@ When making architectural or feature decisions, strictly adhere to this product 
 - **WE ARE NOT**: A restaurant reservation system, a POS integration tool, Uber Eats, or a generic chat bot. Do NOT suggest or build features for automatic ordering, B2B restaurant dashboards, or generic "talk to AI" interfaces.
 - **WE ARE**: A cognitive offloading tool for high-stress dining (especially cross-cultural and dietary-restricted). 
 - **The Core Loop**: Scan foreign/complex menu -> OCR -> Check against user's *Lifetime History/Allergy Profile* -> Generate 3-5 hyper-curated UI cards detailing cultural context, hidden allergens, and localization.
-- **Agentic UI over Chat**: If a complex interaction is needed, default to generating dynamic, visual SwiftUI components (Agentic UI) rather than walls of chatbot text.
+- **Agentic UI vs. Chat**: We are transitioning from CUI (Conversational UI) to AUI (Agentic UI). Code should prioritize "Invisible Agents." 
+  - *Default State*: Zero friction. Silent menu analysis and dynamic UI generation (no text walls).
+  - *Fallback State*: Chat mode (`AgentChatView`) is retained strictly as an on-demand "Copilot" for resolving complex, ad-hoc group constraints that pure visual UI cannot handle. It is an elite safety net, not the primary interaction mechanism.
 
 ---
 

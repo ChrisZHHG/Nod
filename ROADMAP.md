@@ -59,16 +59,17 @@ The current architecture centers around strongly typed, concurrent multi-agent n
 
 ---
 
-## 4. Future Vision & The "Narrow" Moat
+## 4. Future Vision: BYOB & The Agentic Ecosystem (V3)
 
 *(See `design_doc/Market_Fit_Evolution.md` for full market analysis)*
 
 ### We Will NOT Build:
-*   **Direct POS Ordering:** We will not integrate with restaurant point-of-sale systems. It is a B2B sales nightmare that distracts from our consumer focus.
-*   **Uber Eats Integration:** We are an "at-the-table" tool, not a delivery aggregator.
-*   **Generic Text Chatbots:** Users facing cognitive fatigue do not want to type paragraphs to an AI.
+*   **Direct POS Ordering:** We will not integrate with restaurant point-of-sale systems natively. It distracts from our consumer focus.
+*   **Generic Text Chatbots:** Users facing cognitive fatigue do not want to type paragraphs to an AI as a primary interaction.
 
-### We WILL Build (The Moat):
-1.  **The Lifelong Taste Profile:** By recording feedback on every meal (via `HistoryStore`), Nod becomes the only app that truly knows the user's evolving palate and strict health boundaries across borders and platforms. This is a data asset Yelp and OpenTable cannot replicate.
-2.  **Agentic UI (AUI):** We will move away from static results towards dynamic UI generation. If a user has a complex request ("Find a non-spicy, nut-free kid's meal"), Nod won't reply with a text block; it will instantly synthesize a custom, visual carousel card specific to that micro-need.
-3.  **The "Invisible" Copilot:** Nod should require zero typing by default. It cross-references the OCR'd menu against the user's `HistoryStore` silently, highlighting the safest and most culturally relevant dishes instantly. Text/Voice chat only surfaces as an optional fallback for highly complex edge-cases.
+### The Agentic Engineering Roadmap (The Structural Moat):
+1.  **The Lifelong Memory Graph (`HistoryStore`):** The absolute priority. Nod must record every meal feedback to build a cross-border personal taste graph. This forms the foundation for bypassing user input entirely.
+2.  **Proxy Profiles & Memory Segregation:** To solve the multi-user "cold start" (e.g., family dining with children), the data layer will support "Household Managers." A parent's device can locally store a child's "red-line" dietary constraints (e.g., Peanut Allergy) without requiring the child to have an independent bot.
+3.  **Silent A2A & Headless Consensus:** When multiple adults dine together, their agents will communicate via JSON-RPC over `MultipeerConnectivity` *silently* in the background. The app will bypass sequential "Chat UI" negotiation by default, instantly presenting the intersecting safe menu items.
+4.  **The Chat Copilot (Fallback Engine):** The current `AgentChatView` will be repositioned. Instead of the default path, it serves as an easily accessible "Copilot Fallback" button. It handles long-tail, hyper-specific queries ("My throat hurts today, what's soft?") that structured Generative UI cannot predict.
+5.  **MCP & AAuth Readiness:** We will format internal Tool-Calling payloads to model the emerging Model Context Protocol (MCP) standards. As the "Bring Your Own Bot" (BYOB) ecosystem matures, Nod will utilize Agentic Authorization (AAuth) concepts: emitting temporary constraint authorizations to external platforms without leaking the user's permanent medical history text.
