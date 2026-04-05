@@ -7,9 +7,20 @@ Read it completely before writing any code. Do not deviate from these rules.
 
 ## 1. Project Identity
 
-- **App name**: Nod ("The effortless consensus.")
+- **App name**: Nod
+- **Core Value Proposition**: "A private cultural dining guide and allergy safety net for travelers, empowered by a lifelong personal taste memory graph."
 - **Platform**: iOS 17+ (target iOS 18 for MeshGradient features, always provide fallback)
 - **Language**: Swift / SwiftUI — no UIKit views unless bridging via UIViewRepresentable
+
+---
+
+## 1.5. Product Strategic Focus (The "Narrow" Moat)
+
+When making architectural or feature decisions, strictly adhere to this product identity:
+- **WE ARE NOT**: A restaurant reservation system, a POS integration tool, Uber Eats, or a generic chat bot. Do NOT suggest or build features for automatic ordering, B2B restaurant dashboards, or generic "talk to AI" interfaces.
+- **WE ARE**: A cognitive offloading tool for high-stress dining (especially cross-cultural and dietary-restricted). 
+- **The Core Loop**: Scan foreign/complex menu -> OCR -> Check against user's *Lifetime History/Allergy Profile* -> Generate 3-5 hyper-curated UI cards detailing cultural context, hidden allergens, and localization.
+- **Agentic UI over Chat**: If a complex interaction is needed, default to generating dynamic, visual SwiftUI components (Agentic UI) rather than walls of chatbot text.
 
 ---
 
