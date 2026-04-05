@@ -134,8 +134,9 @@ struct ModeSelectionContent: View {
 
     // Hover state for plate buttons
     @State private var hoveredMode: AppMode? = nil
-    @State private var isPressingGroup = false
     @State private var isPressingIndividual = false
+    @State private var isPressingGroup = false
+    @State private var isPressingAgentChat = false
 
     private let heroURL: String = cinematicHeroURLs.randomElement()!
 
@@ -328,11 +329,10 @@ struct ModeSelectionContent: View {
                 .shadow(color: .black, radius: 6)
                 .padding(.bottom, 20)
 
-            // Primary modes: Solo + Group
-            HStack(spacing: 24) {
+            HStack(spacing: 20) {
                 placeSettingButton(
                     mode: .individual,
-                    title: "Solo",
+                    title: "Solo Tasting",
                     subtitle: "Just for you",
                     isGroup: false,
                     isPressing: $isPressingIndividual
@@ -351,43 +351,34 @@ struct ModeSelectionContent: View {
                     store.setMode(.group)
                     store.startSession()
                 }
-            }
-            .padding(.horizontal, 32)
 
-            // Secondary: Agent Copilot (multi-device table negotiation)
-            VStack(spacing: 10) {
-                Button(action: {
+                placeSettingButton(
+                    mode: .agentChat,
+                    title: "Agent Chat",
+                    subtitle: "AI Consensus",
+                    isGroup: true,
+                    isPressing: $isPressingAgentChat
+                ) {
                     store.setMode(.agentChat)
                     store.startSession()
-                }) {
-                    HStack(spacing: 8) {
-                        Image(systemName: "person.wave.2.fill")
-                            .font(.system(size: 13, weight: .medium))
-                        Text("Start AI Table Negotiation")
-                            .font(.system(size: 13, weight: .medium, design: .rounded))
-                    }
-                    .foregroundColor(NodTheme.Cinematic.amber)
-                    .padding(.vertical, 12)
-                    .padding(.horizontal, 22)
-                    .background(NodTheme.Cinematic.amber.opacity(0.12))
-                    .overlay(Capsule().stroke(NodTheme.Cinematic.amber.opacity(0.35), lineWidth: 1))
-                    .clipShape(Capsule())
-                }
-
-                Button(action: {
-                    store.setMode(.agentChat)
-                    store.navigationPath.append(.agentChatLobby(isHost: false))
-                }) {
-                    HStack(spacing: 6) {
-                        Image(systemName: "wave.3.left")
-                            .font(.system(size: 11, weight: .regular))
-                        Text("Join a Table")
-                            .font(.system(size: 12, weight: .regular, design: .rounded))
-                    }
-                    .foregroundColor(.white.opacity(0.50))
                 }
             }
-            .padding(.top, 20)
+            .padding(.horizontal, 16)
+
+            // Join as a Delegate (different action — not hosting, joining an existing table)
+            Button(action: {
+                store.setMode(.agentChat)
+                store.navigationPath.append(.agentChatLobby(isHost: false))
+            }) {
+                HStack(spacing: 6) {
+                    Image(systemName: "wave.3.left")
+                        .font(.system(size: 11, weight: .regular))
+                    Text("Join a Table")
+                        .font(.system(size: 12, weight: .regular, design: .rounded))
+                }
+                .foregroundColor(.white.opacity(0.50))
+            }
+            .padding(.top, 18)
         }
         .frame(maxWidth: .infinity)
     }
