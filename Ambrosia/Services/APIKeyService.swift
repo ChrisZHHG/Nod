@@ -24,7 +24,7 @@ actor APIKeyService {
     static let shared = APIKeyService()
 
     // MARK: - ⚠️ Set this to your private Gist raw URL
-    private let remoteConfigURL = "https://gist.githubusercontent.com/ChrisZHHG/raw/nod-config.json"
+    private let remoteConfigURL = "https://gist.github.com/ChrisZHHG/7ae7a7d81c0f511b121a053076e19f4f/raw/92c94511a652bbb6d3ea4095e3b3661c0dad955d/gistfile1.txt"
 
     // MARK: - In-memory cache (never persisted to disk)
     private var openRouterKey: String?
