@@ -33,15 +33,9 @@ actor OpenRouterService: GeminiServiceProtocol {
     private let retryableStatusCodes: Set<Int> = [429, 500, 502, 503, 504]
 
     init() {
-        let key = Bundle.main.object(forInfoDictionaryKey: "OpenRouterAPIKey") as? String
-        if let key, !key.isEmpty, !key.contains("ReplaceWith") {
-            self.apiKey = key
-        } else {
-            print("⚠️ WARNING: OpenRouter API Key missing. Set OPENROUTER_API_KEY in Secrets.xcconfig.")
-            self.apiKey = nil
-        }
+        // API key is no longer read from bundle — fetched remotely via APIKeyService at call time.
+        self.apiKey = nil  // unused; kept for protocol conformance, key resolved per-request below
 
-        // Build URL safely once — guard here so a bad constant is caught at launch, not mid-request.
         guard let url = URL(string: "https://openrouter.ai/api/v1/chat/completions") else {
             fatalError("OpenRouterService: hardcoded endpoint URL is malformed — this is a code error.")
         }
@@ -55,6 +49,11 @@ actor OpenRouterService: GeminiServiceProtocol {
         self.session = URLSession(configuration: config)
     }
 
+    /// Resolves the API key: fetches from APIKeyService (remote). Never reads from bundle.
+    private func resolvedAPIKey() async -> String? {
+        return await APIKeyService.shared.getOpenRouterKey()
+    }
+
     // MARK: - GeminiServiceProtocol conformance
 
     /// Sends a text prompt + optional images to OpenRouter and returns the text response.
@@ -65,9 +64,9 @@ actor OpenRouterService: GeminiServiceProtocol {
         model: GeminiModel = .flash,
         responseSchema: String? = nil
     ) async throws -> String {
-        guard let apiKey else {
+        guard let apiKey = await resolvedAPIKey() else {
             throw NSError(domain: "OpenRouterService", code: 401,
-                          userInfo: [NSLocalizedDescriptionKey: "OpenRouter API key not configured. Check Secrets.xcconfig."])
+                          userInfo: [NSLocalizedDescriptionKey: "OpenRouter API key unavailable. Check your remote config URL in APIKeyService."])
         }
 
         let orModel = mapModel(model)
@@ -127,16 +126,26 @@ actor OpenRouterService: GeminiServiceProtocol {
         throw lastError
     }
 
-    /// Image Generation using OpenRouter (google/imagen-3.0-generate-001).
-    /// Falls back to Pollinations.ai if OpenRouter fails or no key is present.
+    /// Image Generation Strategy:
+    /// - `useFreeImageTier = true`  → Pollinations.ai (free, no key needed) — use for beta/trial
+    /// - `useFreeImageTier = false` → OpenRouter Imagen 3 (~$0.04/image) with Pollinations fallback
+    ///
+    /// Set to `true` for TestFlight / public beta to control API costs.
+    static let useFreeImageTier: Bool = true
+
     func generateImage(prompt: String, model: String = "google/imagen-3.0-generate-001") async throws -> URL? {
-        print("[OpenRouterService] Generating image via \(model)...")
-        
         let augmentedPrompt = "\(prompt), highly detailed food photography, depth of field, natural lighting, bokeh, 8k resolution, photorealistic"
-        
-        // Try OpenRouter first if we have a key
-        if let apiKey = self.apiKey {
+
+        // 💸 Free tier: skip OpenRouter entirely and use Pollinations (free, unlimited)
+        if OpenRouterService.useFreeImageTier {
+            print("[OpenRouterService] 🆓 Free image tier — using Pollinations.ai")
+            return pollinationsURL(for: augmentedPrompt)
+        }
+
+        // Paid tier: Try OpenRouter Imagen 3 first, then fall back to Pollinations
+        if let apiKey = await resolvedAPIKey() {
             do {
+                print("[OpenRouterService] 💰 Paid image tier — using OpenRouter (\(model))")
                 let body: [String: Any] = [
                     "model": model,
                     "messages": [
@@ -144,7 +153,7 @@ actor OpenRouterService: GeminiServiceProtocol {
                     ]
                 ]
                 let bodyData = try JSONSerialization.data(withJSONObject: body)
-                
+
                 var request = URLRequest(url: endpointURL)
                 request.httpMethod = "POST"
                 request.setValue("application/json", forHTTPHeaderField: "Content-Type")
@@ -153,12 +162,10 @@ actor OpenRouterService: GeminiServiceProtocol {
                 request.setValue("Nod-iOS", forHTTPHeaderField: "X-Title")
                 request.timeoutInterval = 60.0
                 request.httpBody = bodyData
-                
+
                 let (data, response) = try await session.data(for: request)
                 if let http = response as? HTTPURLResponse, http.statusCode == 200 {
                     let content = try parseResponse(data)
-                    // OpenRouter image models typically return markdown `![image](https://...)` or just the URL.
-                    // Extract the first http/https URL we find.
                     if let urlString = extractURL(from: content), let url = URL(string: urlString) {
                         return url
                     }
@@ -170,14 +177,15 @@ actor OpenRouterService: GeminiServiceProtocol {
                 print("[OpenRouterService] Error fetching from OpenRouter: \(error)")
             }
         }
-        
-        // FALLBACK: Pollinations.ai
+
+        // Fallback: Pollinations.ai
         print("[OpenRouterService] Falling back to Pollinations.ai...")
-        guard let encodedPrompt = augmentedPrompt.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) else {
-            return nil
-        }
-        let endpoint = "https://image.pollinations.ai/prompt/\(encodedPrompt)?width=800&height=800&nologo=true&model=flux"
-        return URL(string: endpoint)
+        return pollinationsURL(for: augmentedPrompt)
+    }
+
+    private func pollinationsURL(for prompt: String) -> URL? {
+        guard let encoded = prompt.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) else { return nil }
+        return URL(string: "https://image.pollinations.ai/prompt/\(encoded)?width=800&height=800&nologo=true&model=flux")
     }
 
     // MARK: - Private helpers

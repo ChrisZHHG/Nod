@@ -13,27 +13,18 @@ struct RestaurantResearchData: Codable, Hashable, Sendable {
 
 /// A live implementation connecting to the Google Places API (New)
 final class ResearchAgent: ResearchAgentProtocol {
-    
-    private let apiKey: String?
+
     private let session: URLSession
-    
+
     init() {
-        let key = Bundle.main.object(forInfoDictionaryKey: "GooglePlacesAPIKey") as? String
-        if let key, !key.isEmpty, !key.contains("ReplaceWith") {
-            self.apiKey = key
-        } else {
-            print("⚠️ WARNING: Google Places API Key missing. Set GOOGLE_PLACES_API_KEY in Secrets.xcconfig.")
-            self.apiKey = nil
-        }
-        
         let config = URLSessionConfiguration.default
         config.timeoutIntervalForRequest = 15.0 // Fail fast to prioritize UX
         self.session = URLSession(configuration: config)
     }
     
     func researchRestaurant(name: String, location: String?) async throws -> RestaurantResearchData {
-        guard let apiKey else {
-            print("[ResearchAgent] API key missing. Falling back to default data.")
+        guard let apiKey = await APIKeyService.shared.getGooglePlacesKey() else {
+            print("[ResearchAgent] API key unavailable. Falling back to default data.")
             return fallbackData()
         }
         
@@ -87,25 +78,29 @@ final class ResearchAgent: ResearchAgentProtocol {
             vibeComponents.append(text)
         }
         
-        // 2. Extract sentiment or popular items from top 3 reviews
-        let popularMentions: [String] = []
+        // 2. Extract sentiment and popular dish mentions from top 3 reviews
+        var popularMentions: [String] = []
         if let reviews = firstPlace["reviews"] as? [[String: Any]] {
             for review in reviews.prefix(3) {
                 if let textDict = review["text"] as? [String: Any],
                    let reviewText = textDict["text"] as? String {
-                    // Extract a highly truncated snippet to feed the LLM context
                     vibeComponents.append("\"\(String(reviewText.prefix(150)))...\"")
+                    // Heuristic: capitalised words > 4 chars are likely food/dish names
+                    let words = reviewText.split(separator: " ").map(String.init)
+                    let foodMentions = words.filter { $0.count > 4 && $0.first?.isUppercase == true }
+                    popularMentions.append(contentsOf: foodMentions.prefix(2))
                 }
             }
         }
-        
+
         let finalVibe = vibeComponents.isEmpty ? "No specific atmosphere listed." : vibeComponents.joined(separator: " | ")
-        
+
         return RestaurantResearchData(
-            popularDishes: popularMentions, // Will be extracted directly from menu parsing vs cross-referencing in the future
+            popularDishes: Array(Set(popularMentions)).prefix(6).map { $0 }, // deduplicated, max 6
             generalVibe: finalVibe,
             rating: rating
         )
+
     }
     
     private func fallbackData() -> RestaurantResearchData {

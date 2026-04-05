@@ -4,16 +4,16 @@ import Foundation
 // These are protocol-based clients that follow TCA's DependencyClient pattern
 // without requiring the full TCA library. This enables easy mocking for tests.
 
-// MARK: - Gemini Client
+// MARK: - AI Service Client
 
-/// Client for interacting with Gemini AI service
-protocol GeminiClientProtocol: Sendable {
+/// Client for interacting with the AI service (OpenRouter)
+protocol AIServiceClientProtocol: Sendable {
     func generateContent(prompt: String, images: [Data]) async throws -> String
     func generateImage(prompt: String) async throws -> URL?
 }
 
-/// Live implementation using OpenRouterService (OpenAI-compatible)
-struct GeminiClient: GeminiClientProtocol {
+/// Live implementation using OpenRouterService
+struct AIServiceClient: AIServiceClientProtocol {
     private let service: any GeminiServiceProtocol
 
     init() {
@@ -25,7 +25,7 @@ struct GeminiClient: GeminiClientProtocol {
     }
 
     func generateImage(prompt: String) async throws -> URL? {
-        try await service.generateImage(prompt: prompt, model: "")
+        try await service.generateImage(prompt: prompt, model: OpenRouterModel.geminiFlash.rawValue)
     }
 }
 
