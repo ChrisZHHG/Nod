@@ -29,7 +29,9 @@ final class AppStore {
     
     // Dependencies
     private let dependencies: DependencyContainer
-    
+    // The app's shared memory graph — persists meal history to disk.
+    let historyStore = HistoryStore()
+
     init(dependencies: DependencyContainer = .shared) {
         self.dependencies = dependencies
     }
@@ -143,12 +145,28 @@ final class AppStore {
             self.appState = .idle
             switch output {
             case .individual(let soloSet, let menuData):
-                self.cachedParsedMenu = menuData 
+                self.cachedParsedMenu = menuData
                 self.navigationPath.append(.soloResult(soloSet))
+                // Persist to memory graph — picks the first recommendation as the primary entry.
+                if let topPick = soloSet.options.first {
+                    historyStore.addEntry(
+                        mode: .individual,
+                        restaurantName: menuData.metadata.restaurantName,
+                        recommendation: .individual(topPick)
+                    )
+                }
                 self.log("🎉 Individual Recommendations Ready.")
             case .group(let groupSet, let menuData):
                 self.cachedParsedMenu = menuData
                 self.navigationPath.append(.groupResult(groupSet))
+                // Persist to memory graph — picks the first combo as the primary entry.
+                if let topCombo = groupSet.combos.first {
+                    historyStore.addEntry(
+                        mode: .group,
+                        restaurantName: menuData.metadata.restaurantName,
+                        recommendation: .group(topCombo)
+                    )
+                }
                 self.log("🎉 Group Feast Options Ready and Verified.")
             }
         case .failure(let error):

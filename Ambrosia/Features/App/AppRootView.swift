@@ -5,6 +5,7 @@ import SwiftUI
 struct AppRootView: View {
     @State private var store = AppStore()
     @State private var showErrorAlert: Bool = false
+    @State private var showHistory = false
 
     /// True whenever an agent pipeline is actively running
     private var isProcessing: Bool {
@@ -85,6 +86,14 @@ struct AppRootView: View {
         } message: {
             Text(errorMessage ?? "")
         }
+        // ── History Sheet ──
+        .sheet(isPresented: $showHistory) {
+            HistoryView(store: store.historyStore) { entry in
+                showHistory = false
+            }
+        }
+        .environment(\.historyStoreKey, store.historyStore)
+        .environment(\.showHistoryKey, $showHistory)
     }
 }
 
@@ -113,9 +122,10 @@ private let cinematicHeroURLs: [String] = [
 
 struct ModeSelectionContent: View {
     let store: AppStore
+    @Environment(\.historyStoreKey) private var historyStore
+    @Environment(\.showHistoryKey) private var showHistory
 
-    // Per-word opacity (all start at 0.22, sequence breathes them up/down)
-    // Per-word base opacity (0.9 for maximum vibrancy, 1.0 when active)
+    // Per-word opacity (0.9 base, breathes to 1.0 during intro sequence)
     @State private var opacities: [Double] = [0.9, 0.9, 0.9, 0.9]
 
     // Post-sequence reveals
@@ -124,7 +134,6 @@ struct ModeSelectionContent: View {
 
     // Hover state for plate buttons
     @State private var hoveredMode: AppMode? = nil
-    @State private var isPressingAgentChat = false
     @State private var isPressingGroup = false
     @State private var isPressingIndividual = false
 
@@ -141,16 +150,32 @@ struct ModeSelectionContent: View {
             // Top-left title stack + bottom buttons
             VStack(alignment: .leading, spacing: 0) {
 
+                // History button — top trailing corner
+                HStack {
+                    Spacer()
+                    Button {
+                        showHistory.wrappedValue = true
+                    } label: {
+                        Image(systemName: "clock.arrow.trianglehead.counterclockwise.rotate.90")
+                            .font(.system(size: 20, weight: .light))
+                            .foregroundStyle(.ultraThinMaterial)
+                            .shadow(color: .black.opacity(0.4), radius: 4)
+                            .padding(20)
+                    }
+                    .opacity(showButtons ? 1 : 0)
+                    .animation(.easeIn(duration: 0.4).delay(0.3), value: showButtons)
+                }
+
                 // Vertical word stack — always in layout, never added/removed
                 VStack(alignment: .leading, spacing: 16) {
-                    glassWordWithIcon("Snap",   icon: "camera.fill",  index: 0, size: 50, weight: .light)
-                    glassWordWithIcon("Simmer", icon: "flame.fill",   index: 1, size: 50, weight: .light)
-                    glassWordWithIcon("Pick",   icon: "hand.tap.fill", index: 2, size: 50, weight: .light)
+                    glassWordWithIcon("Snap",   icon: "camera.fill",   index: 0, size: 50, weight: .light)
+                    glassWordWithIcon("Decode", icon: "globe",          index: 1, size: 50, weight: .light)
+                    glassWordWithIcon("Trust",  icon: "hand.tap.fill",  index: 2, size: 50, weight: .light)
 
                     // NOD — massive title treatment
                     nodWordGroup
                 }
-                .padding(.top, 64)
+                .padding(.top, 8)
                 .padding(.leading, 28)
 
                 Spacer()
@@ -245,7 +270,7 @@ struct ModeSelectionContent: View {
             // Tagline aligned below the D
             HStack(spacing: 0) {
                 Spacer().frame(width: 120)
-                Text("The effortless consensus.")
+                Text("Your cultural dining guide.")
                     .font(.system(size: 10, weight: .light, design: .rounded))
                     .italic()
                     .foregroundStyle(.ultraThinMaterial)
@@ -295,7 +320,7 @@ struct ModeSelectionContent: View {
 
     private var placeSettingSection: some View {
         VStack(alignment: .center, spacing: 0) {
-            Text("Who's at the table?")
+            Text("How are you dining today?")
                 .font(.system(size: 14, weight: .light, design: .rounded))
                 .italic()
                 .tracking(0.5)
@@ -303,32 +328,11 @@ struct ModeSelectionContent: View {
                 .shadow(color: .black, radius: 6)
                 .padding(.bottom, 20)
 
-            HStack(spacing: 20) {
-                placeSettingButton(
-                    mode: .agentChat,
-                    title: "Agent Chat",
-                    subtitle: "AI Consensus",
-                    isGroup: true,
-                    isPressing: $isPressingAgentChat
-                ) {
-                    store.setMode(.agentChat)
-                    store.startSession()
-                }
-
-                placeSettingButton(
-                    mode: .group,
-                    title: "Grand Feast",
-                    subtitle: "Manual Veto",
-                    isGroup: true,
-                    isPressing: $isPressingGroup
-                ) {
-                    store.setMode(.group)
-                    store.startSession()
-                }
-
+            // Primary modes: Solo + Group
+            HStack(spacing: 24) {
                 placeSettingButton(
                     mode: .individual,
-                    title: "Solo Tasting",
+                    title: "Solo",
                     subtitle: "Just for you",
                     isGroup: false,
                     isPressing: $isPressingIndividual
@@ -336,26 +340,54 @@ struct ModeSelectionContent: View {
                     store.setMode(.individual)
                     store.startSession()
                 }
-            }
-            .padding(.horizontal, 16)
-            
-            // Delegate Join Button
-            Button(action: {
-                store.setMode(.agentChat)
-                store.navigationPath.append(.agentChatLobby(isHost: false))
-            }) {
-                HStack {
-                    Image(systemName: "wave.3.left")
-                    Text("Looking for a Host? Join Table")
-                        .font(.system(size: 13, weight: .medium, design: .rounded))
+
+                placeSettingButton(
+                    mode: .group,
+                    title: "Grand Feast",
+                    subtitle: "Sharing table",
+                    isGroup: true,
+                    isPressing: $isPressingGroup
+                ) {
+                    store.setMode(.group)
+                    store.startSession()
                 }
-                .foregroundColor(.white.opacity(0.8))
-                .padding(.vertical, 14)
-                .padding(.horizontal, 24)
-                .background(Color.white.opacity(0.12))
-                .clipShape(Capsule())
             }
-            .padding(.top, 24)
+            .padding(.horizontal, 32)
+
+            // Secondary: Agent Copilot (multi-device table negotiation)
+            VStack(spacing: 10) {
+                Button(action: {
+                    store.setMode(.agentChat)
+                    store.startSession()
+                }) {
+                    HStack(spacing: 8) {
+                        Image(systemName: "person.wave.2.fill")
+                            .font(.system(size: 13, weight: .medium))
+                        Text("Start AI Table Negotiation")
+                            .font(.system(size: 13, weight: .medium, design: .rounded))
+                    }
+                    .foregroundColor(NodTheme.Cinematic.amber)
+                    .padding(.vertical, 12)
+                    .padding(.horizontal, 22)
+                    .background(NodTheme.Cinematic.amber.opacity(0.12))
+                    .overlay(Capsule().stroke(NodTheme.Cinematic.amber.opacity(0.35), lineWidth: 1))
+                    .clipShape(Capsule())
+                }
+
+                Button(action: {
+                    store.setMode(.agentChat)
+                    store.navigationPath.append(.agentChatLobby(isHost: false))
+                }) {
+                    HStack(spacing: 6) {
+                        Image(systemName: "wave.3.left")
+                            .font(.system(size: 11, weight: .regular))
+                        Text("Join a Table")
+                            .font(.system(size: 12, weight: .regular, design: .rounded))
+                    }
+                    .foregroundColor(.white.opacity(0.50))
+                }
+            }
+            .padding(.top, 20)
         }
         .frame(maxWidth: .infinity)
     }

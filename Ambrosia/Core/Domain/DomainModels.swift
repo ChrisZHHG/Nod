@@ -101,6 +101,23 @@ struct CulturalTranslation: Codable, Hashable, Sendable {
     let warnings: [String]
 }
 
+// MARK: - Proxy Profile (Household Dependents)
+
+/// A lightweight sub-profile representing a dependent (e.g., child, elderly relative)
+/// who does not operate their own device. Red-line vetoes are merged into the
+/// primary Chef Agent context before any recommendation is generated.
+struct ProxyProfile: Codable, Hashable, Sendable, Identifiable {
+    let id: UUID
+    var name: String                  // e.g. "Emma (8yo)"
+    var vetoes: [String]              // Hard dietary constraints, e.g. ["peanuts", "shellfish"]
+
+    init(id: UUID = UUID(), name: String, vetoes: [String] = []) {
+        self.id = id
+        self.name = name
+        self.vetoes = vetoes
+    }
+}
+
 // MARK: - Progressive Profiles
 
 struct IndividualProfile: Codable, Hashable, Sendable {
@@ -108,6 +125,15 @@ struct IndividualProfile: Codable, Hashable, Sendable {
     var vetoes: [String] = []
     var cravings: [String] = []
     var mood: String = "Relaxed"
+    /// Additional household members whose red-line vetoes are silently merged into the prompt.
+    var proxyProfiles: [ProxyProfile] = []
+
+    /// All vetoes flattened: user's own + all proxy profiles (deduplicated).
+    var mergedVetoes: [String] {
+        (vetoes + proxyProfiles.flatMap(\.vetoes))
+            .map { $0.lowercased() }
+            .reduce(into: [String]()) { if !$0.contains($1) { $0.append($1) } }
+    }
 }
 
 struct GroupProfile: Codable, Hashable, Sendable {
@@ -115,7 +141,17 @@ struct GroupProfile: Codable, Hashable, Sendable {
     var vetoes: [String] = []
     var cravings: [String] = []
     var mood: String = "Social"
+    /// Additional household members whose red-line vetoes are silently merged into the prompt.
+    var proxyProfiles: [ProxyProfile] = []
+
+    /// All vetoes flattened: group's own + all proxy profiles (deduplicated).
+    var mergedVetoes: [String] {
+        (vetoes + proxyProfiles.flatMap(\.vetoes))
+            .map { $0.lowercased() }
+            .reduce(into: [String]()) { if !$0.contains($1) { $0.append($1) } }
+    }
 }
+
 
 // MARK: - Group Recommendation
 
