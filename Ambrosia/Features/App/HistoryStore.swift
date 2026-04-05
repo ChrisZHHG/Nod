@@ -1,3 +1,16 @@
+// MARK: - History Feature (Planned — Not Yet Wired)
+//
+// ✅ Implementation: Complete (HistoryStore, HistoryView, HistoryRowView)
+// ❌ Entry point: NOT connected to AppRootView yet
+//
+// TODO: Wire into app:
+//   1. Add `@State private var historyStore = HistoryStore()` to AppRootView
+//   2. Add a button in ModeSelectionContent (e.g. top-right clock icon)
+//   3. Present HistoryView as a sheet: `.sheet(isPresented:) { HistoryView(...) }`
+//   4. In AppStore.generateRecommendation(), call historyStore.addEntry(...) on success
+//
+// This is a real feature worth finishing before App Store submission.
+
 import Foundation
 import SwiftUI
 

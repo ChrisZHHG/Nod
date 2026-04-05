@@ -1,8 +1,8 @@
 import SwiftUI
 
-// MARK: - Modern Background System (Clean Minimal / 2025)
+// MARK: - Modern Background System
 
-/// Primary background - clean light gradient with subtle accent
+/// Primary background — clean animated mesh gradient (iOS 18+), linear gradient fallback.
 struct ImmersiveBackground: View {
     var body: some View {
         ModernLightBackground()
@@ -13,14 +13,11 @@ struct ImmersiveBackground: View {
 
 struct ModernLightBackground: View {
     @State private var animate = false
-    @State private var timer: Timer?
-    @State private var time: Float = 0
-    
+
     var body: some View {
         GeometryReader { proxy in
             Group {
                 if #available(iOS 18.0, *) {
-                    // True MeshGradient for 2026 aesthetics
                     MeshGradient(
                         width: 3,
                         height: 3,
@@ -41,14 +38,12 @@ struct ModernLightBackground: View {
                         }
                     }
                 } else {
-                    // Fallback for sub-iOS 18
                     ZStack {
                         LinearGradient(
                             colors: [Color(hex: "F8FAFC"), Color(hex: "EFF6FF")],
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
                         )
-                        
                         Circle()
                             .fill(Color(hex: "E0E7FF").opacity(0.5))
                             .frame(width: max(proxy.size.width, proxy.size.height) * 1.5)
@@ -66,30 +61,6 @@ struct ModernLightBackground: View {
             .ignoresSafeArea()
         }
         .ignoresSafeArea()
-    }
-}
-
-// MARK: - Legacy Aliases
-
-/// Legacy LiquidBackground - now uses modern light background
-struct LiquidBackground: View {
-    var body: some View {
-        ImmersiveBackground()
-    }
-}
-
-/// Legacy CoralSunsetMesh - redirects to modern background
-@available(iOS 18.0, *)
-struct CoralSunsetMesh: View {
-    var body: some View {
-        ModernLightBackground()
-    }
-}
-
-/// Legacy fallback
-struct LegacyImmersiveBackground: View {
-    var body: some View {
-        ModernLightBackground()
     }
 }
 
@@ -126,69 +97,3 @@ struct VisualEffectView: UIViewRepresentable {
     func makeUIView(context: UIViewRepresentableContext<Self>) -> UIVisualEffectView { UIVisualEffectView() }
     func updateUIView(_ uiView: UIVisualEffectView, context: UIViewRepresentableContext<Self>) { uiView.effect = effect }
 }
-
-// MARK: - Awwwards Abstract Graphics
-
-/// Abstract geometric wireframe rotating over time for an avant-garde aesthetic.
-struct KineticWireframe: View {
-    @State private var rotation: Double = 0
-    @State private var isAnimating = false
-    
-    var body: some View {
-        GeometryReader { proxy in
-            TimelineView(.animation) { timeline in
-                let time = timeline.date.timeIntervalSinceReferenceDate
-                let slowTime = time * 0.2
-                
-                Canvas { context, canvasSize in
-                    context.translateBy(x: canvasSize.width / 2, y: canvasSize.height / 2)
-                    
-                    for i in 0..<12 {
-                        let offset = Double(i) * (.pi / 6)
-                        let currentRotation = slowTime + offset
-                        
-                        // Create a tilted ellipse that rotates
-                        var path = Path()
-                        let width = canvasSize.width * 0.8
-                        let height = canvasSize.height * 0.2 + (sin(slowTime * 0.5) * canvasSize.height * 0.1)
-                        
-                        path.addEllipse(in: CGRect(x: -width/2, y: -height/2, width: width, height: height))
-                        
-                        let transform = CGAffineTransform(rotationAngle: currentRotation)
-                        let transformedPath = path.applying(transform)
-                        
-                        context.stroke(
-                            transformedPath,
-                            with: .color(NodTheme.Awwwards.inkBlack.opacity(0.15)),
-                            lineWidth: 0.5
-                        )
-                    }
-                }
-            }
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-    }
-}
-
-/// Subtle paper noise overlay to give the app depth and texture.
-struct NoiseOverlay: View {
-    var body: some View {
-        GeometryReader { proxy in
-            Canvas { context, size in
-                for _ in 0..<1500 {
-                    let rx = CGFloat.random(in: 0...size.width)
-                    let ry = CGFloat.random(in: 0...size.height)
-                    let dotSize = CGFloat.random(in: 0.5...1.5)
-                    let color = Bool.random() ? Color.black.opacity(0.04) : Color.white.opacity(0.02)
-                    
-                    var path = Path()
-                    path.addEllipse(in: CGRect(x: rx, y: ry, width: dotSize, height: dotSize))
-                    context.fill(path, with: .color(color))
-                }
-            }
-        }
-        .allowsHitTesting(false)
-        .ignoresSafeArea()
-    }
-}
-
